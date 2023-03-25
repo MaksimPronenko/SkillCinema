@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="TextMainStyle" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:fontFamily">serif</item>
+    </style>
+
+    <style name="TextMainStyle.Button14Grey">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/grey_2</item>
+    </style>
+
+    <style name="TextMainStyle.Button14Blue">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/blue</item>
+    </style>
+
+    <style name="TextMainStyle.WelcomeComment">
+        <item name="android:textSize">28sp</item>
+        <item name="android:textColor">@color/grey_4</item>
+    </style>
+
+    <style name="TextMainStyle.Heading">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/grey_4</item>
+    </style>
+
+    <style name="TextMainStyle.Rating">
+        <item name="android:textSize">6sp</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="TextMainStyle.FilmName">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/grey_4</item>
+    </style>
+
+    <style name="TextMainStyle.Genre">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/grey_3</item>
+    </style>
+
+    <style name="TextMainStyle.FilmShortDescription">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/grey_4</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="TextMainStyle.FilmDescription">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/grey_4</item>
+    </style>
+
+    <style name="TextMainStyle.FilmInfo">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/grey_2</item>
+    </style>
+
+    <style name="TextMainStyle.ListSize">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/blue</item>
+    </style>
+
+</resources>

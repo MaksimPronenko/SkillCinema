@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/welcome_3_fragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".presentation.Welcome2Fragment">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/app_name_image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="26dp"
+        android:layout_marginTop="38dp"
+        android:src="@drawable/app_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/button_skip"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="26dp"
+        android:background="@color/transparent"
+        android:text="@string/button_skip"
+        android:textAppearance="@style/TextMainStyle.Button14Grey"
+        app:layout_constraintBottom_toBottomOf="@+id/app_name_image"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/app_name_image" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/welcome_3_image"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:src="@drawable/welcome_3"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.5" />
+
+    <TextView
+        android:id="@+id/welcome_3_comment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="26dp"
+        android:text="@string/welcome_2_comment"
+        android:textAppearance="@style/TextMainStyle.WelcomeComment"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/welcome_3_image"
+        app:layout_constraintVertical_bias="0.24" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="26dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/welcome_3_image"
+        app:layout_constraintVertical_bias="0.72">
+
+        <androidx.constraintlayout.utils.widget.ImageFilterView
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_margin="2dp"
+            android:background="@color/grey_1"
+            app:round="4dp"
+            />
+
+        <androidx.constraintlayout.utils.widget.ImageFilterView
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:background="@color/grey_1"
+            android:layout_margin="2dp"
+            app:round="4dp"
+            />
+
+        <androidx.constraintlayout.utils.widget.ImageFilterView
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:background="@color/black"
+            android:layout_margin="2dp"
+            app:round="4dp"
+            />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

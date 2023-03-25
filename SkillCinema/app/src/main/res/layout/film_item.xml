@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="111dp"
+    android:layout_height="194dp"
+    android:paddingStart="4dp"
+    android:paddingEnd="4dp">
+
+    <androidx.constraintlayout.utils.widget.ImageFilterView
+        android:id="@+id/poster"
+        android:layout_width="match_parent"
+        android:layout_height="154dp"
+        android:scaleType="centerCrop"
+        android:src="@mipmap/ic_launcher"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:round="4dp" />
+
+    <FrameLayout
+        android:id="@+id/rating_frame"
+        android:layout_width="17dp"
+        android:layout_height="10dp"
+        android:layout_margin="6dp"
+        android:background="@drawable/rating"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="0.0"
+            android:textAppearance="@style/TextMainStyle.Rating" />
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextMainStyle.FilmName"
+        app:layout_constraintTop_toBottomOf="@id/poster"
+        android:singleLine="true"
+        app:layout_constraintBottom_toTopOf="@+id/genres"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="Близкие" />
+
+    <TextView
+        android:id="@+id/genres"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        android:textAppearance="@style/TextMainStyle.Genre"
+        app:layout_constraintTop_toBottomOf="@id/title"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        tools:text="драма" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
