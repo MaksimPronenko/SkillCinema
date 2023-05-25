@@ -6,10 +6,12 @@
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
-    <color name="grey_4">#FF272727</color>
-    <color name="grey_3">#FF838390</color>
-    <color name="grey_2">#FFB5B5C9</color>
     <color name="grey_1">#FFD9D9D9</color>
+    <color name="grey_2">#FFB5B5C9</color>
+    <color name="grey_3">#FF838390</color>
+    <color name="grey_4">#FF272727</color>
+    <color name="grey_2_transparent_40">#66B5B5C9</color>
+    <color name="grey_2_transparent_30">#4DB5B5C9</color>
     <color name="white">#FFFFFFFF</color>
     <color name="transparent">#00FFFFFF</color>
     <color name="blue">#FF3D3BFF</color>

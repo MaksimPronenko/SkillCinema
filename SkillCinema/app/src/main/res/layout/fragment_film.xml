@@ -23,18 +23,17 @@
         android:id="@+id/scroll_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginBottom="24dp"
         android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/search_button"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_menu_background"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0">
+        app:layout_constraintTop_toTopOf="parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/scroll_container"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:animateLayoutChanges="true">
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/poster"
@@ -184,7 +183,6 @@
                 app:layout_constraintTop_toBottomOf="@id/description" />
 
 
-
             <LinearLayout
                 android:id="@+id/button_all_actors"
                 android:layout_width="wrap_content"
@@ -220,7 +218,7 @@
                 android:id="@+id/actors_recycler"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="22dp"
+                android:layout_marginStart="22dp"
                 android:layout_marginTop="28dp"
                 android:orientation="horizontal"
                 app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
@@ -276,7 +274,7 @@
                 android:id="@+id/staff_recycler"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="22dp"
+                android:layout_marginStart="22dp"
                 android:layout_marginTop="28dp"
                 android:orientation="horizontal"
                 app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
@@ -332,7 +330,7 @@
                 android:id="@+id/gallery_recycler"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="22dp"
+                android:layout_marginStart="22dp"
                 android:layout_marginTop="28dp"
                 android:orientation="horizontal"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
@@ -388,8 +386,8 @@
                 android:id="@+id/similars_recycler"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="22dp"
-                android:layout_marginTop="28dp"
+                android:layout_marginStart="22dp"
+                android:layout_marginTop="24dp"
                 android:orientation="horizontal"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -411,6 +409,16 @@
         android:src="@drawable/ic_baseline_arrow_back_ios_24"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/bottom_menu_background"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:background="@drawable/bottom_menu_background"
+        android:elevation="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/main_button"
@@ -441,5 +449,6 @@
         app:layout_constraintBottom_toBottomOf="@+id/search_button"
         app:layout_constraintStart_toEndOf="@+id/search_button"
         app:layout_constraintTop_toTopOf="@+id/search_button" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

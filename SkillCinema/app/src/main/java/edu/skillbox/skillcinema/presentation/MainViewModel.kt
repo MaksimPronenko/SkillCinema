@@ -30,7 +30,7 @@ private const val TAG = "Main"
 //    private val application: App
 //) : AndroidViewModel(application) {
 
-class MainViewModel (
+class MainViewModel(
     private val repository: Repository,
     private val filmTop100PopularPagingSource: FilmsTop100PopularPagingSource,
     private val filmTop250PagingSource: FilmsTop250PagingSource,
@@ -109,24 +109,42 @@ class MainViewModel (
 
     private suspend fun loadFilms(genre1: Int, country1: Int, genre2: Int, country2: Int) {
         _state.value = ViewModelState.Loading
+        var error = false
         val jobLoading = viewModelScope.launch(Dispatchers.IO) {
+            var listPremieres: List<FilmPremiere> = emptyList()
             kotlin.runCatching {
-                repository.getPremieres()
+                listPremieres = repository.getPremieres()
+                top100PopularPagesQuantity = repository.getTop100Popular(1).pagesCount
+                top250PagesQuantity = repository.getTop250(1).pagesCount
+                seriesPagesQuantity = repository.getSeries(1).totalPages
+                filmsFiltered1PagesQuantity =
+                    repository.getFilmFiltered(genre1, country1, 1).totalPages
+                filmsFiltered2PagesQuantity =
+                    repository.getFilmFiltered(genre2, country2, 1).totalPages
             }.fold(
                 onSuccess = {
-                    _premieres.value = it
-                    premieresQuantity = it.size
+                    _premieres.value = listPremieres
+                    premieresQuantity = listPremieres.size
                 },
-                onFailure = { Log.d(TAG, it.message ?: "Ошибка загрузки премьер") }
+                onFailure = {
+                    Log.d(TAG, it.message ?: "Ошибка загрузки премьер")
+                    error = true
+                }
             )
-            top100PopularPagesQuantity = repository.getTop100Popular(1).pagesCount
-            top250PagesQuantity = repository.getTop250(1).pagesCount
-            seriesPagesQuantity = repository.getSeries(1).totalPages
-            filmsFiltered1PagesQuantity = repository.getFilmFiltered(genre1, country1, 1).totalPages
-            filmsFiltered2PagesQuantity = repository.getFilmFiltered(genre2, country2, 1).totalPages
+//            top100PopularPagesQuantity = repository.getTop100Popular(1).pagesCount
+//            top250PagesQuantity = repository.getTop250(1).pagesCount
+//            seriesPagesQuantity = repository.getSeries(1).totalPages
+//            filmsFiltered1PagesQuantity = repository.getFilmFiltered(genre1, country1, 1).totalPages
+//            filmsFiltered2PagesQuantity = repository.getFilmFiltered(genre2, country2, 1).totalPages
         }
         jobLoading.join()
-        _state.value = ViewModelState.Loaded
+        if (error) {
+            _state.value = ViewModelState.Error
+            Log.d("FilmVM", "ViewModel. Cостояние = ${_state.value}")
+        } else {
+            _state.value = ViewModelState.Loaded
+            Log.d("FilmVM", "ViewModel. Cостояние = ${_state.value}")
+        }
     }
 
 //        viewModelScope.launch(Dispatchers.IO) {

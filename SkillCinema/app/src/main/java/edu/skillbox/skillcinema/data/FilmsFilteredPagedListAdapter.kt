@@ -32,16 +32,18 @@ class FilmsFilteredPagedListAdapter(
             else "Наименование неизвестно"
             genres.text = item?.genres?.joinToString(", ") { it.genre }
             item?.let {
-                val image: String = if (!it.posterUrlPreview.isNullOrEmpty()) it.posterUrlPreview
-                else it.posterUrl
+                val image: String = it.posterUrlPreview.ifEmpty { it.posterUrl }
                 Glide
                     .with(poster.context)
                     .load(image)
                     .into(poster)
             }
-            if (item?.ratingKinopoisk != null)
+            if (item?.ratingKinopoisk != null) {
+                ratingFrame.isGone = false
                 rating.text = item.ratingKinopoisk.toString()
-            else ratingFrame.isGone = true
+            } else {
+                ratingFrame.isGone = true
+            }
         }
         holder.binding.root.setOnClickListener {
             item?.let {

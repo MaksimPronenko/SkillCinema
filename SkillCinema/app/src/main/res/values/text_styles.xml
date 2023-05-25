@@ -26,6 +26,12 @@
         <item name="android:textColor">@color/grey_4</item>
     </style>
 
+    <style name="TextMainStyle.SmallHeading">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">@color/grey_4</item>
+    </style>
+
     <style name="TextMainStyle.Rating">
         <item name="android:textSize">6sp</item>
         <item name="android:textColor">@color/white</item>
@@ -60,6 +66,52 @@
     <style name="TextMainStyle.ListSize">
         <item name="android:textSize">14sp</item>
         <item name="android:textColor">@color/blue</item>
+    </style>
+
+    <style name="TextMainStyle.FilmNameSmall">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/grey_4</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="TextMainStyle.FilmInfoSmall">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/grey_3</item>
+    </style>
+
+    <style name="TextMainStyle.ErrorDescription">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/grey_3</item>
+    </style>
+
+    <style name="TextMainStyle.BlueButton">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
+    <style name="TextMainStyle.EpisodeInfo">
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">@color/grey_3</item>
+    </style>
+
+    <style name="TextMainStyle.Season_number_and_episode_quantity">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/grey_3</item>
+    </style>
+
+    <style name="TextMainStyle.ChipStyle">
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/chip_text</item>
+    </style>
+
+    <style name="TextMainStyle.PeriodBlue">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/blue</item>
+    </style>
+
+    <style name="TextMainStyle.CollectionQuantity">
+        <item name="android:textSize">8sp</item>
+        <item name="android:textColor">@color/white</item>
     </style>
 
 </resources>

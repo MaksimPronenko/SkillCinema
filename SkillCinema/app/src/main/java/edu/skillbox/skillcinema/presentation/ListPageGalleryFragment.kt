@@ -5,19 +5,16 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.GridLayoutManager
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
-import edu.skillbox.skillcinema.data.GalleryAdapter
+import edu.skillbox.skillcinema.data.Gallery12SpansAdapter
 import edu.skillbox.skillcinema.databinding.FragmentListPageGalleryBinding
-import edu.skillbox.skillcinema.models.ImageWithType
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
@@ -30,8 +27,10 @@ class ListPageGalleryFragment : Fragment() {
     private var _binding: FragmentListPageGalleryBinding? = null
     private val binding get() = _binding!!
 
-    private val galleryAdapter =
-        GalleryAdapter(limited = false) { image -> onImageClick(image) }
+//    private val dpToPix: Float = context?.resources?.displayMetrics?.density ?: 0F
+//    private val galleryAdapter = Gallery12SpansAdapter( dpToPix ){ image -> onImageClick(image) }
+
+//    private val galleryLayoutManager: GalleryLayoutManager = GalleryLayoutManager(requireContext(), 2)
 
     @Inject
     lateinit var listPageGalleryViewModelFactory: ListPageGalleryViewModelFactory
@@ -61,18 +60,34 @@ class ListPageGalleryFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val dpToPix: Float = context?.resources?.displayMetrics?.density ?: 0F
+        val galleryAdapter = Gallery12SpansAdapter(dpToPix) { currentImage ->
+            onImageClick(currentImage)
+        }
+
+        val galleryLayoutManager = GridLayoutManager(requireContext(), 2)
+        galleryLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+            override fun getSpanSize(position: Int): Int {
+                return when (position % 3) {
+                    0 -> 2
+                    else -> 1
+                }
+            }
+        }
+
+        binding.listPageRecycler.layoutManager = galleryLayoutManager
         binding.listPageRecycler.adapter = galleryAdapter
 
-        val dividerItemDecorationVertical = DividerItemDecoration(context, RecyclerView.VERTICAL)
-        val dividerItemDecorationHorizontal =
-            DividerItemDecoration(context, RecyclerView.HORIZONTAL)
-        context?.let { ContextCompat.getDrawable(it, R.drawable.divider_drawable) }
-            ?.let {
-                dividerItemDecorationVertical.setDrawable(it)
-                dividerItemDecorationHorizontal.setDrawable(it)
-            }
-        binding.listPageRecycler.addItemDecoration(dividerItemDecorationVertical)
-        binding.listPageRecycler.addItemDecoration(dividerItemDecorationHorizontal)
+//        val dividerItemDecorationVertical = DividerItemDecoration(context, RecyclerView.VERTICAL)
+//        val dividerItemDecorationHorizontal =
+//            DividerItemDecoration(context, RecyclerView.HORIZONTAL)
+//        context?.let { ContextCompat.getDrawable(it, R.drawable.divider_drawable) }
+//            ?.let {
+//                dividerItemDecorationVertical.setDrawable(it)
+//                dividerItemDecorationHorizontal.setDrawable(it)
+//            }
+//        binding.listPageRecycler.addItemDecoration(dividerItemDecorationVertical)
+//        binding.listPageRecycler.addItemDecoration(dividerItemDecorationHorizontal)
 
         binding.imageFilterGroup.setOnCheckedStateChangeListener { _, _ ->
             if (binding.filterAll.isChecked) {
@@ -281,19 +296,25 @@ class ListPageGalleryFragment : Fragment() {
             }
     }
 
-    private fun onImageClick(
-        item: ImageWithType
-    ) {
-//        val bundle =
-//            Bundle().apply {
-//                putInt(
-//                    "filmId",
-//                    item.filmId
-//                )
-//            }
-//        findNavController().navigate(
-//            R.id.action_ListPageSimilarsFragment_to_FilmFragment,
-//            bundle
-//        )
+    private fun onImageClick(currentImage: String) {
+        val bundle =
+            Bundle().apply {
+                putInt(
+                    "filmId",
+                    viewModel.filmId
+                )
+                putString(
+                    "currentImage",
+                    currentImage
+                )
+                putInt(
+                    "imagesType",
+                    viewModel.chosenType
+                )
+            }
+        findNavController().navigate(
+            R.id.action_ListPageGalleryFragment_to_ImagePagerFragment,
+            bundle
+        )
     }
 }

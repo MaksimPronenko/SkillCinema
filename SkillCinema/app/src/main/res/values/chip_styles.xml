@@ -14,4 +14,51 @@
         <item name="chipCornerRadius">18dp</item>
     </style>
 
+    <style name="YearChipStyle" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="chipBackgroundColor">@color/chip_background</item>
+        <item name="rippleColor">@color/blue</item>
+        <item name="android:fontFamily">serif</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/chip_text</item>
+        <item name="android:textAlignment">center</item>
+        <item name="chipMinHeight">48dp</item>
+        <item name="chipCornerRadius">24dp</item>
+    </style>
+
+    <style name="LineChipStyle" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="chipBackgroundColor">@color/chip_line_style_colors</item>
+        <item name="rippleColor">@color/grey_2</item>
+        <item name="android:fontFamily">serif</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/grey_4</item>
+        <item name="textStartPadding">26dp</item>
+        <item name="textEndPadding">26dp</item>
+        <item name="chipMinHeight">50dp</item>
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearanceOverlay.LineChipStyle</item>
+    </style>
+
+    <style name="ShapeAppearanceOverlay.LineChipStyle" parent="ShapeAppearanceOverlay.MaterialComponents.Chip">
+        <item name="cornerSize">0%</item>
+    </style>
+
+    <style name="EdgeChipStyle" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="chipBackgroundColor">@color/chip_background</item>
+        <item name="chipStrokeColor">@color/chip_stroke</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="android:fontFamily">serif</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/chip_text</item>
+        <item name="chipCornerRadius">18dp</item>
+    </style>
+
+    <style name="CenterChipStyle" parent="Widget.MaterialComponents.Chip.Choice">
+        <item name="chipBackgroundColor">@color/chip_background</item>
+        <item name="chipStrokeColor">@color/chip_stroke</item>
+        <item name="chipStrokeWidth">1dp</item>
+        <item name="android:fontFamily">serif</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/chip_text</item>
+        <item name="chipCornerRadius">0dp</item>
+    </style>
+
 </resources>

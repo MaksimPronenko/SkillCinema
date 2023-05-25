@@ -1,11 +1,9 @@
 package edu.skillbox.skillcinema.presentation
 
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import edu.skillbox.skillcinema.App
-import edu.skillbox.skillcinema.data.*
+import edu.skillbox.skillcinema.data.Repository
 import edu.skillbox.skillcinema.models.FilmPremiere
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow

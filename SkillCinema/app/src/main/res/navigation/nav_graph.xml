@@ -62,6 +62,9 @@
         tools:layout="@layout/fragment_main">
 
         <action
+            android:id="@+id/action_MainFragment_to_SearchFragment"
+            app:destination="@id/SearchFragment" />
+        <action
             android:id="@+id/action_MainFragment_to_ListPagePremieresFragment"
             app:destination="@id/ListPagePremieresFragment" />
         <action
@@ -82,6 +85,12 @@
         <action
             android:id="@+id/action_MainFragment_to_FilmFragment"
             app:destination="@id/FilmFragment" />
+        <action
+            android:id="@+id/action_MainFragment_to_SerialFragment"
+            app:destination="@id/SerialFragment" />
+        <action
+            android:id="@+id/action_MainFragment_to_ErrorBottomFragment"
+            app:destination="@id/ErrorBottomDialogFragment" />
     </fragment>
 
     <fragment
@@ -168,6 +177,12 @@
             android:id="@+id/action_FilmFragment_to_MainFragment"
             app:destination="@id/MainFragment" />
         <action
+            android:id="@+id/action_FilmFragment_to_SearchFragment"
+            app:destination="@id/SearchFragment" />
+        <action
+            android:id="@+id/action_FilmFragment_to_AllStaffFragment"
+            app:destination="@id/AllStaffFragment" />
+        <action
             android:id="@+id/action_FilmFragment_to_ListPageGalleryFragment"
             app:destination="@id/ListPageGalleryFragment" />
         <action
@@ -176,6 +191,158 @@
         <action
             android:id="@+id/action_FilmFragment_to_FilmFragment"
             app:destination="@id/FilmFragment" />
+        <action
+            android:id="@+id/action_FilmFragment_to_BottomFragment"
+            app:destination="@id/BottomDialogFragment" />
+        <action
+            android:id="@+id/action_FilmFragment_to_ErrorBottomFragment"
+            app:destination="@id/ErrorBottomDialogFragment" />
+        <action
+            android:id="@+id/action_FilmFragment_to_ImagePagerFragment"
+            app:destination="@id/ImagePagerFragment" />
+        <action
+            android:id="@+id/action_FilmFragment_to_StaffFragment"
+            app:destination="@id/StaffFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/SerialFragment"
+        android:name="edu.skillbox.skillcinema.presentation.SerialFragment"
+        tools:layout="@layout/fragment_serial">
+        <argument
+            android:name="filmId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_SerialFragment_to_MainFragment"
+            app:destination="@id/MainFragment" />
+        <action
+            android:id="@+id/action_SerialFragment_to_SearchFragment"
+            app:destination="@id/SearchFragment" />
+        <action
+            android:id="@+id/action_SerialFragment_to_SerialContentFragment"
+            app:destination="@id/SerialContentFragment" />
+        <action
+            android:id="@+id/action_SerialFragment_to_AllStaffFragment"
+            app:destination="@id/AllStaffFragment" />
+        <action
+            android:id="@+id/action_SerialFragment_to_ListPageGalleryFragment"
+            app:destination="@id/ListPageGalleryFragment" />
+        <action
+            android:id="@+id/action_SerialFragment_to_ListPageSimilarsFragment"
+            app:destination="@id/ListPageSimilarsFragment" />
+        <action
+            android:id="@+id/action_SerialFragment_to_SerialFragment"
+            app:destination="@id/SerialFragment" />
+        <action
+            android:id="@+id/action_SerialFragment_to_BottomFragment"
+            app:destination="@id/BottomDialogFragment" />
+        <action
+            android:id="@+id/action_SerialFragment_to_ErrorBottomFragment"
+            app:destination="@id/ErrorBottomDialogFragment" />
+        <action
+            android:id="@+id/action_SerialFragment_to_ImagePagerFragment"
+            app:destination="@id/ImagePagerFragment" />
+        <action
+            android:id="@+id/action_SerialFragment_to_StaffFragment"
+            app:destination="@id/StaffFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/SerialContentFragment"
+        android:name="edu.skillbox.skillcinema.presentation.SerialContentFragment"
+        tools:layout="@layout/fragment_serial_content">
+        <argument
+            android:name="filmId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="name"
+            android:defaultValue=""
+            app:argType="string" />
+        <action
+            android:id="@+id/action_SerialContentFragment_to_MainFragment"
+            app:destination="@id/MainFragment" />
+        <action
+            android:id="@+id/action_SerialContentFragment_to_BottomFragment"
+            app:destination="@id/BottomDialogFragment" />
+        <action
+            android:id="@+id/action_SerialContentFragment_to_ErrorBottomFragment"
+            app:destination="@id/ErrorBottomDialogFragment" />
+    </fragment>
+
+    <dialog
+        android:id="@+id/BottomDialogFragment"
+        android:name="edu.skillbox.skillcinema.presentation.BottomDialogFragment"
+        tools:layout="@layout/bottom_dialog">
+        <argument
+            android:name="filmId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="posterSmall"
+            android:defaultValue=""
+            app:argType="string" />
+        <argument
+            android:name="name"
+            android:defaultValue=""
+            app:argType="string" />
+        <argument
+            android:name="year"
+            android:defaultValue=""
+            app:argType="string" />
+        <argument
+            android:name="genres"
+            android:defaultValue=""
+            app:argType="string" />
+        <argument
+            android:name="newCollectionName"
+            android:defaultValue=""
+            app:argType="string" />
+        <action
+            android:id="@+id/action_BottomDialogFragment_to_CollectionNameDialogFragment"
+            app:destination="@id/CollectionNameDialogFragment" />
+    </dialog>
+
+    <dialog
+        android:id="@+id/CollectionNameDialogFragment"
+        android:name="edu.skillbox.skillcinema.presentation.CollectionNameDialogFragment"
+        tools:layout="@layout/collection_name_dialog">
+        <action
+            android:id="@+id/action_CollectionNameDialogFragment_to_BottomDialogFragment"
+            app:destination="@id/BottomDialogFragment" />
+    </dialog>
+
+    <dialog
+        android:id="@+id/ErrorBottomDialogFragment"
+        android:name="edu.skillbox.skillcinema.presentation.ErrorBottomDialogFragment"
+        tools:layout="@layout/error_bottom_dialog"></dialog>
+
+    <fragment
+        android:id="@+id/AllStaffFragment"
+        android:name="edu.skillbox.skillcinema.presentation.AllStaffFragment"
+        tools:layout="@layout/fragment_all_staff">
+        <argument
+            android:name="filmId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="filmName"
+            android:defaultValue="0"
+            app:argType="string" />
+        <argument
+            android:name="staffType"
+            android:defaultValue="false"
+            app:argType="boolean" />
+        <action
+            android:id="@+id/action_AllStaffFragment_to_MainFragment"
+            app:destination="@id/MainFragment" />
+        <action
+            android:id="@+id/action_AllStaffFragment_to_StaffFragment"
+            app:destination="@id/StaffFragment" />
+        <action
+            android:id="@+id/action_AllStaffFragment_to_ErrorBottomFragment"
+            app:destination="@id/ErrorBottomDialogFragment" />
     </fragment>
 
     <fragment
@@ -190,8 +357,8 @@
             android:id="@+id/action_ListPageGalleryFragment_to_MainFragment"
             app:destination="@id/MainFragment" />
         <action
-            android:id="@+id/action_ListPageGalleryFragment_to_FilmFragment"
-            app:destination="@id/FilmFragment" />
+            android:id="@+id/action_ListPageGalleryFragment_to_ImagePagerFragment"
+            app:destination="@id/ImagePagerFragment" />
     </fragment>
 
     <fragment
@@ -208,6 +375,228 @@
         <action
             android:id="@+id/action_ListPageSimilarsFragment_to_FilmFragment"
             app:destination="@id/FilmFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/ImagePagerFragment"
+        android:name="edu.skillbox.skillcinema.presentation.ImagePagerFragment"
+        tools:layout="@layout/fragment_image_pager">
+        <argument
+            android:name="filmId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="currentImage"
+            android:defaultValue=""
+            app:argType="string" />
+        <argument
+            android:name="imagesType"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_ImagePagerFragment_to_ErrorBottomFragment"
+            app:destination="@id/ErrorBottomDialogFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/StaffFragment"
+        android:name="edu.skillbox.skillcinema.presentation.StaffFragment"
+        tools:layout="@layout/fragment_staff">
+        <argument
+            android:name="staffId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_StaffFragment_to_FilmFragment"
+            app:destination="@id/FilmFragment" />
+        <action
+            android:id="@+id/action_StaffFragment_to_AllFilmsOfStaffFragment"
+            app:destination="@id/AllFilmsOfStaffFragment" />
+        <action
+            android:id="@+id/action_StaffFragment_to_ListPageFilmographyFragment"
+            app:destination="@id/ListPageFilmographyFragment" />
+        <action
+            android:id="@+id/action_StaffFragment_to_MainFragment"
+            app:destination="@id/MainFragment" />
+        <action
+            android:id="@+id/action_StaffFragment_to_ErrorBottomFragment"
+            app:destination="@id/ErrorBottomDialogFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/ListPageFilmographyFragment"
+        android:name="edu.skillbox.skillcinema.presentation.ListPageFilmographyFragment"
+        tools:layout="@layout/fragment_list_page_filmography">
+        <argument
+            android:name="staffId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_ListPageFilmographyFragment_to_MainFragment"
+            app:destination="@id/MainFragment" />
+        <action
+            android:id="@+id/action_ListPageFilmographyFragment_to_FilmFragment"
+            app:destination="@id/FilmFragment" />
+        <action
+            android:id="@+id/action_ListPageFilmographyFragment_to_ErrorBottomFragment"
+            app:destination="@id/ErrorBottomDialogFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/AllFilmsOfStaffFragment"
+        android:name="edu.skillbox.skillcinema.presentation.AllFilmsOfStaffFragment"
+        tools:layout="@layout/fragment_all_films_of_staff">
+        <argument
+            android:name="staffId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_AllFilmsOfStaffFragment_to_MainFragment"
+            app:destination="@id/MainFragment" />
+        <action
+            android:id="@+id/action_AllFilmsOfStaffFragment_to_FilmFragment"
+            app:destination="@id/FilmFragment" />
+        <action
+            android:id="@+id/action_AllFilmsOfStaffFragment_to_ErrorBottomFragment"
+            app:destination="@id/ErrorBottomDialogFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/SearchFragment"
+        android:name="edu.skillbox.skillcinema.presentation.SearchFragment"
+        tools:layout="@layout/fragment_search">
+        <action
+            android:id="@+id/action_SearchFragment_to_FilmFragment"
+            app:destination="@id/FilmFragment" />
+        <action
+            android:id="@+id/action_SearchFragment_to_MainFragment"
+            app:destination="@id/MainFragment" />
+        <action
+            android:id="@+id/action_SearchFragment_to_SearchSettings1Fragment"
+            app:destination="@id/SearchSettings1Fragment" />
+        <action
+            android:id="@+id/action_SearchFragment_to_ErrorBottomFragment"
+            app:destination="@id/ErrorBottomDialogFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/SearchSettings1Fragment"
+        android:name="edu.skillbox.skillcinema.presentation.SearchSettings1Fragment"
+        tools:layout="@layout/fragment_search_settings_1">
+        <action
+            android:id="@+id/action_SearchSettings1Fragment_to_SearchFragment"
+            app:destination="@id/SearchFragment" />
+        <action
+            android:id="@+id/action_SearchSettings1Fragment_to_SearchSettings2Fragment"
+            app:destination="@id/SearchSettings2Fragment" />
+        <action
+            android:id="@+id/action_SearchSettings1Fragment_to_SearchSettings3Fragment"
+            app:destination="@id/SearchSettings3Fragment" />
+        <action
+            android:id="@+id/action_SearchSettings1Fragment_to_SearchSettings4Fragment"
+            app:destination="@id/SearchSettings4Fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/SearchSettings2Fragment"
+        android:name="edu.skillbox.skillcinema.presentation.SearchSettings2Fragment"
+        tools:layout="@layout/fragment_search_settings_2">
+        <action
+            android:id="@+id/action_SearchSettings2Fragment_to_SearchSettings1Fragment"
+            app:destination="@id/SearchSettings1Fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/SearchSettings3Fragment"
+        android:name="edu.skillbox.skillcinema.presentation.SearchSettings3Fragment"
+        tools:layout="@layout/fragment_search_settings_3">
+        <action
+            android:id="@+id/action_SearchSettings3Fragment_to_SearchSettings1Fragment"
+            app:destination="@id/SearchSettings1Fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/SearchSettings4Fragment"
+        android:name="edu.skillbox.skillcinema.presentation.SearchSettings4Fragment"
+        tools:layout="@layout/fragment_search_settings_4">
+        <action
+            android:id="@+id/action_SearchSettings4Fragment_to_SearchSettings1Fragment"
+            app:destination="@id/SearchSettings1Fragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/ProfileFragment"
+        android:name="edu.skillbox.skillcinema.presentation.ProfileFragment"
+        tools:layout="@layout/fragment_profile">
+        <action
+            android:id="@+id/action_ProfileFragment_to_MainFragment"
+            app:destination="@id/MainFragment" />
+        <action
+            android:id="@+id/action_ProfileFragment_to_SearchFragment"
+            app:destination="@id/SearchFragment" />
+        <action
+            android:id="@+id/action_ProfileFragment_to_AllViewedFragment"
+            app:destination="@id/AllViewedFragment" />
+        <action
+            android:id="@+id/action_ProfileFragment_to_AllInterestedFragment"
+            app:destination="@id/AllInterestedFragment" />
+        <action
+            android:id="@+id/action_ProfileFragment_to_FilmFragment"
+            app:destination="@id/FilmFragment" />
+        <action
+            android:id="@+id/action_ProfileFragment_to_CollectionFragment"
+            app:destination="@id/CollectionFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/AllViewedFragment"
+        android:name="edu.skillbox.skillcinema.presentation.AllViewedFragment"
+        tools:layout="@layout/fragment_all_viewed">
+        <action
+            android:id="@+id/action_AllViewedFragment_to_MainFragment"
+            app:destination="@id/MainFragment" />
+        <action
+            android:id="@+id/action_AllViewedFragment_to_SearchFragment"
+            app:destination="@id/SearchFragment" />
+        <action
+            android:id="@+id/action_AllViewedFragment_to_FilmFragment"
+            app:destination="@id/FilmFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/CollectionFragment"
+        android:name="edu.skillbox.skillcinema.presentation.AllViewedFragment"
+        tools:layout="@layout/fragment_collection">
+        <action
+            android:id="@+id/action_AllViewedFragment_to_MainFragment"
+            app:destination="@id/MainFragment" />
+        <action
+            android:id="@+id/action_AllViewedFragment_to_SearchFragment"
+            app:destination="@id/SearchFragment" />
+        <action
+            android:id="@+id/action_AllViewedFragment_to_FilmFragment"
+            app:destination="@id/FilmFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/AllInterestedFragment"
+        android:name="edu.skillbox.skillcinema.presentation.AllInterestedFragment"
+        tools:layout="@layout/fragment_all_interested">
+        <action
+            android:id="@+id/action_AllInterestedFragment_to_MainFragment"
+            app:destination="@id/MainFragment" />
+        <action
+            android:id="@+id/action_AllInterestedFragment_to_SearchFragment"
+            app:destination="@id/SearchFragment" />
+        <action
+            android:id="@+id/action_AllInterestedFragment_to_FilmFragment"
+            app:destination="@id/FilmFragment" />
+        <action
+            android:id="@+id/action_AllInterestedFragment_to_SerialFragment"
+            app:destination="@id/SerialFragment" />
+        <action
+            android:id="@+id/action_AllInterestedFragment_to_StaffFragment"
+            app:destination="@id/StaffFragment" />
     </fragment>
 
 </navigation>

@@ -24,35 +24,47 @@ class DataModule {
     }
 
     @Provides
-    fun provideRepository(): Repository {
-        return Repository()
+    @Singleton
+    fun provideFilmDao(application: App): FilmDao {
+        return application.db.filmDao()
     }
 
     @Provides
-    fun provideFilmsTop100PopularPagingSource(): FilmsTop100PopularPagingSource {
-        return FilmsTop100PopularPagingSource()
+    fun provideRepository(dao: FilmDao): Repository {
+        return Repository(dao)
     }
 
     @Provides
-    fun provideFilmsTop250PagingSource(): FilmsTop250PagingSource {
-        return FilmsTop250PagingSource()
+    fun provideFilmsTop100PopularPagingSource(repository: Repository): FilmsTop100PopularPagingSource {
+        return FilmsTop100PopularPagingSource(repository)
     }
 
     @Provides
-    fun provideSeriesPagingSource(): SeriesPagingSource {
-        return SeriesPagingSource()
+    fun provideFilmsTop250PagingSource(repository: Repository): FilmsTop250PagingSource {
+        return FilmsTop250PagingSource(repository)
+    }
+
+    @Provides
+    fun provideSeriesPagingSource(repository: Repository): SeriesPagingSource {
+        return SeriesPagingSource(repository)
     }
 
     @Provides
     @Singleton
-    fun provideFilmsFiltered1PagingSource(application: App): FilmsFiltered1PagingSource {
-        return FilmsFiltered1PagingSource(application)
+    fun provideFilmsFiltered1PagingSource(application: App, dao: FilmDao): FilmsFiltered1PagingSource {
+        return FilmsFiltered1PagingSource(application, dao)
     }
 
     @Provides
     @Singleton
-    fun provideFilmsFiltered2PagingSource(application: App): FilmsFiltered2PagingSource {
-        return FilmsFiltered2PagingSource(application)
+    fun provideFilmsFiltered2PagingSource(application: App, dao: FilmDao): FilmsFiltered2PagingSource {
+        return FilmsFiltered2PagingSource(application, dao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideSearchPagingSource(application: App, dao: FilmDao): SearchPagingSource {
+        return SearchPagingSource(application, dao)
     }
 
 }

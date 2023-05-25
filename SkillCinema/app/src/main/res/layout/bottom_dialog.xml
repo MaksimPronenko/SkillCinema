@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="492dp">
+
+    <androidx.constraintlayout.utils.widget.ImageFilterView
+        android:id="@+id/poster"
+        android:layout_width="96dp"
+        android:layout_height="132dp"
+        android:layout_marginStart="26dp"
+        android:layout_marginTop="28dp"
+        android:background="@color/grey_2"
+        android:scaleType="centerCrop"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:round="4dp" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="78dp"
+        app:layout_constraintBottom_toBottomOf="@id/poster"
+        app:layout_constraintStart_toEndOf="@id/poster"
+        app:layout_constraintTop_toTopOf="@id/poster">
+
+        <TextView
+            android:id="@+id/film_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:singleLine="false"
+            android:textAppearance="@style/TextMainStyle.FilmNameSmall"
+            tools:text="Название фильма" />
+
+        <TextView
+            android:id="@+id/film_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:singleLine="false"
+            android:textAppearance="@style/TextMainStyle.FilmInfoSmall"
+            android:textColor="@color/grey_4"
+            tools:text="Год, жанры" />
+
+    </LinearLayout>
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/close_button"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="14dp"
+        android:backgroundTint="@color/white"
+        android:contentDescription="@string/close"
+        android:src="@drawable/close"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <FrameLayout
+        android:id="@+id/line_1"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="24dp"
+        android:background="@color/grey_2"
+        app:layout_constraintTop_toBottomOf="@id/poster">
+    </FrameLayout>
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/add_to_collection_button"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginStart="26dp"
+        android:backgroundTint="@color/white"
+        android:contentDescription="@string/add_to_collection"
+        android:src="@drawable/add_to_collection"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="@id/line_2"
+        app:layout_constraintTop_toTopOf="@id/line_1" />
+
+    <TextView
+        android:id="@+id/add_to_collection"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:singleLine="false"
+        android:layout_marginStart="24dp"
+        app:layout_constraintBottom_toBottomOf="@id/line_2"
+        app:layout_constraintTop_toTopOf="@id/line_1"
+        app:layout_constraintStart_toEndOf="@id/add_to_collection_button"
+        android:textAppearance="@style/TextMainStyle.FilmNameSmall"
+        android:text="@string/add_to_collection" />
+
+    <FrameLayout
+        android:id="@+id/line_2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginTop="40dp"
+        android:background="@color/grey_2"
+        app:layout_constraintTop_toBottomOf="@id/line_1">
+    </FrameLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

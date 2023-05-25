@@ -10,6 +10,7 @@
     <string name="top_250">Топ-250</string>
     <string name="series">Сериалы</string>
     <string name="button_all">Все</string>
+    <string name="seasons_and_episodes_title">Сезоны и серии</string>
     <string name="actors_recycler_title">В фильме снимались</string>
     <string name="staff_recycler_title">Над фильмом работали</string>
     <string name="gallery_recycler_title">Галерея</string>
@@ -24,96 +25,97 @@
     <string name="wallpaper">Обои</string>
     <string name="cover">Обложки</string>
     <string name="screenshot">Скриншоты</string>
+    <string name="close">Закрыть</string>
+    <string name="add_to_collection">Добавить в коллекцию</string>
+    <string name="error_title">Ошибка!</string>
+    <string name="error_description">Во время обработки запроса\nпроизошла ошибка</string>
+    <string name="collection_name_input">Придумайте название для вашей новой коллекции</string>
+    <string name="ready">Готово</string>
+    <string name="best_title">Лучшее</string>
+    <string name="filmography_title">Фильмография</string>
+    <string name="button_to_the_list">К списку</string>
+    <string name="chip_actor">Актёр</string>
+    <string name="chip_actress">Актриса</string>
+    <string name="chip_himself">Актёр играет сам себя</string>
+    <string name="chip_herself">Актриса играет сама себя</string>
+    <string name="chip_hrono_titr_male">Актёр дубляжа</string>
+    <string name="chip_hrono_titr_female">Актриса дубляжа</string>
+    <string name="chip_writer">Сценарист</string>
+    <string name="chip_operator">Оператор</string>
+    <string name="chip_editor">Монтажёр</string>
+    <string name="chip_composer">Композитор</string>
+    <string name="chip_producer_ussr">Директор фильма</string>
+    <string name="chip_producer">Продюсер</string>
+    <string name="chip_design">Художник</string>
+    <string name="chip_director">Режисёр</string>
+    <string name="chip_voice_director">Режисёр озвучки</string>
+    <string name="chip_translator">Переводчик</string>
+    <string name="chip_unknown">Неизвестно</string>
+    <string name="chip_season_title">Сезон</string>
+    <string name="search_hint">Фильмы, актёры, режиссёры</string>
+    <string name="search_failed">К сожалению, по вашему запросу\nничего не найдено</string>
+    <string name="search_settings_title">Настройки поиска</string>
+    <string name="text_show">Показывать</string>
+    <string name="films">Фильмы</string>
+    <string name="serials">Сериалы</string>
+    <string name="text_sort">Сортировать</string>
+    <string name="date">Дата</string>
+    <string name="country">Страна</string>
+    <string name="genre">Жанр</string>
+    <string name="year">Год</string>
+    <string name="period">Период</string>
+    <string name="popularity">Популярность</string>
+    <string name="rating">Рейтинг</string>
+    <string name="slider_start_value">1</string>
+    <string name="slider_end_value">10</string>
+    <string name="watched">Просмотрен</string>
+    <string name="not_watched">Не просмотрен</string>
+    <string name="choose">Выбрать</string>
+    <string name="search_country">Введите страну</string>
+    <string name="search_genre">Введите жанр</string>
+    <string name="search_period_from">Искать в период с</string>
+    <string name="search_period_to">Искать в период до</string>
 
-    <string name="large_text">
-        "Material is the metaphor.\n\n"
+    <string name="russia">Россия</string>
+    <string name="ussr">СССР</string>
+    <string name="usa">США</string>
+    <string name="france">Франция</string>
+    <string name="great_britain">Великобритания</string>
+    <string name="germany">Германия</string>
+    <string name="germany_frg">Германия (ФРГ)</string>
+    <string name="italy">Италия</string>
+    <string name="japan">Япония</string>
+    <string name="china">Китай</string>
+    <string name="india">Индия</string>
+    <string name="australia">Австралия</string>
+    <string name="canada">Канада</string>
+    <string name="spain">Испания</string>
+    <string name="mexico">Мексика</string>
+    <string name="switzerland">Швейцария</string>
+    <string name="poland">Польша</string>
+    <string name="sweden">Швеция</string>
 
-        "A material metaphor is the unifying theory of a rationalized space and a system of motion."
-        "The material is grounded in tactile reality, inspired by the study of paper and ink, yet "
-        "technologically advanced and open to imagination and magic.\n"
-        "Surfaces and edges of the material provide visual cues that are grounded in reality. The "
-        "use of familiar tactile attributes helps users quickly understand affordances. Yet the "
-        "flexibility of the material creates new affordances that supercede those in the physical "
-        "world, without breaking the rules of physics.\n"
-        "The fundamentals of light, surface, and movement are key to conveying how objects move, "
-        "interact, and exist in space and in relation to each other. Realistic lighting shows "
-        "seams, divides space, and indicates moving parts.\n\n"
+    <string name="detective">Детектив</string>
+    <string name="thriller">Триллер</string>
+    <string name="action_movie">Боевик</string>
+    <string name="crime_film">Криминальный фильм</string>
+    <string name="drama">Драма</string>
+    <string name="melodrama">Мелодрама</string>
+    <string name="family_movie">Семейный фильм</string>
+    <string name="comedy">Комедия</string>
+    <string name="cartoon">Мультфильм</string>
+    <string name="children_film">Детский фильм</string>
+    <string name="fantasy">Фэнтези</string>
+    <string name="science_fiction">Фантастика</string>
+    <string name="horror_movie">Ужасы</string>
+    <string name="war_film">Военный фильм</string>
+    <string name="historical_film">Исторический фильм</string>
 
-        "Bold, graphic, intentional.\n\n"
+    <string name="she_is_any">любая</string>
+    <string name="he_is_any">любой</string>
 
-        "The foundational elements of print based design typography, grids, space, scale, color, "
-        "and use of imagery guide visual treatments. These elements do far more than please the "
-        "eye. They create hierarchy, meaning, and focus. Deliberate color choices, edge to edge "
-        "imagery, large scale typography, and intentional white space create a bold and graphic "
-        "interface that immerse the user in the experience.\n"
-        "An emphasis on user actions makes core functionality immediately apparent and provides "
-        "waypoints for the user.\n\n"
+    <string name="viewed">Просмотрено</string>
+    <string name="collections">Коллекции</string>
+    <string name="interested">Вам было интересно</string>
 
-        "Motion provides meaning.\n\n"
-
-        "Motion respects and reinforces the user as the prime mover. Primary user actions are "
-        "inflection points that initiate motion, transforming the whole design.\n"
-        "All action takes place in a single environment. Objects are presented to the user without "
-        "breaking the continuity of experience even as they transform and reorganize.\n"
-        "Motion is meaningful and appropriate, serving to focus attention and maintain continuity. "
-        "Feedback is subtle yet clear. Transitions are efﬁcient yet coherent.\n\n"
-
-        "3D world.\n\n"
-
-        "The material environment is a 3D space, which means all objects have x, y, and z "
-        "dimensions. The z-axis is perpendicularly aligned to the plane of the display, with the "
-        "positive z-axis extending towards the viewer. Every sheet of material occupies a single "
-        "position along the z-axis and has a standard 1dp thickness.\n"
-        "On the web, the z-axis is used for layering and not for perspective. The 3D world is "
-        "emulated by manipulating the y-axis.\n\n"
-
-        "Light and shadow.\n\n"
-
-        "Within the material environment, virtual lights illuminate the scene. Key lights create "
-        "directional shadows, while ambient light creates soft shadows from all angles.\n"
-        "Shadows in the material environment are cast by these two light sources. In Android "
-        "development, shadows occur when light sources are blocked by sheets of material at "
-        "various positions along the z-axis. On the web, shadows are depicted by manipulating the "
-        "y-axis only. The following example shows the card with a height of 6dp.\n\n"
-
-        "Resting elevation.\n\n"
-
-        "All material objects, regardless of size, have a resting elevation, or default elevation "
-        "that does not change. If an object changes elevation, it should return to its resting "
-        "elevation as soon as possible.\n\n"
-
-        "Component elevations.\n\n"
-
-        "The resting elevation for a component type is consistent across apps (e.g., FAB elevation "
-        "does not vary from 6dp in one app to 16dp in another app).\n"
-        "Components may have different resting elevations across platforms, depending on the depth "
-        "of the environment (e.g., TV has a greater depth than mobile or desktop).\n\n"
-
-        "Responsive elevation and dynamic elevation offsets.\n\n"
-
-        "Some component types have responsive elevation, meaning they change elevation in response "
-        "to user input (e.g., normal, focused, and pressed) or system events. These elevation "
-        "changes are consistently implemented using dynamic elevation offsets.\n"
-        "Dynamic elevation offsets are the goal elevation that a component moves towards, relative "
-        "to the component’s resting state. They ensure that elevation changes are consistent "
-        "across actions and component types. For example, all components that lift on press have "
-        "the same elevation change relative to their resting elevation.\n"
-        "Once the input event is completed or cancelled, the component will return to its resting "
-        "elevation.\n\n"
-
-        "Avoiding elevation interference.\n\n"
-
-        "Components with responsive elevations may encounter other components as they move between "
-        "their resting elevations and dynamic elevation offsets. Because material cannot pass "
-        "through other material, components avoid interfering with one another any number of ways, "
-        "whether on a per component basis or using the entire app layout.\n"
-        "On a component level, components can move or be removed before they cause interference. "
-        "For example, a floating action button (FAB) can disappear or move off screen before a "
-        "user picks up a card, or it can move if a snackbar appears.\n"
-        "On the layout level, design your app layout to minimize opportunities for interference. "
-        "For example, position the FAB to one side of stream of a cards so the FAB won’t interfere "
-        "when a user tries to pick up one of cards.\n\n"
-    </string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

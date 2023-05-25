@@ -1,6 +1,8 @@
 package edu.skillbox.skillcinema.presentation
 
+import android.animation.LayoutTransition
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,20 +14,18 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
 import edu.skillbox.skillcinema.data.GalleryAdapter
 import edu.skillbox.skillcinema.data.SimilarsAdapter
 import edu.skillbox.skillcinema.data.StaffInfoAdapter
-import edu.skillbox.skillcinema.databinding.FilmBottomDialogBinding
 import edu.skillbox.skillcinema.databinding.FragmentFilmBinding
-import edu.skillbox.skillcinema.models.ImageWithType
 import edu.skillbox.skillcinema.models.SimilarFilm
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
+import edu.skillbox.skillcinema.models.StaffInfo
 import javax.inject.Inject
 import kotlin.math.roundToInt
+
+private const val TAG = "FilmFragment"
 
 private const val ARG_FILM_ID = "filmId"
 
@@ -36,15 +36,20 @@ class FilmFragment : Fragment() {
     lateinit var filmViewModelFactory: FilmViewModelFactory
     private val viewModel: FilmViewModel by viewModels { filmViewModelFactory }
 
+//    @Inject
+//    lateinit var filmViewModelFactory: FilmViewModelFactory
+//    private val viewModel: FilmViewModel by activityViewModels {
+//        filmViewModelFactory
+//    }
+
     private var _binding: FragmentFilmBinding? = null
     private val binding get() = _binding!!
 
-    private var _bottomDialogBinding: FilmBottomDialogBinding? = null
-    private val bottomDialogBinding get() = _bottomDialogBinding!!
-
-    private val actorsAdapter = StaffInfoAdapter(maxSize = 20)
-    private val staffAdapter = StaffInfoAdapter(maxSize = 6)
-    private val galleryAdapter = GalleryAdapter(limited = true) { image -> onImageClick(image) }
+    private val actorsAdapter =
+        StaffInfoAdapter(maxSize = 20) { staffInfo -> onStaffItemClick(staffInfo) }
+    private val staffAdapter =
+        StaffInfoAdapter(maxSize = 6) { staffInfo -> onStaffItemClick(staffInfo) }
+    private val galleryAdapter = GalleryAdapter { currentImage -> onImageClick(currentImage) }
     private val similarsAdapter =
         SimilarsAdapter(limited = true) { similarFilm -> onSimilarsItemClick(similarFilm) }
 
@@ -52,6 +57,10 @@ class FilmFragment : Fragment() {
         super.onCreate(savedInstanceState)
 //        if (arguments != null && viewModel.filmId == 0)
         val filmId = arguments?.getInt(ARG_FILM_ID) ?: 0
+        Log.d(
+            "FilmVM",
+            "onCreate Film Fragment. VM.filmId = ${viewModel.filmId}, arguments.filmId = $filmId"
+        )
         if (viewModel.filmId == 0 && filmId != 0) {
             viewModel.filmId = filmId
             viewModel.loadFilmInfo(filmId)
@@ -63,7 +72,6 @@ class FilmFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentFilmBinding.inflate(inflater, container, false)
-//        _bottomDialogBinding = FilmBottomDialogBinding.inflate(layoutInflater)
         return binding.root
     }
 
@@ -75,27 +83,59 @@ class FilmFragment : Fragment() {
         binding.galleryRecycler.adapter = galleryAdapter
         binding.similarsRecycler.adapter = similarsAdapter
 
-        //        posterUrl?.let {
-//            Glide
-//                .with(binding.poster.context)
-//                .load(posterUrl)
-//                .into(binding.poster)
-//        }
+        binding.favorite.setOnClickListener {
+            Log.d("BD", "Нажата кнопка favorite для ${viewModel.filmId}")
+            viewModel.onCollectionButtonClick("Любимое")
+        }
+
+        binding.wantedToWatch.setOnClickListener {
+            Log.d("BD", "Нажата кнопка wantedToWatch для ${viewModel.filmId}")
+            viewModel.onCollectionButtonClick("Хочу посмотреть")
+        }
+
+        binding.shortDescription.setOnClickListener {
+            applyLayoutTransition()
+            viewModel.shortDescriptionCollapsed = !viewModel.shortDescriptionCollapsed
+            binding.shortDescription.text =
+                if (viewModel.shortDescriptionCollapsed)
+                    cutText(viewModel.shortDescription!!)
+                else viewModel.shortDescription
+        }
+
+        binding.description.setOnClickListener {
+            applyLayoutTransition()
+            viewModel.descriptionCollapsed = !viewModel.descriptionCollapsed
+            binding.description.text =
+                if (viewModel.descriptionCollapsed)
+                    cutText(viewModel.description!!)
+                else viewModel.description
+        }
 
         binding.collection.setOnClickListener {
-            val dialog = context?.let { fragmentContext -> BottomSheetDialog(fragmentContext) }
-
-            _bottomDialogBinding = FilmBottomDialogBinding.inflate(layoutInflater)
-
-            bottomDialogBinding.closeButton.setOnClickListener {
-                dialog?.dismiss()
-            }
-
-            dialog?.setCancelable(false)
-
-            dialog?.setContentView(bottomDialogBinding.root)
-
-            dialog?.show()
+            val bundle =
+                Bundle().apply {
+                    putInt(
+                        "filmId",
+                        viewModel.filmId
+                    )
+                    putString(
+                        "posterSmall",
+                        viewModel.posterSmall
+                    )
+                    putString(
+                        "name",
+                        viewModel.name
+                    )
+                    putString(
+                        "year",
+                        if (viewModel.year == null) "" else viewModel.year.toString()
+                    )
+                    putString(
+                        "genres",
+                        viewModel.genres
+                    )
+                }
+            findNavController().navigate(R.id.action_FilmFragment_to_BottomFragment, bundle)
         }
 
         binding.backButton.setOnClickListener {
@@ -104,6 +144,38 @@ class FilmFragment : Fragment() {
 
         binding.mainButton.setOnClickListener {
             findNavController().navigate(R.id.action_FilmFragment_to_MainFragment)
+        }
+
+        binding.searchButton.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_FilmFragment_to_SearchFragment
+            )
+        }
+
+        binding.buttonAllActors.setOnClickListener {
+            val bundle =
+                Bundle().apply {
+                    putInt("filmId", viewModel.filmId)
+                    putString("filmName", viewModel.name)
+                    putBoolean("staffType", false)
+                }
+            findNavController().navigate(
+                R.id.action_FilmFragment_to_AllStaffFragment,
+                bundle
+            )
+        }
+
+        binding.buttonAllStaff.setOnClickListener {
+            val bundle =
+                Bundle().apply {
+                    putInt("filmId", viewModel.filmId)
+                    putString("filmName", viewModel.name)
+                    putBoolean("staffType", true)
+                }
+            findNavController().navigate(
+                R.id.action_FilmFragment_to_AllStaffFragment,
+                bundle
+            )
         }
 
         binding.buttonAllGallery.setOnClickListener {
@@ -136,6 +208,47 @@ class FilmFragment : Fragment() {
 
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
+                viewModel.favoriteChannel.collect { isFavorite ->
+                    if (isFavorite) {
+                        binding.favorite.setColorFilter(resources.getColor(R.color.blue, null))
+//                        binding.favorite.background.setTint(resources.getColor(R.color.blue, null))
+                        Log.d(TAG, "Фильм ${viewModel.filmId} в коллекции \"Любимое\"")
+                    } else {
+                        binding.favorite.setColorFilter(resources.getColor(R.color.grey_4, null))
+//                        binding.favorite.background.setTint(
+//                            resources.getColor(
+//                                R.color.grey_4,
+//                                null
+//                            )
+//                        )
+                        Log.d(TAG, "Фильм ${viewModel.filmId} отсутствует в коллекции \"Любимое\"")
+                    }
+                }
+            }
+
+        viewLifecycleOwner.lifecycleScope
+            .launchWhenStarted {
+                viewModel.wantedToWatchChannel.collect { isWantedToWatch ->
+                    if (isWantedToWatch) {
+//                        binding.wantedToWatch.background.setTint(resources.getColor(R.color.blue, null))
+                        binding.wantedToWatch.setColorFilter(resources.getColor(R.color.blue, null))
+                        Log.d(TAG, "Фильм ${viewModel.filmId} в коллекции \"Хочу посмотреть\"")
+
+                    } else {
+                        binding.wantedToWatch.setColorFilter(resources.getColor(R.color.grey_4, null))
+//                        binding.wantedToWatch.background.setTint(
+//                            resources.getColor(
+//                                R.color.grey_4,
+//                                null
+//                            )
+//                        )
+                        Log.d(TAG, "Фильм ${viewModel.filmId} отсутствует в коллекции \"Хочу посмотреть\"")
+                    }
+                }
+            }
+
+        viewLifecycleOwner.lifecycleScope
+            .launchWhenStarted {
                 viewModel.state
                     .collect { state ->
                         when (state) {
@@ -158,8 +271,9 @@ class FilmFragment : Fragment() {
                                 else
                                     binding.ratingAndName.text = viewModel.name
 
-                                binding.yearAndGenres.text =
-                                    viewModel.year.toString() + ", " + viewModel.genres
+                                val yearPart =
+                                    if (viewModel.year == null) "" else viewModel.year.toString() + ", "
+                                binding.yearAndGenres.text = yearPart + viewModel.genres
 
                                 binding.countriesAndLengthAndAgeLimit.text =
                                     viewModel.countries.toString() +
@@ -176,14 +290,18 @@ class FilmFragment : Fragment() {
 
                                 if (viewModel.shortDescription != null)
                                     binding.shortDescription.text =
-                                        viewModel.shortDescription
+                                        if (viewModel.shortDescriptionCollapsed)
+                                            cutText(viewModel.shortDescription!!)
+                                        else viewModel.shortDescription
                                 else {
                                     binding.shortDescription.isGone = true
                                     binding.blankLineBetweenTextFields.isGone = true
                                 }
 
                                 if (viewModel.description != null)
-                                    binding.description.text = viewModel.description
+                                    binding.description.text =
+                                        if (viewModel.descriptionCollapsed) cutText(viewModel.description!!)
+                                        else viewModel.description
                                 else {
                                     binding.description.isGone = true
                                     binding.blankLineBetweenTextFields.isGone = true
@@ -194,9 +312,7 @@ class FilmFragment : Fragment() {
                                     binding.buttonAllActors.isGone = true
                                     binding.actorsRecycler.isGone = true
                                 } else {
-                                    viewModel.actors.onEach {
-                                        actorsAdapter.setData(it)
-                                    }.launchIn(viewLifecycleOwner.lifecycleScope)
+                                    actorsAdapter.setData(viewModel.actorsList)
 
                                     if (viewModel.actorsQuantity > 20) {
                                         binding.actorsListSize.text =
@@ -220,9 +336,7 @@ class FilmFragment : Fragment() {
                                     binding.buttonAllStaff.isGone = true
                                     binding.staffRecycler.isGone = true
                                 } else {
-                                    viewModel.staff.onEach {
-                                        staffAdapter.setData(it)
-                                    }.launchIn(viewLifecycleOwner.lifecycleScope)
+                                    staffAdapter.setData(viewModel.staffList)
 
                                     if (viewModel.staffQuantity > 6) {
                                         binding.staffListSize.text =
@@ -237,18 +351,16 @@ class FilmFragment : Fragment() {
                                     }
                                 }
 
-                                if (viewModel.galleryQuantity == 0) {
+                                if (viewModel.gallerySize == 0) {
                                     binding.galleryRecyclerTitle.isGone = true
                                     binding.buttonAllGallery.isGone = true
                                     binding.galleryRecycler.isGone = true
                                 } else {
-                                    viewModel.gallery.onEach {
-                                        galleryAdapter.setData(it)
-                                    }.launchIn(viewLifecycleOwner.lifecycleScope)
+                                    galleryAdapter.setData(viewModel.imageWithTypeList)
 
-                                    if (viewModel.galleryQuantity > 20) {
+                                    if (viewModel.gallerySize > 20) {
                                         binding.galleryListSize.text =
-                                            viewModel.galleryQuantity.toString()
+                                            viewModel.gallerySize.toString()
                                     } else {
                                         binding.buttonAllGallery.isGone = true
                                     }
@@ -259,9 +371,7 @@ class FilmFragment : Fragment() {
                                     binding.buttonAllSimilars.isGone = true
                                     binding.similarsRecycler.isGone = true
                                 } else {
-                                    viewModel.similars.onEach {
-                                        similarsAdapter.setData(it)
-                                    }.launchIn(viewLifecycleOwner.lifecycleScope)
+                                    similarsAdapter.setData(viewModel.similarFilmList)
 
                                     if (viewModel.similarsQuantity > 20) {
                                         binding.similarsListSize.text =
@@ -270,18 +380,63 @@ class FilmFragment : Fragment() {
                                         binding.buttonAllSimilars.isGone = true
                                     }
                                 }
-
-//                                viewModel.pagedFilmsTop100Popular.onEach {
-//                                    filmTop100PopularAdapter.submitData(it)
-//                                }.launchIn(viewLifecycleOwner.lifecycleScope)
                             }
                             ViewModelState.Error -> {
                                 binding.scrollView.isGone = true
                                 binding.progress.isGone = true
+                                findNavController().navigate(R.id.action_FilmFragment_to_ErrorBottomFragment)
                             }
                         }
                     }
             }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+//        activity?.viewModelStore?.clear()
+//        this.viewModelStore.clear()
+//        viewModelStore.clear()
+//        val application = requireContext().applicationContext as App
+//        activity
+//        requireActivity().viewModelStore.clear()
+//
+//        Log.d("FilmVM", "Film Fragment. onDestroyView.")
+    }
+
+//    override fun onDetach() {
+//        super.onDetach()
+//        requireActivity().viewModelStore.clear()
+//        Log.d("FilmVM", "Film Fragment. onDetach.")
+//    }
+
+//    override fun onDestroy() {
+//        super.onDestroy()
+//        if (activity != null) {
+//            Log.d("FilmVM", "FilmFragment. Activity != null. ${activity.toString()}")
+//            val vmStore = activity!!.viewModelStore
+//            Log.d("FilmVM", "FilmFragment. vmStore = $vmStore")
+//            activity!!.viewModelStore.clear()
+//            val vmStoreCleared = activity!!.viewModelStore
+//            Log.d("FilmVM", "FilmFragment. vmStoreCleared = $vmStoreCleared")
+//        }
+//        Log.d("FilmVM", "Film Fragment. onDestroy.")
+//    }
+
+    private fun onStaffItemClick(
+        item: StaffInfo
+    ) {
+        val bundle =
+            Bundle().apply {
+                putInt(
+                    "staffId",
+                    item.staffId
+                )
+            }
+        findNavController().navigate(
+            R.id.action_FilmFragment_to_StaffFragment,
+            bundle
+        )
     }
 
     private fun onSimilarsItemClick(
@@ -300,29 +455,33 @@ class FilmFragment : Fragment() {
         )
     }
 
-    private fun onImageClick(
-        item: ImageWithType
-    ) {
-
+    private fun onImageClick(currentImage: String) {
+        val bundle =
+            Bundle().apply {
+                putInt(
+                    "filmId",
+                    viewModel.filmId
+                )
+                putString(
+                    "currentImage",
+                    currentImage
+                )
+            }
+        findNavController().navigate(
+            R.id.action_FilmFragment_to_ImagePagerFragment,
+            bundle
+        )
     }
 
-//    companion object {
-//        /**
-//         * Use this factory method to create a new instance of
-//         * this fragment using the provided parameters.
-//         *
-//         * @param param1 Parameter 1.
-//         * @param param2 Parameter 2.
-//         * @return A new instance of fragment FilmFragment.
-//         */
-//        // TODO: Rename and change types and number of parameters
-//        @JvmStatic
-//        fun newInstance(param1: String, param2: String) =
-//            FilmFragment().apply {
-//                arguments = Bundle().apply {
-//                    putString(ARG_PARAM1, param1)
-//                    putString(ARG_PARAM2, param2)
-//                }
-//            }
-//    }
+    private fun cutText(baseText: String) = if (baseText.length > 250) baseText.substring(
+        startIndex = 0,
+        endIndex = 249
+    ) + "..." else baseText
+
+    private fun applyLayoutTransition() {
+        val transition = LayoutTransition()
+        transition.setDuration(300)
+        transition.enableTransitionType(LayoutTransition.CHANGING)
+        binding.scrollContainer.layoutTransition = transition
+    }
 }

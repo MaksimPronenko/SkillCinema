@@ -9,8 +9,7 @@ import edu.skillbox.skillcinema.databinding.GalleryItemBinding
 import edu.skillbox.skillcinema.models.ImageWithType
 
 class GalleryAdapter(
-    val limited: Boolean,
-    private val onClick: (ImageWithType) -> Unit
+    private val onClick: (String) -> Unit
 ) : RecyclerView.Adapter<GalleryViewHolder>() {
     private var data: List<ImageWithType> = emptyList()
 
@@ -21,7 +20,7 @@ class GalleryAdapter(
     }
 
     override fun getItemCount(): Int {
-        return if (!limited || data.size < 20) data.size
+        return if (data.size < 20) data.size
         else 20
     }
 
@@ -47,7 +46,9 @@ class GalleryAdapter(
         }
         holder.binding.root.setOnClickListener {
             item?.let {
-                onClick(item)
+                val currentImage: String? = it.imageUrl ?: it.previewUrl
+                if (currentImage != null)
+                    onClick(currentImage)
             }
         }
     }

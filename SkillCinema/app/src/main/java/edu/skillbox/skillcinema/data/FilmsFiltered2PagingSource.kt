@@ -7,9 +7,9 @@ import edu.skillbox.skillcinema.models.FilmFiltered
 import javax.inject.Inject
 
 //class FilmsFiltered2PagingSource @Inject constructor(val genre:Int, val country:Int) : PagingSource<Int, FilmFiltered>() {
-class FilmsFiltered2PagingSource (private val application: App) :
+class FilmsFiltered2PagingSource (private val application: App, dao: FilmDao) :
     PagingSource<Int, FilmFiltered>() {
-    private val repository = Repository()
+    private val repository = Repository(dao)
     override fun getRefreshKey(state: PagingState<Int, FilmFiltered>): Int = FIRST_PAGE
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, FilmFiltered> {

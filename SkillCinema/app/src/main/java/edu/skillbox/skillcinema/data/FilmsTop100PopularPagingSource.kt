@@ -4,8 +4,9 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import edu.skillbox.skillcinema.models.FilmTop
 
-class FilmsTop100PopularPagingSource: PagingSource<Int, FilmTop>() {
-    private val repository = Repository()
+class FilmsTop100PopularPagingSource(val repository: Repository) : PagingSource<Int, FilmTop>() {
+    //    private val dao = application.db.favoriteDao()
+//    private val repository = Repository(dao)
     override fun getRefreshKey(state: PagingState<Int, FilmTop>): Int = FIRST_PAGE
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, FilmTop> {

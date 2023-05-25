@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".presentation.SearchSettings2Fragment">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/back_button"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:layout_marginStart="34dp"
+        android:layout_marginTop="26dp"
+        android:src="@drawable/ic_baseline_arrow_back_ios_24"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/search_settings_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/country"
+        android:textAppearance="@style/TextMainStyle.SmallHeading"
+        app:layout_constraintBottom_toBottomOf="@+id/back_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/back_button" />
+
+    <androidx.appcompat.widget.AppCompatEditText
+        android:id="@+id/search_country_field"
+        android:layout_width="match_parent"
+        android:layout_height="32dp"
+        app:layout_constraintCircleRadius="16dp"
+        android:layout_marginHorizontal="26dp"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/search_text_background"
+        android:hint="@string/search_country"
+        android:paddingVertical="8dp"
+        android:paddingStart="40dp"
+        android:paddingEnd="60dp"
+        android:textColor="@color/grey_4"
+        android:textColorHint="@color/grey_3"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/search_settings_title" />
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/search_image"
+        android:layout_width="12dp"
+        android:layout_height="12dp"
+        android:layout_marginStart="18dp"
+        android:src="@drawable/search"
+        android:tint="@color/grey_3"
+        app:layout_constraintBottom_toBottomOf="@+id/search_country_field"
+        app:layout_constraintStart_toStartOf="@id/search_country_field"
+        app:layout_constraintTop_toTopOf="@+id/search_country_field" />
+
+    <TextView
+        android:id="@+id/search_failed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/search_failed"
+        android:textAppearance="@style/TextMainStyle.FilmDescription"
+        android:gravity="center"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/search_country_field"
+        android:layout_marginTop="64dp" />
+
+    <ScrollView
+        android:id="@+id/chip_scroll_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="52dp"
+        android:orientation="vertical"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/search_country_field">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/countries_group"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:singleSelection="true">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/russia"
+                style="@style/LineChipStyle"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                app:chipStartPadding="0dp"
+                app:chipEndPadding="0dp"
+                android:text="@string/russia" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/ussr"
+                style="@style/LineChipStyle"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/ussr" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/usa"
+                style="@style/LineChipStyle"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/usa" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/france"
+                style="@style/LineChipStyle"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/france" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/great_britain"
+                style="@style/LineChipStyle"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/great_britain" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/germany"
+                style="@style/LineChipStyle"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/germany" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/germany_frg"
+                style="@style/LineChipStyle"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/germany_frg" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/italy"
+                style="@style/LineChipStyle"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/italy" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/japan"
+                style="@style/LineChipStyle"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/japan" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/china"
+                style="@style/LineChipStyle"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/china" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/india"
+                style="@style/LineChipStyle"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/india" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/australia"
+                style="@style/LineChipStyle"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/australia" />
+            <com.google.android.material.chip.Chip
+                android:id="@+id/canada"
+                style="@style/LineChipStyle"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/canada" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/spain"
+                style="@style/LineChipStyle"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/spain" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/mexico"
+                style="@style/LineChipStyle"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/mexico" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/switzerland"
+                style="@style/LineChipStyle"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/switzerland" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/poland"
+                style="@style/LineChipStyle"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/poland" />
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/sweden"
+                style="@style/LineChipStyle"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:text="@string/sweden" />
+
+        </com.google.android.material.chip.ChipGroup>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

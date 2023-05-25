@@ -43,7 +43,7 @@ class ListPageSeriesViewModel(
     var seriesPagesQuantity = 0
     val pagedSeries: Flow<PagingData<FilmFiltered>> = Pager(
         config = PagingConfig(pageSize = 20),
-        pagingSourceFactory = { SeriesPagingSource() }
+        pagingSourceFactory = { SeriesPagingSource(repository) }
     ).flow.cachedIn(viewModelScope)
 //
 //    val pagedFilmsFiltered1: Flow<PagingData<FilmFiltered>> = Pager(

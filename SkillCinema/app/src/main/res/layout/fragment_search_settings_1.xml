@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".presentation.SearchSettings1Fragment">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/back_button"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:layout_marginStart="34dp"
+        android:layout_marginTop="26dp"
+        android:src="@drawable/ic_baseline_arrow_back_ios_24"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/search_settings_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/search_settings_title"
+        android:textAppearance="@style/TextMainStyle.SmallHeading"
+        app:layout_constraintBottom_toBottomOf="@+id/back_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/back_button" />
+
+    <TextView
+        android:id="@+id/text_show"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="26dp"
+        android:layout_marginTop="37dp"
+        android:text="@string/text_show"
+        android:textAppearance="@style/TextMainStyle.FilmInfoSmall"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/search_settings_title" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/film_types_chip_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="26dp"
+        android:layout_marginTop="8dp"
+        app:chipSpacingHorizontal="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_show"
+        app:singleLine="true"
+        app:singleSelection="true">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_all"
+            style="@style/EdgeChipStyle"
+            android:layout_width="95dp"
+            android:layout_height="wrap_content"
+            android:text="@string/all"
+            android:textAlignment="center"
+            app:textEndPadding="18dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_serials"
+            style="@style/EdgeChipStyle"
+            android:layout_width="128dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="94dp"
+            android:text="@string/serials"
+            android:textAlignment="center"
+            app:textStartPadding="18dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_films"
+            style="@style/CenterChipStyle"
+            android:layout_width="130dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="-240dp"
+            android:text="@string/films"
+            android:textAlignment="center" />
+
+    </com.google.android.material.chip.ChipGroup>
+
+    <FrameLayout
+        android:id="@+id/country_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/film_types_chip_group">
+
+        <TextView
+            android:id="@+id/title_country"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="16dp"
+            android:layout_gravity="start|center_vertical"
+            android:layout_marginStart="26dp"
+            android:text="@string/country"
+            android:textAppearance="@style/TextMainStyle.FilmDescription" />
+
+        <TextView
+            android:id="@+id/text_country"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="26dp"
+            android:textAppearance="@style/TextMainStyle.Season_number_and_episode_quantity"
+            tools:text="@string/she_is_any" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_gravity="bottom"
+            android:background="@color/grey_2" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/genre_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/country_button">
+
+        <TextView
+            android:id="@+id/title_genre"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="16dp"
+            android:layout_gravity="start|center_vertical"
+            android:layout_marginStart="26dp"
+            android:text="@string/genre"
+            android:textAppearance="@style/TextMainStyle.FilmDescription"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/line_1" />
+
+        <TextView
+            android:id="@+id/text_genre"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical|end"
+            android:layout_marginEnd="26dp"
+            android:textAppearance="@style/TextMainStyle.Season_number_and_episode_quantity"
+            app:layout_constraintBottom_toBottomOf="@+id/title_genre"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/title_genre"
+            tools:text="@string/he_is_any" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_gravity="bottom"
+            android:background="@color/grey_2" />
+
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/years_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/genre_button">
+
+        <TextView
+            android:id="@+id/title_years"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="16dp"
+            android:layout_marginStart="26dp"
+            android:text="@string/year"
+            android:textAppearance="@style/TextMainStyle.FilmDescription" />
+
+        <TextView
+            android:id="@+id/text_years"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="26dp"
+            android:textAppearance="@style/TextMainStyle.Season_number_and_episode_quantity"
+            tools:text="до 2023" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_gravity="bottom"
+            android:background="@color/grey_2" />
+
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/title_rating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="26dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/rating"
+        android:textAppearance="@style/TextMainStyle.FilmDescription"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/years_button" />
+
+    <TextView
+        android:id="@+id/text_rating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="26dp"
+        android:textAppearance="@style/TextMainStyle.Season_number_and_episode_quantity"
+        app:layout_constraintBottom_toBottomOf="@+id/title_rating"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/title_rating"
+        tools:text="@string/he_is_any" />
+
+    <com.google.android.material.slider.RangeSlider
+        android:id="@+id/rating_slider"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="26dp"
+        android:layout_marginTop="16dp"
+        android:stepSize="1"
+        android:valueFrom="1"
+        android:valueTo="10"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/title_rating"
+        app:thumbColor="@color/white"
+        app:thumbRadius="12dp"
+        app:thumbStrokeColor="@color/black"
+        app:thumbStrokeWidth="1dp"
+        app:tickVisible="false"
+        app:trackColorActive="@color/blue"
+        app:trackColorInactive="@color/grey_3"
+        app:values="@array/initial_slider_values" />
+
+    <TextView
+        android:id="@+id/slider_start_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="-4dp"
+        android:text="@string/slider_start_value"
+        android:textAppearance="@style/TextMainStyle.Season_number_and_episode_quantity"
+        app:layout_constraintStart_toStartOf="@id/rating_slider"
+        app:layout_constraintTop_toBottomOf="@id/rating_slider" />
+
+    <TextView
+        android:id="@+id/slider_end_value"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="-4dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/slider_end_value"
+        android:textAppearance="@style/TextMainStyle.Season_number_and_episode_quantity"
+        app:layout_constraintEnd_toEndOf="@id/rating_slider"
+        app:layout_constraintTop_toBottomOf="@id/rating_slider" />
+
+    <FrameLayout
+        android:id="@+id/line_1"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="34dp"
+        android:background="@color/grey_2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/rating_slider" />
+
+    <TextView
+        android:id="@+id/text_sort"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="26dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/text_sort"
+        android:textAppearance="@style/TextMainStyle.FilmInfoSmall"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/line_1" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/sorting_types_chip_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="26dp"
+        android:layout_marginTop="8dp"
+        app:chipSpacingHorizontal="0dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/text_sort"
+        app:singleLine="true"
+        app:singleSelection="true">
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_date"
+            style="@style/EdgeChipStyle"
+            android:layout_width="95dp"
+            android:layout_height="wrap_content"
+            android:text="@string/date"
+            android:textAlignment="center"
+            app:textEndPadding="18dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_rating"
+            style="@style/EdgeChipStyle"
+            android:layout_width="128dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="94dp"
+            android:text="@string/rating"
+            android:textAlignment="center"
+            app:textStartPadding="18dp" />
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_popularity"
+            style="@style/CenterChipStyle"
+            android:layout_width="130dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="-240dp"
+            android:text="@string/popularity"
+            android:textAlignment="center" />
+
+    </com.google.android.material.chip.ChipGroup>
+
+    <FrameLayout
+        android:id="@+id/line_2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="16dp"
+        android:background="@color/grey_2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sorting_types_chip_group" />
+
+    <LinearLayout
+        android:id="@+id/show_watched_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/line_2">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/viewed_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start|center_vertical"
+            android:layout_marginStart="36dp"
+            android:src="@drawable/not_watched"
+            android:tint="@color/grey_4"
+            app:layout_constraintBottom_toBottomOf="@+id/searchButton"
+            app:layout_constraintEnd_toStartOf="@+id/searchButton"
+            app:layout_constraintTop_toTopOf="@+id/searchButton" />
+
+        <TextView
+            android:id="@+id/text_hide_viewed"
+            android:layout_width="wrap_content"
+            android:layout_marginVertical="16dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:layout_marginStart="34dp"
+            android:text="@string/not_watched"
+            android:textAppearance="@style/TextMainStyle.FilmDescription" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

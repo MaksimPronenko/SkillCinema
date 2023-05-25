@@ -7,6 +7,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import edu.skillbox.skillcinema.App
+import edu.skillbox.skillcinema.data.FilmDao
 import edu.skillbox.skillcinema.data.FilmsFiltered2PagingSource
 import edu.skillbox.skillcinema.data.Repository
 import edu.skillbox.skillcinema.models.FilmFiltered
@@ -20,7 +21,8 @@ private const val TAG = "ListPageFiltered2"
 
 class ListPageFiltered2ViewModel (
     private val repository: Repository,
-    application: App
+    application: App,
+    dao: FilmDao
 ) : AndroidViewModel(application) {
 
     private val _state = MutableStateFlow<ViewModelState>(
@@ -66,7 +68,8 @@ var filmsFiltered2PagesQuantity = 0
         config = PagingConfig(pageSize = 20),
         pagingSourceFactory = {
             FilmsFiltered2PagingSource(
-                application
+                application,
+                dao
             )
         }
     ).flow.cachedIn(viewModelScope)

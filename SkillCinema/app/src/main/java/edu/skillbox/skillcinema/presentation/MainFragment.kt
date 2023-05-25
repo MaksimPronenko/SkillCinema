@@ -1,6 +1,7 @@
 package edu.skillbox.skillcinema.presentation
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -84,8 +85,7 @@ class MainFragment : Fragment() {
     //    { filmTop -> onItemClick(filmTop) }
     private
     val seriesAdapter =
-        FilmsFilteredPagedListAdapter { filmFiltered -> onFilmFilteredItemClick(filmFiltered) }
-    //    { filmTop -> onItemClick(filmTop) }
+        FilmsFilteredPagedListAdapter { filmFiltered -> onSerialItemClick(filmFiltered) }
 
     // TODO: Rename and change types of parameters
     private
@@ -192,6 +192,12 @@ class MainFragment : Fragment() {
             )
         }
 
+        binding.searchButton.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_MainFragment_to_SearchFragment
+            )
+        }
+
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
                 viewModel.state
@@ -284,14 +290,11 @@ class MainFragment : Fragment() {
                                     )
                             }
                             ViewModelState.Error -> {
-                                binding.scrollView.isGone =
-                                    true
-                                binding.appNameImageLoading.isGone =
-                                    true
-                                binding.progress.isGone =
-                                    true
-                                binding.welcome1Image.isGone =
-                                    false
+                                binding.scrollView.isGone = true
+                                binding.appNameImageLoading.isGone = true
+                                binding.progress.isGone = true
+                                binding.welcome1Image.isGone = true
+                                findNavController().navigate(R.id.action_MainFragment_to_ErrorBottomFragment)
                             }
                         }
                     }
@@ -301,6 +304,7 @@ class MainFragment : Fragment() {
     private fun onItemClick(
         item: FilmTop
     ) {
+        Log.d("FilmVM", "MainFragment. FilmID called = ${item.filmId}")
         val bundle =
             Bundle().apply {
                 putInt(
@@ -312,15 +316,12 @@ class MainFragment : Fragment() {
             R.id.action_MainFragment_to_FilmFragment,
             bundle
         )
-//        parentFragmentManager.commit {
-//            replace<ItemFragment>(containerViewId = R.id.container, args = bundle)
-//            addToBackStack(ItemFragment::class.java.simpleName)
-//        }
     }
 
     private fun onPremiereItemClick(
         item: FilmPremiere
     ) {
+        Log.d("FilmVM", "MainFragment. FilmID called = ${item.kinopoiskId}")
         val bundle =
             Bundle().apply {
                 putInt(
@@ -337,6 +338,7 @@ class MainFragment : Fragment() {
     private fun onFilmFilteredItemClick(
         item: FilmFiltered
     ) {
+        Log.d("FilmVM", "MainFragment. FilmID called = ${item.kinopoiskId}")
         val bundle =
             Bundle().apply {
                 putInt(
@@ -350,23 +352,20 @@ class MainFragment : Fragment() {
         )
     }
 
-//    companion object {
-//        /**
-//         * Use this factory method to create a new instance of
-//         * this fragment using the provided parameters.
-//         *
-//         * @param param1 Parameter 1.
-//         * @param param2 Parameter 2.
-//         * @return A new instance of fragment MainFragment.
-//         */
-//        // TODO: Rename and change types and number of parameters
-//        @JvmStatic
-//        fun newInstance(param1: String, param2: String) =
-//            MainFragment().apply {
-//                arguments = Bundle().apply {
-//                    putString(ARG_PARAM1, param1)
-//                    putString(ARG_PARAM2, param2)
-//                }
-//            }
-//    }
+    private fun onSerialItemClick(
+        item: FilmFiltered
+    ) {
+        Log.d("FilmVM", "MainFragment. FilmID called = ${item.kinopoiskId}")
+        val bundle =
+            Bundle().apply {
+                putInt(
+                    "filmId",
+                    item.kinopoiskId
+                )
+            }
+        findNavController().navigate(
+            R.id.action_MainFragment_to_SerialFragment,
+            bundle
+        )
+    }
 }

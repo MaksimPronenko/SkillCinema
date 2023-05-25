@@ -79,7 +79,7 @@ class ListPageGalleryViewModel(
             _state.value = ViewModelState.Loading
             val jobLoading = viewModelScope.launch(Dispatchers.IO) {
                 kotlin.runCatching {
-                    repository.getImages(filmId)
+                    repository.getAllGallery(filmId)
                 }.fold(
                     onSuccess = {
                         _gallery.value = it

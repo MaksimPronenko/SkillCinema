@@ -39,7 +39,7 @@ class ListPageTop250ViewModel(
     var top250PagesQuantity = 0
     val pagedFilmsTop250: Flow<PagingData<FilmTop>> = Pager(
         config = PagingConfig(pageSize = 20),
-        pagingSourceFactory = { FilmsTop250PagingSource() }
+        pagingSourceFactory = { FilmsTop250PagingSource(repository) }
     ).flow.cachedIn(viewModelScope)
 //
 //    val pagedSeries: Flow<PagingData<FilmFiltered>> = Pager(

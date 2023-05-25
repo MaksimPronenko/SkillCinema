@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="CollectionBottomDialogTheme"
+        parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/CollectionBottomDialogStyle</item>
+    </style>
+    <style name="CollectionBottomDialogStyle"
+        parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/dialog_bottom_shape</item>
+    </style>
+
+    <style name="ErrorBottomDialogTheme"
+        parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/ErrorBottomDialogStyle</item>
+    </style>
+    <style name="ErrorBottomDialogStyle"
+        parent="Widget.Design.BottomSheet.Modal">
+        <item name="android:background">@drawable/error_dialog_bottom_shape</item>
+    </style>
+
+    <style name="CollectionNameDialogTheme"
+        parent="Theme.Design.Light.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/CollectionNameDialogStyle</item>
+    </style>
+    <style name="CollectionNameDialogStyle">
+        <item name="android:background">@drawable/collection_name_dialog_shape</item>
+    </style>
+
+</resources>
