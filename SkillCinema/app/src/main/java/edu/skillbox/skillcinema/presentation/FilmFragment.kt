@@ -211,16 +211,9 @@ class FilmFragment : Fragment() {
                 viewModel.favoriteChannel.collect { isFavorite ->
                     if (isFavorite) {
                         binding.favorite.setColorFilter(resources.getColor(R.color.blue, null))
-//                        binding.favorite.background.setTint(resources.getColor(R.color.blue, null))
                         Log.d(TAG, "Фильм ${viewModel.filmId} в коллекции \"Любимое\"")
                     } else {
                         binding.favorite.setColorFilter(resources.getColor(R.color.grey_4, null))
-//                        binding.favorite.background.setTint(
-//                            resources.getColor(
-//                                R.color.grey_4,
-//                                null
-//                            )
-//                        )
                         Log.d(TAG, "Фильм ${viewModel.filmId} отсутствует в коллекции \"Любимое\"")
                     }
                 }
@@ -230,18 +223,11 @@ class FilmFragment : Fragment() {
             .launchWhenStarted {
                 viewModel.wantedToWatchChannel.collect { isWantedToWatch ->
                     if (isWantedToWatch) {
-//                        binding.wantedToWatch.background.setTint(resources.getColor(R.color.blue, null))
                         binding.wantedToWatch.setColorFilter(resources.getColor(R.color.blue, null))
                         Log.d(TAG, "Фильм ${viewModel.filmId} в коллекции \"Хочу посмотреть\"")
 
                     } else {
                         binding.wantedToWatch.setColorFilter(resources.getColor(R.color.grey_4, null))
-//                        binding.wantedToWatch.background.setTint(
-//                            resources.getColor(
-//                                R.color.grey_4,
-//                                null
-//                            )
-//                        )
                         Log.d(TAG, "Фильм ${viewModel.filmId} отсутствует в коллекции \"Хочу посмотреть\"")
                     }
                 }
