@@ -198,6 +198,12 @@ class MainFragment : Fragment() {
             )
         }
 
+        binding.profileButton.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_MainFragment_to_ProfileFragment
+            )
+        }
+
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
                 viewModel.state

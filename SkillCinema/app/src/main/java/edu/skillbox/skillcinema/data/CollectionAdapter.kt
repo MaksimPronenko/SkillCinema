@@ -12,7 +12,8 @@ import edu.skillbox.skillcinema.models.CollectionInfo
 private const val TAG = "Collection.Adapter"
 
 class CollectionAdapter(
-    private val onClick: (CollectionInfo) -> Unit
+    private val onOpenCollection: (CollectionInfo) -> Unit,
+    private val onDeleteCollection: (CollectionInfo) -> Unit
 ) : RecyclerView.Adapter<CollectionViewHolder>() {
 
     private var data: List<CollectionInfo> = emptyList()
@@ -52,16 +53,33 @@ class CollectionAdapter(
     override fun onBindViewHolder(holder: CollectionViewHolder, position: Int) {
         val collection = data.getOrNull(position)
         with(holder.binding) {
-            collectionName.text = "Имя коллекции"
-            closeButton.isGone = true
-            closeButton.isGone = false
-            collectionImage.setImageResource(R.drawable.favorite)
-            collectionImage.setImageResource(R.drawable.wanted_to_watch)
-            collectionImage.setImageResource(R.drawable.profile)
+            if (collection != null) {
+                collectionName.text = collection.collectionName
+                when(collection.collectionName) {
+                    "Любимое" -> {
+                        collectionImage.setImageResource(R.drawable.favorite)
+                        deleteButton.isGone = true
+                    }
+                    "Хочу посмотреть" -> {
+                        collectionImage.setImageResource(R.drawable.wanted_to_watch)
+                        deleteButton.isGone = true
+                    }
+                    else -> {
+                        collectionImage.setImageResource(R.drawable.profile)
+                        deleteButton.isGone = false
+                    }
+                }
+                quantity.text = collection.filmsQuantity.toString()
+            }
         }
         holder.binding.root.setOnClickListener {
             collection?.let {
-                onClick(it)
+                onOpenCollection(it)
+            }
+        }
+        holder.binding.deleteButton.setOnClickListener {
+            collection?.let {
+                onDeleteCollection(it)
             }
         }
     }

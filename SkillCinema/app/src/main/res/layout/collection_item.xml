@@ -7,7 +7,7 @@
     android:background="@drawable/collection_background">
 
     <FrameLayout
-        android:id="@+id/close_button"
+        android:id="@+id/delete_button"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_marginEnd="5dp"
@@ -22,8 +22,8 @@
     </FrameLayout>
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:layout_marginHorizontal="8dp"
         android:layout_marginVertical="8dp"
         android:gravity="center"

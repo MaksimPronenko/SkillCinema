@@ -114,4 +114,14 @@
         <item name="android:textColor">@color/white</item>
     </style>
 
+    <style name="TextMainStyle.InputError">
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColor">@color/red</item>
+    </style>
+
+    <style name="TextMainStyle.GreyDark12">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/grey_4</item>
+    </style>
+
 </resources>

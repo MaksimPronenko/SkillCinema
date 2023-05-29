@@ -18,18 +18,6 @@ interface FilmDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addGenreTable(genreTable: GenreTable)
 
-    // Запрос на проверку наличия фильма в указанной коллекции
-    @Query("SELECT EXISTS (SELECT * FROM collection_table WHERE film_id LIKE :filmId AND collection LIKE :collectionName)")
-    suspend fun isFilmExistsInCollection(filmId: Int, collectionName: String): Boolean
-
-    // Запрос на добавление новой записи коллекции фильма
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun addCollectionTable(collectionTable: CollectionTable)
-
-    // Запрос на удаление фильма из коллекции
-    @Query("DELETE FROM collection_table WHERE film_id LIKE :filmId AND collection LIKE :collectionName")
-    suspend fun removeCollectionTable(filmId: Int, collectionName: String)
-
     // Запрос на добавление новой записи персонала фильма
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addStaffTable(staffTable: StaffTable)
@@ -91,6 +79,42 @@ interface FilmDao {
     @Transaction
     @Query("SELECT * FROM person_table WHERE person_id LIKE :personId")
     suspend fun getPersonInfoDb(personId: Int): PersonInfoDb
+
+    // Запрос на проверку наличия фильма в указанной коллекции
+    @Query("SELECT EXISTS (SELECT * FROM collection_table WHERE film_id = :filmId AND collection = :collectionName)")
+    suspend fun isFilmExistsInCollection(filmId: Int, collectionName: String): Boolean
+
+    // Запрос на добавление фильма в коллекцию
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addCollectionTable(collectionTable: CollectionTable)
+
+    // Запрос на удаление фильма из коллекции
+    @Query("DELETE FROM collection_table WHERE film_id = :filmId AND collection = :collectionName")
+    suspend fun removeCollectionTable(filmId: Int, collectionName: String)
+
+    // Запрос на получение количества фильмов в коллекции
+    @Query("SELECT COUNT(*) FROM collection_table WHERE collection = :collectionName")
+    suspend fun getCollectionFilmsQuantity(collectionName: String): Int
+
+    // Запрос на получение списка имен сохранённых коллекций
+    @Query("SELECT collection_name FROM collection_existing")
+    suspend fun getCollectionNames(): List<String>
+
+    // Запрос на получение списка имен коллекций, относящихся к фильмам
+    @Query("SELECT DISTINCT collection FROM collection_table")
+    suspend fun getCollectionNamesOfFilms(): List<String>
+
+    // Запрос на добавление новой коллекции
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun addCollection(collection: CollectionExisting)
+
+    // Запрос на удаление коллекции
+    @Query("DELETE FROM collection_existing WHERE collection_name = :collectionName")
+    suspend fun removeCollection(collectionName: String)
+
+    // Запрос на удаление всех фильмов коллекции
+    @Query("DELETE FROM collection_table WHERE collection = :collectionName")
+    suspend fun removeCollectionFilms(collectionName: String)
 
     // Запросы для проверки
 

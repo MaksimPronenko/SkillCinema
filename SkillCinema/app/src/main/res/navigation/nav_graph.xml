@@ -65,6 +65,9 @@
             android:id="@+id/action_MainFragment_to_SearchFragment"
             app:destination="@id/SearchFragment" />
         <action
+            android:id="@+id/action_MainFragment_to_ProfileFragment"
+            app:destination="@id/ProfileFragment" />
+        <action
             android:id="@+id/action_MainFragment_to_ListPagePremieresFragment"
             app:destination="@id/ListPagePremieresFragment" />
         <action
@@ -311,12 +314,15 @@
         <action
             android:id="@+id/action_CollectionNameDialogFragment_to_BottomDialogFragment"
             app:destination="@id/BottomDialogFragment" />
+        <action
+            android:id="@+id/action_CollectionNameDialogFragment_to_ProfileFragment"
+            app:destination="@id/ProfileFragment" />
     </dialog>
 
     <dialog
         android:id="@+id/ErrorBottomDialogFragment"
         android:name="edu.skillbox.skillcinema.presentation.ErrorBottomDialogFragment"
-        tools:layout="@layout/error_bottom_dialog"></dialog>
+        tools:layout="@layout/error_bottom_dialog" />
 
     <fragment
         android:id="@+id/AllStaffFragment"
@@ -528,6 +534,13 @@
         android:id="@+id/ProfileFragment"
         android:name="edu.skillbox.skillcinema.presentation.ProfileFragment"
         tools:layout="@layout/fragment_profile">
+        <argument
+            android:name="newCollectionName"
+            android:defaultValue=""
+            app:argType="string" />
+        <action
+            android:id="@+id/action_ProfileFragment_to_CollectionNameDialogFragment"
+            app:destination="@id/CollectionNameDialogFragment" />
         <action
             android:id="@+id/action_ProfileFragment_to_MainFragment"
             app:destination="@id/MainFragment" />

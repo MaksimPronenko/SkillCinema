@@ -85,10 +85,12 @@ interface FilmListApi {
     suspend fun getPersonInfo(@Path("personId") personId: Int): PersonInfo
 
     private companion object {
-        private const val api_key = "ce6f81de-e746-4a8b-8a79-4a7fe451b75d"
+//        private const val api_key = "ce6f81de-e746-4a8b-8a79-4a7fe451b75d"
 //        private const val api_key = "a8429c6b-2971-443a-9a72-59932af2324f"
 //        private const val api_key = "ca8d9204-5d12-4fcd-bdfc-194f72a55394"
-//        private const val api_key = "3a8ba0d1-8a76-4d8b-90e6-b3d00ed195c5"
+
+        // Четвёртый ключ API оставляю для проверяющего. Все 4 ключа рабочие.
+        private const val api_key = "3a8ba0d1-8a76-4d8b-90e6-b3d00ed195c5"
     }
 }
 

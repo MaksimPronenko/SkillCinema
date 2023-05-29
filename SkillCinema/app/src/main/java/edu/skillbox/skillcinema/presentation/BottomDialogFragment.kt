@@ -5,16 +5,22 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isGone
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
+import edu.skillbox.skillcinema.data.CollectionFilmAdapter
 import edu.skillbox.skillcinema.databinding.BottomDialogBinding
+import edu.skillbox.skillcinema.models.CollectionFilm
 import javax.inject.Inject
+
+private const val TAG = "BottomDialog.Fragment"
 
 private const val ARG_FILM_ID = "filmId"
 private const val ARG_POSTER_SMALL = "posterSmall"
@@ -30,18 +36,10 @@ class BottomDialogFragment : BottomSheetDialogFragment() {
     lateinit var bottomDialogViewModelFactory: BottomDialogViewModelFactory
     private val viewModel: BottomDialogViewModel by viewModels { bottomDialogViewModelFactory }
 
-//    @Inject
-//    lateinit var filmViewModelFactory: FilmViewModelFactory
-//    private val viewModel: FilmViewModel by activityViewModels {
-//        filmViewModelFactory
-//    }
-
-//    val viewModel: FilmViewModel by viewModels({requireParentFragment()})
-
-//    lateinit var binding: BottomDialogBinding
-
     private var _binding: BottomDialogBinding? = null
     private val binding get() = _binding!!
+
+    private val collectionAdapter =  CollectionFilmAdapter { collection -> onCollectionItemClick(collection) }
 
     override fun getTheme() = R.style.CollectionBottomDialogTheme
 
@@ -60,7 +58,6 @@ class BottomDialogFragment : BottomSheetDialogFragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-//        binding = BottomDialogBinding.bind(inflater.inflate(R.layout.bottom_dialog, container))
         _binding = BottomDialogBinding.bind(inflater.inflate(R.layout.bottom_dialog, container))
         return binding.root
     }
@@ -70,13 +67,44 @@ class BottomDialogFragment : BottomSheetDialogFragment() {
 
         binding.filmName.text = viewModel.name
         binding.filmInfo.text = "${viewModel.year}, ${viewModel.genres}"
-//        if (viewModel.newCollectionName != "")
-//            binding.addToCollection.text = viewModel.newCollectionName
+        binding.collectionRecycler.adapter = collectionAdapter
 
         Glide
             .with(binding.poster.context)
             .load(viewModel.posterSmall)
             .into(binding.poster)
+
+        viewLifecycleOwner.lifecycleScope
+            .launchWhenStarted {
+                viewModel.collectionChannel.collect { collectionList ->
+                    collectionAdapter.setData(collectionList)
+                    Log.d(TAG, "Новый список коллекций: $collectionList")
+                    Log.d(TAG, "Recycler: ${binding.collectionRecycler.layoutManager?.childCount}")
+                }
+            }
+
+//        viewLifecycleOwner.lifecycleScope
+//            .launchWhenStarted {
+//                viewModel.state
+//                    .collect { state ->
+//                        when (state) {
+//                            ViewModelState.Loading -> {
+//                                Log.d(TAG, "Состояние загрузки")
+//                            }
+//                            ViewModelState.Loaded -> {
+//                                Log.d(TAG, "Состояние рабочее")
+//                            }
+//                            ViewModelState.Error -> {
+//                                Log.d(TAG, "Состояние ошибки")
+////                                findNavController().navigate(R.id.action_BottomDialogFragment_to_ErrorBottomFragment)
+//                            }
+//                        }
+//                    }
+//            }
+
+        binding.filmInfo.setOnClickListener {
+            viewModel.loadCollectionData()
+        }
 
         binding.addToCollectionButton.setOnClickListener {
             findNavController().navigate(R.id.action_BottomDialogFragment_to_CollectionNameDialogFragment)
@@ -85,7 +113,9 @@ class BottomDialogFragment : BottomSheetDialogFragment() {
         val currentFragment = findNavController().getBackStackEntry(R.id.BottomDialogFragment)
         val dialogObserver = LifecycleEventObserver{ _, event ->
             if (event == Lifecycle.Event.ON_RESUME && currentFragment.savedStateHandle.contains("key")) {
-                binding.addToCollection.text = currentFragment.savedStateHandle.get("key")
+//                binding.addToCollection.text = currentFragment.savedStateHandle.get("key")
+                val newCollectionName = currentFragment.savedStateHandle.get<String>("key") ?: ""
+                viewModel.createNewCollection(collectionName = newCollectionName)
             }
         }
         val dialogLifecycle = currentFragment.lifecycle
@@ -103,19 +133,17 @@ class BottomDialogFragment : BottomSheetDialogFragment() {
 
     override fun onStart() {
         super.onStart()
-
         dialog?.setCanceledOnTouchOutside(false)
+    }
 
-//        dialog?.let {
-//            val bottomSheet =
-//                it.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet) as FrameLayout
-//            val behavior = BottomSheetBehavior.from(bottomSheet)
-//        }
+    private fun onCollectionItemClick(
+        item: CollectionFilm
+    ) {
+        viewModel.onCollectionItemClick(item)
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        Log.d("FilmVM", "BottomDialogFragment. onDestroyView.")
     }
 }

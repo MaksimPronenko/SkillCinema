@@ -8,6 +8,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatDialogFragment
+import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -47,21 +48,6 @@ class CollectionNameDialogFragment : AppCompatDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewLifecycleOwner.lifecycleScope
-            .launchWhenStarted {
-                viewModel.state
-                    .collect { state ->
-                        when (state) {
-                            is CollectionNameViewModelState.DataInput -> {
-                                binding.readyButton.isEnabled = false
-                            }
-                            CollectionNameViewModelState.DataIsValid -> {
-                                binding.readyButton.isEnabled = true
-                            }
-                        }
-                    }
-            }
-
         binding.collectionNameInput.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
 
@@ -77,11 +63,40 @@ class CollectionNameDialogFragment : AppCompatDialogFragment() {
             }
         })
 
+        viewLifecycleOwner.lifecycleScope
+            .launchWhenStarted {
+                viewModel.state
+                    .collect { state ->
+                        when (state) {
+                            CollectionNameViewModelState.DataIsEmpty -> {
+                                binding.readyButton.isEnabled = false
+                                binding.inputError.isVisible = false
+                            }
+                            CollectionNameViewModelState.DataIsValid -> {
+                                binding.readyButton.isEnabled = true
+                                binding.inputError.isVisible = false
+                            }
+                            CollectionNameViewModelState.DataIsNotValid -> {
+                                binding.readyButton.isEnabled = false
+                                binding.inputError.isVisible = true
+                            }
+                        }
+                    }
+            }
+
 //        viewLifecycleOwner.lifecycleScope
 //            .launchWhenStarted {
 //                viewModel.readyButtonIsEnabled.collect {
 //                    binding.readyButton.isEnabled = it
 //                    Log.d(TAG, "Сработал searchButtonIsEnabled.collect")
+//                }
+//            }
+
+//        viewLifecycleOwner.lifecycleScope
+//            .launchWhenStarted {
+//                viewModel.correctedInput.collect { correctedText ->
+//                    binding.collectionNameInput.setText(correctedText)
+//                    binding.collectionNameInput.setSelection(40)
 //                }
 //            }
 

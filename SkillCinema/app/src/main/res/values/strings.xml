@@ -116,6 +116,9 @@
 
     <string name="viewed">Просмотрено</string>
     <string name="collections">Коллекции</string>
+    <string name="create_collection">Создать свою коллекцию</string>
     <string name="interested">Вам было интересно</string>
+
+    <string name="input_error">Не более 24 символов</string>
 
 </resources>

@@ -580,21 +580,6 @@ class Repository @Inject constructor(private val dao: FilmDao) {
         }
     }
 
-    // Запрос на проверку наличия фильма в указанной коллекции
-    suspend fun isFilmExistsInCollection(filmId: Int, collectionName: String): Boolean {
-        return dao.isFilmExistsInCollection(filmId, collectionName)
-    }
-
-    // Запрос на добавление коллекции, включающей фильм
-    suspend fun addCollectionTable(collectionTable: CollectionTable) {
-        dao.addCollectionTable(collectionTable)
-    }
-
-    // Запрос на удаление фильма из коллекции
-    suspend fun removeCollectionTable(filmId: Int, collectionName: String) {
-        dao.removeCollectionTable(filmId, collectionName)
-    }
-
     // Запрос на добавление персонала фильма
     suspend fun addStaffTable(filmId: Int, staffInfoList: List<StaffInfo>) {
         staffInfoList.forEach { staffInfo ->
@@ -766,6 +751,73 @@ class Repository @Inject constructor(private val dao: FilmDao) {
 //            started = SharingStarted.WhileSubscribed(5000L),
 //            initialValue = emptyList()
 //        )
+
+    // Запрос на проверку наличия фильма в указанной коллекции
+    suspend fun isFilmExistsInCollection(filmId: Int, collectionName: String): Boolean {
+        return dao.isFilmExistsInCollection(filmId, collectionName)
+    }
+
+    // Запрос на добавление фильма в коллекцию
+    suspend fun addCollectionTable(collectionTable: CollectionTable) {
+        dao.addCollectionTable(collectionTable)
+    }
+
+    // Запрос на удаление фильма из коллекции
+    suspend fun removeCollectionTable(filmId: Int, collectionName: String) {
+        dao.removeCollectionTable(filmId, collectionName)
+    }
+
+    // Запрос на получение списка имен коллекций, относящихся к фильмам
+    suspend fun getCollectionNamesOfFilms(): List<String> {
+        return dao.getCollectionNamesOfFilms()
+    }
+
+    // Получение списка коллекций
+    suspend fun getCollectionInfoList(): List<CollectionInfo> {
+        val collectionInfoList: MutableList<CollectionInfo> =
+            emptyList<CollectionInfo>().toMutableList()
+        val collectionNamesList: List<String> = dao.getCollectionNames()
+        collectionNamesList.forEach { collectionName ->
+            val filmsQuantity: Int = dao.getCollectionFilmsQuantity(collectionName)
+            collectionInfoList.add(
+                CollectionInfo(
+                    collectionName = collectionName,
+                    filmsQuantity = filmsQuantity
+                )
+            )
+        }
+        return collectionInfoList.toList()
+    }
+
+    // Получение списка коллекций, с информацией, включён ли фильм в коллекцию
+    suspend fun getCollectionFilmList(filmId: Int): List<CollectionFilm> {
+        val collectionFilmList: MutableList<CollectionFilm> =
+            emptyList<CollectionFilm>().toMutableList()
+        val collectionNamesList: List<String> = dao.getCollectionNames()
+        collectionNamesList.forEach { collectionName ->
+            val filmsQuantity: Int = dao.getCollectionFilmsQuantity(collectionName)
+            val isFilmExistsInCollection: Boolean = dao.isFilmExistsInCollection(filmId, collectionName)
+            collectionFilmList.add(
+                CollectionFilm(
+                    collectionName = collectionName,
+                    filmsQuantity = filmsQuantity,
+                    filmIncluded = isFilmExistsInCollection
+                )
+            )
+        }
+        return collectionFilmList.toList()
+    }
+
+    // Запрос на добавление пустой колекции без фильмов
+    suspend fun addCollection(collection: CollectionExisting) {
+        dao.addCollection(collection)
+    }
+
+    // Запрос на удаление колекции и фильмов в ней
+    suspend fun deleteCollection(collectionName: String) {
+        dao.removeCollectionFilms(collectionName)
+        dao.removeCollection(collectionName)
+    }
 
     fun convertStaffTableListToStaffInfoList(staffTableList: List<StaffTable>): List<StaffInfo> {
         val staffInfoList: MutableList<StaffInfo> =

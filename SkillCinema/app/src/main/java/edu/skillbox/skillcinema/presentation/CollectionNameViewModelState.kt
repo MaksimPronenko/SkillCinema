@@ -1,6 +1,7 @@
 package edu.skillbox.skillcinema.presentation
 
 sealed class CollectionNameViewModelState {
-    object DataInput : CollectionNameViewModelState()
+    object DataIsEmpty : CollectionNameViewModelState()
     object DataIsValid : CollectionNameViewModelState()
+    object DataIsNotValid : CollectionNameViewModelState()
 }
