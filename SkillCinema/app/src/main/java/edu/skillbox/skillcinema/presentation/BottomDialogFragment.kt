@@ -5,7 +5,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.isGone
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -27,7 +26,6 @@ private const val ARG_POSTER_SMALL = "posterSmall"
 private const val ARG_NAME = "name"
 private const val ARG_YEAR = "year"
 private const val ARG_GENRES = "genres"
-private const val ARG_NEW_COLLECTION_NAME = "newCollectionName"
 
 @AndroidEntryPoint
 class BottomDialogFragment : BottomSheetDialogFragment() {
@@ -39,7 +37,12 @@ class BottomDialogFragment : BottomSheetDialogFragment() {
     private var _binding: BottomDialogBinding? = null
     private val binding get() = _binding!!
 
-    private val collectionAdapter =  CollectionFilmAdapter { collection -> onCollectionItemClick(collection) }
+    private val collectionAdapter = CollectionFilmAdapter(
+        onCollectionItemClick =
+        { collection -> onCollectionItemClick(collection) },
+        onAddCollectionItemClick =
+        { findNavController().navigate(R.id.action_BottomDialogFragment_to_CollectionNameDialogFragment) }
+    )
 
     override fun getTheme() = R.style.CollectionBottomDialogTheme
 
@@ -50,7 +53,6 @@ class BottomDialogFragment : BottomSheetDialogFragment() {
         viewModel.name = arguments?.getString(ARG_NAME) ?: ""
         viewModel.year = arguments?.getString(ARG_YEAR) ?: ""
         viewModel.genres = arguments?.getString(ARG_GENRES) ?: ""
-        viewModel.newCollectionName = arguments?.getString(ARG_NEW_COLLECTION_NAME) ?: ""
     }
 
     override fun onCreateView(
@@ -77,56 +79,42 @@ class BottomDialogFragment : BottomSheetDialogFragment() {
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
                 viewModel.collectionChannel.collect { collectionList ->
-                    collectionAdapter.setData(collectionList)
+                    collectionAdapter.setAdapterData(collectionList)
                     Log.d(TAG, "Новый список коллекций: $collectionList")
                     Log.d(TAG, "Recycler: ${binding.collectionRecycler.layoutManager?.childCount}")
                 }
             }
 
-//        viewLifecycleOwner.lifecycleScope
-//            .launchWhenStarted {
-//                viewModel.state
-//                    .collect { state ->
-//                        when (state) {
-//                            ViewModelState.Loading -> {
-//                                Log.d(TAG, "Состояние загрузки")
-//                            }
-//                            ViewModelState.Loaded -> {
-//                                Log.d(TAG, "Состояние рабочее")
-//                            }
-//                            ViewModelState.Error -> {
-//                                Log.d(TAG, "Состояние ошибки")
-////                                findNavController().navigate(R.id.action_BottomDialogFragment_to_ErrorBottomFragment)
-//                            }
-//                        }
-//                    }
-//            }
-
         binding.filmInfo.setOnClickListener {
             viewModel.loadCollectionData()
         }
 
-        binding.addToCollectionButton.setOnClickListener {
-            findNavController().navigate(R.id.action_BottomDialogFragment_to_CollectionNameDialogFragment)
-        }
-
         val currentFragment = findNavController().getBackStackEntry(R.id.BottomDialogFragment)
-        val dialogObserver = LifecycleEventObserver{ _, event ->
-            if (event == Lifecycle.Event.ON_RESUME && currentFragment.savedStateHandle.contains("key")) {
+        val dialogObserver = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME && currentFragment.savedStateHandle.contains("newCollectionName")) {
 //                binding.addToCollection.text = currentFragment.savedStateHandle.get("key")
-                val newCollectionName = currentFragment.savedStateHandle.get<String>("key") ?: ""
+                val newCollectionName =
+                    currentFragment.savedStateHandle.get<String>("newCollectionName") ?: ""
                 viewModel.createNewCollection(collectionName = newCollectionName)
             }
         }
         val dialogLifecycle = currentFragment.lifecycle
         dialogLifecycle.addObserver(dialogObserver)
-        viewLifecycleOwner.lifecycle.addObserver(LifecycleEventObserver{ _, event ->
-            if(event == Lifecycle.Event.ON_DESTROY) {
+        viewLifecycleOwner.lifecycle.addObserver(LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_DESTROY) {
                 dialogLifecycle.removeObserver(dialogObserver)
             }
         })
 
         binding.closeButton.setOnClickListener {
+            findNavController().previousBackStackEntry?.savedStateHandle?.set(
+                "favorite",
+                viewModel.favorite
+            )
+            findNavController().previousBackStackEntry?.savedStateHandle?.set(
+                "wantedToWatch",
+                viewModel.wantedToWatch
+            )
             dialog?.dismiss()
         }
     }

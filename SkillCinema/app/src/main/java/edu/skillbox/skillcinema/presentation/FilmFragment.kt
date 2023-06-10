@@ -1,19 +1,26 @@
 package edu.skillbox.skillcinema.presentation
 
 import android.animation.LayoutTransition
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.children
+import androidx.core.view.contains
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
 import edu.skillbox.skillcinema.data.GalleryAdapter
@@ -25,7 +32,7 @@ import edu.skillbox.skillcinema.models.StaffInfo
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
-private const val TAG = "FilmFragment"
+private const val TAG = "Film.Fragment"
 
 private const val ARG_FILM_ID = "filmId"
 
@@ -55,12 +62,7 @@ class FilmFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        if (arguments != null && viewModel.filmId == 0)
         val filmId = arguments?.getInt(ARG_FILM_ID) ?: 0
-        Log.d(
-            "FilmVM",
-            "onCreate Film Fragment. VM.filmId = ${viewModel.filmId}, arguments.filmId = $filmId"
-        )
         if (viewModel.filmId == 0 && filmId != 0) {
             viewModel.filmId = filmId
             viewModel.loadFilmInfo(filmId)
@@ -71,12 +73,55 @@ class FilmFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        val bottomNavigation: BottomNavigationView? = activity?.findViewById(R.id.bottom_navigation)
+        if (bottomNavigation != null) {
+            bottomNavigation.isGone = false
+
+            val menu = bottomNavigation.menu
+            menu.setGroupCheckable(0, true, false)
+            for (i in 0 until menu.size()) {
+                menu.getItem(i).isChecked = false
+            }
+            menu.setGroupCheckable(0, true, true)
+        }
+
         _binding = FragmentFilmBinding.inflate(inflater, container, false)
         return binding.root
     }
 
+    override fun onStart() {
+        super.onStart()
+        Log.d(TAG, "onStart")
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        Log.d(TAG, "onAttach")
+    }
+
+    override fun onDetach() {
+        super.onDetach()
+        Log.d(TAG, "onDetach")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d(TAG, "onPause()")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d(TAG, "onStop")
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d(TAG, "onViewCreated")
 
         binding.actorsRecycler.adapter = actorsAdapter
         binding.staffRecycler.adapter = staffAdapter
@@ -84,13 +129,15 @@ class FilmFragment : Fragment() {
         binding.similarsRecycler.adapter = similarsAdapter
 
         binding.favorite.setOnClickListener {
-            Log.d("BD", "Нажата кнопка favorite для ${viewModel.filmId}")
             viewModel.onCollectionButtonClick("Любимое")
         }
 
         binding.wantedToWatch.setOnClickListener {
-            Log.d("BD", "Нажата кнопка wantedToWatch для ${viewModel.filmId}")
             viewModel.onCollectionButtonClick("Хочу посмотреть")
+        }
+
+        binding.viewed.setOnClickListener {
+            viewModel.onViewedButtonClick()
         }
 
         binding.shortDescription.setOnClickListener {
@@ -138,18 +185,24 @@ class FilmFragment : Fragment() {
             findNavController().navigate(R.id.action_FilmFragment_to_BottomFragment, bundle)
         }
 
+        // При отключении диалога BottomDialogFragment инициирую проверку данных о включении
+        // фильма в "Любимое" и "Хочу посмотреть"
+        val currentFragment = findNavController().getBackStackEntry(R.id.FilmFragment)
+        val dialogObserver = LifecycleEventObserver{ _, event ->
+            if (event == Lifecycle.Event.ON_RESUME){
+                viewModel.checkFilmInCollections()
+            }
+        }
+        val dialogLifecycle = currentFragment.lifecycle
+        dialogLifecycle.addObserver(dialogObserver)
+        viewLifecycleOwner.lifecycle.addObserver(LifecycleEventObserver{ _, event ->
+            if(event == Lifecycle.Event.ON_DESTROY) {
+                dialogLifecycle.removeObserver(dialogObserver)
+            }
+        })
+
         binding.backButton.setOnClickListener {
             findNavController().popBackStack()
-        }
-
-        binding.mainButton.setOnClickListener {
-            findNavController().navigate(R.id.action_FilmFragment_to_MainFragment)
-        }
-
-        binding.searchButton.setOnClickListener {
-            findNavController().navigate(
-                R.id.action_FilmFragment_to_SearchFragment
-            )
         }
 
         binding.buttonAllActors.setOnClickListener {
@@ -229,6 +282,22 @@ class FilmFragment : Fragment() {
                     } else {
                         binding.wantedToWatch.setColorFilter(resources.getColor(R.color.grey_4, null))
                         Log.d(TAG, "Фильм ${viewModel.filmId} отсутствует в коллекции \"Хочу посмотреть\"")
+                    }
+                }
+            }
+
+        viewLifecycleOwner.lifecycleScope
+            .launchWhenStarted {
+                viewModel.viewedChannel.collect { viewed ->
+                    if (viewed) {
+                        binding.viewed.setImageResource(R.drawable.watched)
+                        binding.viewed.setColorFilter(resources.getColor(R.color.blue, null))
+                        Log.d(TAG, "Фильм ${viewModel.filmId} просмотрен")
+
+                    } else {
+                        binding.viewed.setImageResource(R.drawable.not_watched)
+                        binding.viewed.setColorFilter(resources.getColor(R.color.grey_4, null))
+                        Log.d(TAG, "Фильм ${viewModel.filmId} не просмотрен")
                     }
                 }
             }
@@ -380,14 +449,7 @@ class FilmFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-//        activity?.viewModelStore?.clear()
-//        this.viewModelStore.clear()
-//        viewModelStore.clear()
-//        val application = requireContext().applicationContext as App
-//        activity
-//        requireActivity().viewModelStore.clear()
-//
-//        Log.d("FilmVM", "Film Fragment. onDestroyView.")
+        Log.d(TAG, "onDestroyView")
     }
 
 //    override fun onDetach() {

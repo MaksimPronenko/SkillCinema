@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import edu.skillbox.skillcinema.data.Repository
 import edu.skillbox.skillcinema.models.FilmOfPersonTable
 import edu.skillbox.skillcinema.models.FilmOfStaff
+import edu.skillbox.skillcinema.models.InterestedTable
 import edu.skillbox.skillcinema.models.PersonInfoDb
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -156,6 +157,14 @@ class StaffViewModel(
             } else {
                 _state.value = ViewModelState.Loaded
                 Log.d(TAG, "Состояние успешного завершения загрузки")
+
+                // Запись в список "Вам было инетересно"
+                repository.addInterested(
+                    InterestedTable(
+                        id = staffId,
+                        type = 2
+                    )
+                )
             }
 
             viewModelScope.launch(Dispatchers.IO) {

@@ -2,15 +2,11 @@ package edu.skillbox.skillcinema.presentation
 
 import androidx.lifecycle.AndroidViewModel
 import edu.skillbox.skillcinema.App
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
-import javax.inject.Inject
+import kotlinx.coroutines.*
 
 private const val TAG = "Welcome"
 
-class WelcomeViewModel (
+class WelcomeViewModel(
     application: App
 ) : AndroidViewModel(application) {
 
@@ -27,6 +23,12 @@ class WelcomeViewModel (
     suspend fun countdownToChangeScreen() {
         delay(timeToChangeWelcomeScreen)
     }
+
+//    fun countdownToChangeScreen() {
+//        changeScreenScope.launch {
+//            delay(timeToChangeWelcomeScreen)
+//        }
+//    }
 
     override fun onCleared() {
         super.onCleared()

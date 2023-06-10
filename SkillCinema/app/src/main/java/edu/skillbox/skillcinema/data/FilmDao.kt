@@ -62,7 +62,15 @@ interface FilmDao {
     @Query("SELECT EXISTS (SELECT person_id FROM person_table WHERE person_id LIKE :searchedPersonId)")
     suspend fun isPersonDataExists(searchedPersonId: Int): Boolean
 
-    // Запрос на получение данных фильма по filmId
+    // Запрос на получение данных фильма FilmDb по filmId
+    @Query("SELECT * FROM person_table WHERE person_id LIKE :searchedPersonId")
+    suspend fun getPersonTable(searchedPersonId: Int): PersonTable?
+
+    // Запрос на получение данных фильма FilmDb по filmId
+    @Query("SELECT * FROM film_table WHERE film_id LIKE :filmId")
+    suspend fun getFilmDbFromDao(filmId: Int): FilmDb?
+
+    // Запрос на получение данных фильма FilmInfoDb по filmId
     @Transaction
     @Query("SELECT * FROM film_table WHERE film_id LIKE :filmId")
     suspend fun getFilmInfoDb(filmId: Int): FilmInfoDb?
@@ -96,6 +104,10 @@ interface FilmDao {
     @Query("SELECT COUNT(*) FROM collection_table WHERE collection = :collectionName")
     suspend fun getCollectionFilmsQuantity(collectionName: String): Int
 
+    // Запрос на получение списка id фильмов коллекции
+    @Query("SELECT film_id FROM collection_table WHERE collection = :collectionName")
+    suspend fun getCollectionFilmsIds(collectionName: String): List<Int>
+
     // Запрос на получение списка имен сохранённых коллекций
     @Query("SELECT collection_name FROM collection_existing")
     suspend fun getCollectionNames(): List<String>
@@ -115,6 +127,46 @@ interface FilmDao {
     // Запрос на удаление всех фильмов коллекции
     @Query("DELETE FROM collection_table WHERE collection = :collectionName")
     suspend fun removeCollectionFilms(collectionName: String)
+
+    // Запрос на добавление фильма в просмотренные
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    suspend fun addViewedFilm(viewedFilm: ViewedTable)
+
+    // Запрос на проверку наличия фильма в просмотренных
+    @Query("SELECT EXISTS (SELECT * FROM viewed_table WHERE film_id = :filmId)")
+    suspend fun isFilmExistsInViewed(filmId: Int): Boolean
+
+    // Запрос на получение количества просмотренных фильмов
+    @Query("SELECT COUNT(*) FROM viewed_table")
+    suspend fun getViewedFilmsQuantity(): Int
+
+    // Запрос на получение списка id просмотренных фильмов
+    @Query("SELECT film_id FROM viewed_table")
+    suspend fun getViewedFilmsIds(): List<Int>
+
+    // Запрос на удаление фильма из списка просмотренных
+    @Query("DELETE FROM viewed_table WHERE film_id = :viewedFilmId")
+    suspend fun removeViewedFilm(viewedFilmId: Int)
+
+    // Запрос на удаление всех просмотренных фильмов
+    @Query("DELETE FROM viewed_table")
+    suspend fun removeAllViewedFilms()
+
+    // Запрос на добавление фильма, сериала или человека в список "Вам было интересно"
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addInterested(interested: InterestedTable)
+
+    // Запрос на получение количества элементов в списке "Вам было интересно"
+    @Query("SELECT COUNT(*) FROM interested_table")
+    suspend fun getInterestedQuantity(): Int
+
+    // Запрос на получение списка "Вам было интересно"
+    @Query("SELECT * FROM interested_table")
+    suspend fun getInterestedList(): List<InterestedTable>
+
+    // Запрос на удаление всех элементов в списке "Вам было интересно"
+    @Query("DELETE FROM interested_table")
+    suspend fun removeAllInterested()
 
     // Запросы для проверки
 

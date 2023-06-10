@@ -6,8 +6,10 @@ import androidx.lifecycle.viewModelScope
 import edu.skillbox.skillcinema.data.Repository
 import edu.skillbox.skillcinema.models.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
 private const val TAG = "SerialVM"
@@ -63,6 +65,18 @@ class SerialViewModel(
 
     var similarFilmList: List<SimilarFilm> = emptyList()
     var similarsQuantity = 0
+
+    var favorite = false
+    private val _favoriteChannel = Channel<Boolean>()
+    val favoriteChannel = _favoriteChannel.receiveAsFlow()
+
+    var wantedToWatch = false
+    private val _wantedToWatchChannel = Channel<Boolean>()
+    val wantedToWatchChannel = _wantedToWatchChannel.receiveAsFlow()
+
+    var viewed = false
+    private val _viewedChannel = Channel<Boolean>()
+    val viewedChannel = _viewedChannel.receiveAsFlow()
 
     fun loadSerialData(filmId: Int) {
         Log.d(TAG, "loadSerialData($filmId)")
@@ -132,25 +146,29 @@ class SerialViewModel(
                             repository.getFilmInfo(filmId)
                         }.fold(
                             onSuccess = {
-                                name = it.nameRu ?: it.nameEn ?: it.nameOriginal ?: ""
-                                poster = it.posterUrl ?: ""
-                                posterSmall = it.posterUrlPreview ?: ""
-                                rating = it.ratingKinopoisk
-                                year = it.year
+                                name = it?.nameRu ?: it?.nameEn ?: it?.nameOriginal ?: ""
+                                poster = it?.posterUrl ?: ""
+                                posterSmall = it?.posterUrlPreview ?: ""
+                                rating = it?.ratingKinopoisk
+                                year = it?.year
 
-                                length = it.filmLength
+                                length = it?.filmLength
                                 filmLength = repository.convertLength(length)
 
-                                ratingAgeLimits = it.ratingAgeLimits
+                                ratingAgeLimits = it?.ratingAgeLimits
                                 ageLimit = repository.convertAgeLimit(ratingAgeLimits)
 
-                                shortDescription = it.shortDescription
-                                description = it.description
+                                shortDescription = it?.shortDescription
+                                description = it?.description
 
-                                countryList = repository.convertClassListToStringList(it.countries)
+                                if (it != null) {
+                                    countryList = repository.convertClassListToStringList(it.countries)
+                                }
                                 countries = repository.convertStringListToString(countryList)
 
-                                genreList = repository.convertClassListToStringList(it.genres)
+                                if (it != null) {
+                                    genreList = repository.convertClassListToStringList(it.genres)
+                                }
                                 genres = repository.convertStringListToString(genreList)
                                 Log.d(TAG, "Загружена из Api FilmInfo: $it")
                             },
@@ -290,12 +308,30 @@ class SerialViewModel(
             jobFilmData.join()
             jobSerialData.join()
 
+            favorite = repository.isFilmExistsInCollection(filmId, "Любимое")
+            _favoriteChannel.send(element = favorite)
+            wantedToWatch = repository.isFilmExistsInCollection(filmId, "Хочу посмотреть")
+            _wantedToWatchChannel.send(element = wantedToWatch)
+            viewed = repository.isFilmExistsInViewed(filmId)
+            _viewedChannel.send(element = viewed)
+            Log.d(TAG, "Коллекция \"Любимое\": $favorite")
+            Log.d(TAG, "Коллекция \"Хочу посмотреть\": $wantedToWatch")
+            Log.d(TAG, "Просмотрен: $viewed")
+
             if (error) {
                 _state.value = ViewModelState.Error
                 Log.d(TAG, "Состояние ошибки VM")
             } else {
                 _state.value = ViewModelState.Loaded
                 Log.d(TAG, "Состояние умпешного завершения загрузки VM")
+
+                // Запись в список "Вам было инетересно"
+                repository.addInterested(
+                    InterestedTable(
+                        id = filmId,
+                        type = 1
+                    )
+                )
             }
         }
     }
@@ -313,17 +349,57 @@ class SerialViewModel(
             )
     }
 
-    suspend fun onFavoriteButtonClick() {
-        val addCollectionTableJob = viewModelScope.launch {
-            repository.addCollectionTable(
-                CollectionTable(
-                    filmId = filmId,
-                    collection = "Любимое"
+    fun onCollectionButtonClick(collectionName: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val filmExistsInCollection = repository.isFilmExistsInCollection(filmId, collectionName)
+            if (filmExistsInCollection) {
+                repository.removeCollectionTable(filmId, collectionName)
+            } else {
+                repository.addCollectionTable(
+                    CollectionTable(
+                        collection = collectionName,
+                        filmId = filmId
+                    )
                 )
-            )
+            }
+            if (collectionName == "Любимое") {
+                favorite = !filmExistsInCollection
+                _favoriteChannel.send(element = favorite)
+                Log.d(TAG, "Коллекция \"Любимое\": $favorite")
+            } else if (collectionName == "Хочу посмотреть") {
+                wantedToWatch = !filmExistsInCollection
+                _wantedToWatchChannel.send(element = wantedToWatch)
+                Log.d(TAG, "Коллекция \"Хочу посмотреть\": $wantedToWatch")
+            }
         }
-        addCollectionTableJob.join()
-        Log.d(TAG, "Закончена работа записи фильма в коллекцию Любимое")
+    }
+
+    fun onViewedButtonClick() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val filmViewed = repository.isFilmExistsInViewed(filmId)
+            if (filmViewed) {
+                repository.removeViewedFilm(filmId)
+            } else {
+                repository.addViewedFilm(ViewedTable(filmId = filmId))
+            }
+            viewed = !filmViewed
+            _viewedChannel.send(element = viewed)
+            Log.d(TAG, "Просмотрен: $viewed")
+        }
+    }
+
+    fun checkFilmInCollections() {
+        viewModelScope.launch(Dispatchers.IO) {
+            favorite = repository.isFilmExistsInCollection(filmId, "Любимое")
+            _favoriteChannel.send(element = favorite)
+            wantedToWatch = repository.isFilmExistsInCollection(filmId, "Хочу посмотреть")
+            _wantedToWatchChannel.send(element = wantedToWatch)
+            viewed = repository.isFilmExistsInViewed(filmId)
+            _viewedChannel.send(element = viewed)
+            Log.d(TAG, "Коллекция \"Любимое\": $favorite")
+            Log.d(TAG, "Коллекция \"Хочу посмотреть\": $wantedToWatch")
+            Log.d(TAG, "Просмотрен: $viewed")
+        }
     }
 
     private fun seasonQuantityToText(quantity: Int): String {

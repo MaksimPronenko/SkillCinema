@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.App
 import edu.skillbox.skillcinema.R
@@ -58,6 +59,8 @@ class MainFragment : Fragment() {
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
 
+    var bottomNavigation: BottomNavigationView? = null
+
     private val filmPremieresAdapter =
         FilmPremieresAdapter(limited = true) { filmPremiere -> onPremiereItemClick(filmPremiere) }
 
@@ -69,7 +72,8 @@ class MainFragment : Fragment() {
         FilmsTopPagedListAdapter { filmTop -> onItemClick(filmTop) }
 
     private
-    val filmsFiltered1Adapter = FilmsFilteredPagedListAdapter { filmFiltered -> onFilmFilteredItemClick(filmFiltered) }
+    val filmsFiltered1Adapter =
+        FilmsFilteredPagedListAdapter { filmFiltered -> onFilmFilteredItemClick(filmFiltered) }
 
     //    { filmTop -> onItemClick(filmTop) }
 //    private val filmTop250Adapter = FilmsTopPagedListAdapter()
@@ -114,16 +118,13 @@ class MainFragment : Fragment() {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        _binding =
-            FragmentMainBinding.inflate(
-                inflater,
-                container,
-                false
-            )
+        bottomNavigation = activity?.findViewById(R.id.bottom_navigation)
+        if (bottomNavigation != null) bottomNavigation!!.isGone = false
+        bottomNavigation?.invalidate()
+
+        _binding = FragmentMainBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -136,27 +137,42 @@ class MainFragment : Fragment() {
             savedInstanceState
         )
 
-        binding.premieresRecycler.adapter =
-            filmPremieresAdapter
-        binding.popularRecycler.adapter =
-            filmTop100PopularAdapter
-        binding.filmsFiltered1Recycler.adapter =
-            filmsFiltered1Adapter
-        binding.top250Recycler.adapter =
-            filmTop250Adapter
-        binding.filmsFiltered2Recycler.adapter =
-            filmsFiltered2Adapter
-        binding.serialsRecycler.adapter =
-            seriesAdapter
+        binding.premieresRecycler.adapter = filmPremieresAdapter
+        binding.popularRecycler.adapter = filmTop100PopularAdapter
+        binding.filmsFiltered1Recycler.adapter = filmsFiltered1Adapter
+        binding.top250Recycler.adapter = filmTop250Adapter
+        binding.filmsFiltered2Recycler.adapter = filmsFiltered2Adapter
+        binding.serialsRecycler.adapter = seriesAdapter
 
-        val application =
-            requireContext().applicationContext as App
-        binding.filmsFiltered1.text =
-            application.filteredFilms1title
-        binding.filmsFiltered2.text =
-            application.filteredFilms2title
+        val application = requireContext().applicationContext as App
+        binding.filmsFiltered1.text = application.filteredFilms1title
+        binding.filmsFiltered2.text = application.filteredFilms2title
+
+//        binding.buttonAllPremieres.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.action_MainFragment_to_ListPagePremieresFragment, null))
 
         binding.buttonAllPremieres.setOnClickListener {
+//            Navigation.findNavController(it).navigate(
+//                R.id.action_MainFragment_to_ListPagePremieresFragment
+//            )
+
+            // Use the navigate() method that takes a navOptions DSL Builder
+//            navController.navigate(selectedBottomNavRoute) {
+//                launchSingleTop = true
+//                restoreState = true
+//                popUpTo(navController.graph.findStartDestination().id) {
+//                    saveState = true
+//                }
+//            }
+//
+//            FragmentNavigatorExtras(image_cover to "image_cover")
+
+//            findNavController().navigate(
+//                "@id/ListPagePremieresFragment"
+//            ) {
+//                launchSingleTop = true
+//                restoreState = true
+//            }
+
             findNavController().navigate(
                 R.id.action_MainFragment_to_ListPagePremieresFragment
             )
@@ -192,119 +208,106 @@ class MainFragment : Fragment() {
             )
         }
 
-        binding.searchButton.setOnClickListener {
-            findNavController().navigate(
-                R.id.action_MainFragment_to_SearchFragment
-            )
-        }
+        viewLifecycleOwner.lifecycleScope.launchWhenStarted {
+            viewModel.state
+                .collect { state ->
+                    when (state) {
+                        ViewModelState.Loading -> {
+                            binding.scrollView.isGone =
+                                true
+                            binding.appNameImageLoading.isGone =
+                                false
+                            binding.progress.isGone =
+                                false
+                            binding.welcome1Image.isGone =
+                                false
+                        }
+                        ViewModelState.Loaded -> {
+                            binding.scrollView.isGone =
+                                false
+                            binding.appNameImageLoading.isGone =
+                                true
+                            binding.progress.isGone =
+                                true
+                            binding.welcome1Image.isGone =
+                                true
 
-        binding.profileButton.setOnClickListener {
-            findNavController().navigate(
-                R.id.action_MainFragment_to_ProfileFragment
-            )
-        }
-
-        viewLifecycleOwner.lifecycleScope
-            .launchWhenStarted {
-                viewModel.state
-                    .collect { state ->
-                        when (state) {
-                            ViewModelState.Loading -> {
-                                binding.scrollView.isGone =
-                                    true
-                                binding.appNameImageLoading.isGone =
-                                    false
-                                binding.progress.isGone =
-                                    false
-                                binding.welcome1Image.isGone =
-                                    false
+                            binding.buttonAllPremieres.isVisible =
+                                viewModel.premieresQuantity > 20
+                            viewModel.premieres.onEach {
+                                filmPremieresAdapter.setData(
+                                    it
+                                )
                             }
-                            ViewModelState.Loaded -> {
-                                binding.scrollView.isGone =
-                                    false
-                                binding.appNameImageLoading.isGone =
-                                    true
-                                binding.progress.isGone =
-                                    true
-                                binding.welcome1Image.isGone =
-                                    true
+                                .launchIn(
+                                    viewLifecycleOwner.lifecycleScope
+                                )
 
-                                binding.buttonAllPremieres.isVisible =
-                                    viewModel.premieresQuantity > 20
-                                viewModel.premieres.onEach {
-                                    filmPremieresAdapter.setData(
-                                        it
-                                    )
-                                }
-                                    .launchIn(
-                                        viewLifecycleOwner.lifecycleScope
-                                    )
-
-                                binding.buttonAllPopular.isVisible =
-                                    viewModel.top100PopularPagesQuantity > 1
-                                viewModel.pagedFilmsTop100Popular.onEach {
-                                    filmTop100PopularAdapter.submitData(
-                                        it
-                                    )
-                                }
-                                    .launchIn(
-                                        viewLifecycleOwner.lifecycleScope
-                                    )
-
-                                binding.buttonAllFilmsFiltered1.isVisible =
-                                    viewModel.filmsFiltered1PagesQuantity > 1
-                                viewModel.pagedFilmsFiltered1.onEach {
-                                    filmsFiltered1Adapter.submitData(
-                                        it
-                                    )
-                                }
-                                    .launchIn(
-                                        viewLifecycleOwner.lifecycleScope
-                                    )
-
-                                binding.buttonAllTop250.isVisible =
-                                    viewModel.top250PagesQuantity > 1
-                                viewModel.pagedFilmsTop250.onEach {
-                                    filmTop250Adapter.submitData(
-                                        it
-                                    )
-                                }
-                                    .launchIn(
-                                        viewLifecycleOwner.lifecycleScope
-                                    )
-
-                                binding.buttonAllFilmsFiltered2.isVisible =
-                                    viewModel.filmsFiltered2PagesQuantity > 1
-                                viewModel.pagedFilmsFiltered2.onEach {
-                                    filmsFiltered2Adapter.submitData(
-                                        it
-                                    )
-                                }
-                                    .launchIn(
-                                        viewLifecycleOwner.lifecycleScope
-                                    )
-
-                                binding.buttonAllSeries.isVisible =
-                                    viewModel.seriesPagesQuantity > 1
-                                viewModel.pagedSeries.onEach {
-                                    seriesAdapter.submitData(
-                                        it
-                                    )
-                                }
-                                    .launchIn(
-                                        viewLifecycleOwner.lifecycleScope
-                                    )
+                            binding.buttonAllPopular.isVisible =
+                                viewModel.top100PopularPagesQuantity > 1
+                            viewModel.pagedFilmsTop100Popular.onEach {
+                                filmTop100PopularAdapter.submitData(
+                                    it
+                                )
                             }
-                            ViewModelState.Error -> {
-                                binding.scrollView.isGone = true
-                                binding.appNameImageLoading.isGone = true
-                                binding.progress.isGone = true
-                                binding.welcome1Image.isGone = true
-                                findNavController().navigate(R.id.action_MainFragment_to_ErrorBottomFragment)
+                                .launchIn(
+                                    viewLifecycleOwner.lifecycleScope
+                                )
+
+                            binding.buttonAllFilmsFiltered1.isVisible =
+                                viewModel.filmsFiltered1PagesQuantity > 1
+                            viewModel.pagedFilmsFiltered1.onEach {
+                                filmsFiltered1Adapter.submitData(
+                                    it
+                                )
                             }
+                                .launchIn(
+                                    viewLifecycleOwner.lifecycleScope
+                                )
+
+                            binding.buttonAllTop250.isVisible =
+                                viewModel.top250PagesQuantity > 1
+                            viewModel.pagedFilmsTop250.onEach {
+                                filmTop250Adapter.submitData(
+                                    it
+                                )
+                            }
+                                .launchIn(
+                                    viewLifecycleOwner.lifecycleScope
+                                )
+
+                            binding.buttonAllFilmsFiltered2.isVisible =
+                                viewModel.filmsFiltered2PagesQuantity > 1
+                            viewModel.pagedFilmsFiltered2.onEach {
+                                filmsFiltered2Adapter.submitData(
+                                    it
+                                )
+                            }
+                                .launchIn(
+                                    viewLifecycleOwner.lifecycleScope
+                                )
+
+                            binding.buttonAllSeries.isVisible =
+                                viewModel.seriesPagesQuantity > 1
+                            viewModel.pagedSeries.onEach {
+                                seriesAdapter.submitData(
+                                    it
+                                )
+                            }
+                                .launchIn(
+                                    viewLifecycleOwner.lifecycleScope
+                                )
+                        }
+                        ViewModelState.Error -> {
+                            binding.scrollView.isGone = true
+                            binding.appNameImageLoading.isGone = true
+                            binding.progress.isGone = true
+                            binding.welcome1Image.isGone = true
+                            findNavController().navigate(R.id.action_MainFragment_to_ErrorBottomFragment)
                         }
                     }
-            }
+                }
+        }
     }
 
     private fun onItemClick(

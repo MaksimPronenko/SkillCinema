@@ -298,10 +298,6 @@
             android:name="genres"
             android:defaultValue=""
             app:argType="string" />
-        <argument
-            android:name="newCollectionName"
-            android:defaultValue=""
-            app:argType="string" />
         <action
             android:id="@+id/action_BottomDialogFragment_to_CollectionNameDialogFragment"
             app:destination="@id/CollectionNameDialogFragment" />
@@ -534,10 +530,6 @@
         android:id="@+id/ProfileFragment"
         android:name="edu.skillbox.skillcinema.presentation.ProfileFragment"
         tools:layout="@layout/fragment_profile">
-        <argument
-            android:name="newCollectionName"
-            android:defaultValue=""
-            app:argType="string" />
         <action
             android:id="@+id/action_ProfileFragment_to_CollectionNameDialogFragment"
             app:destination="@id/CollectionNameDialogFragment" />
@@ -548,46 +540,38 @@
             android:id="@+id/action_ProfileFragment_to_SearchFragment"
             app:destination="@id/SearchFragment" />
         <action
-            android:id="@+id/action_ProfileFragment_to_AllViewedFragment"
-            app:destination="@id/AllViewedFragment" />
-        <action
             android:id="@+id/action_ProfileFragment_to_AllInterestedFragment"
             app:destination="@id/AllInterestedFragment" />
         <action
             android:id="@+id/action_ProfileFragment_to_FilmFragment"
-            app:destination="@id/FilmFragment" />
+            app:destination="@id/FilmFragment"/>
+        <action
+            android:id="@+id/action_ProfileFragment_to_SerialFragment"
+            app:destination="@id/SerialFragment" />
+        <action
+            android:id="@+id/action_ProfileFragment_to_StaffFragment"
+            app:destination="@id/StaffFragment" />
         <action
             android:id="@+id/action_ProfileFragment_to_CollectionFragment"
             app:destination="@id/CollectionFragment" />
     </fragment>
 
     <fragment
-        android:id="@+id/AllViewedFragment"
-        android:name="edu.skillbox.skillcinema.presentation.AllViewedFragment"
-        tools:layout="@layout/fragment_all_viewed">
-        <action
-            android:id="@+id/action_AllViewedFragment_to_MainFragment"
-            app:destination="@id/MainFragment" />
-        <action
-            android:id="@+id/action_AllViewedFragment_to_SearchFragment"
-            app:destination="@id/SearchFragment" />
-        <action
-            android:id="@+id/action_AllViewedFragment_to_FilmFragment"
-            app:destination="@id/FilmFragment" />
-    </fragment>
-
-    <fragment
         android:id="@+id/CollectionFragment"
-        android:name="edu.skillbox.skillcinema.presentation.AllViewedFragment"
+        android:name="edu.skillbox.skillcinema.presentation.CollectionFragment"
         tools:layout="@layout/fragment_collection">
+        <argument
+            android:name="collectionName"
+            android:defaultValue=""
+            app:argType="string" />
         <action
-            android:id="@+id/action_AllViewedFragment_to_MainFragment"
+            android:id="@+id/action_CollectionFragment_to_MainFragment"
             app:destination="@id/MainFragment" />
         <action
-            android:id="@+id/action_AllViewedFragment_to_SearchFragment"
+            android:id="@+id/action_CollectionFragment_to_SearchFragment"
             app:destination="@id/SearchFragment" />
         <action
-            android:id="@+id/action_AllViewedFragment_to_FilmFragment"
+            android:id="@+id/action_CollectionFragment_to_FilmFragment"
             app:destination="@id/FilmFragment" />
     </fragment>
 

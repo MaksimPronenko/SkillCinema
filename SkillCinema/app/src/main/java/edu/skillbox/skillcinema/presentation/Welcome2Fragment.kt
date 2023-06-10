@@ -4,10 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
 import edu.skillbox.skillcinema.databinding.FragmentWelcome2Binding
@@ -57,9 +59,10 @@ class Welcome2Fragment : Fragment() {
 //    }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
+        val bottomNavigation: BottomNavigationView? = activity?.findViewById(R.id.bottom_navigation)
+        if (bottomNavigation != null) bottomNavigation.isGone = true
 
         _binding = FragmentWelcome2Binding.inflate(inflater, container, false)
         return binding.root
@@ -71,9 +74,36 @@ class Welcome2Fragment : Fragment() {
 
         changeSlides()
 
-        binding.welcome2Fragment.setOnClickListener {
-            findNavController().navigate(R.id.action_Welcome2Fragment_to_Welcome3Fragment)
-        }
+//        binding.welcome2Fragment.setOnClickListener {
+//            findNavController().navigate(R.id.action_Welcome2Fragment_to_Welcome3Fragment)
+//        }
+
+        binding.welcome2Fragment.setOnTouchListener(object : OnSwipeTouchListener(context) {
+            override fun onSwipeLeft() {
+                super.onSwipeLeft()
+//                Toast.makeText(
+//                    context, "Swipe Left gesture detected",
+//                    Toast.LENGTH_SHORT
+//                ).show()
+                findNavController().navigate(R.id.action_Welcome2Fragment_to_Welcome3Fragment)
+            }
+
+            override fun onClick() {
+                super.onClick()
+                findNavController().navigate(R.id.action_Welcome2Fragment_to_Welcome3Fragment)
+            }
+
+            override fun onSwipeRight() {
+                super.onSwipeRight()
+//                Toast.makeText(
+//                    context,
+//                    "Swipe Right gesture detected",
+//                    Toast.LENGTH_SHORT
+//                ).show()
+                findNavController().popBackStack()
+            }
+        })
+
         binding.buttonSkip.setOnClickListener {
             findNavController().navigate(R.id.action_Welcome2Fragment_to_MainFragment_no_animation)
         }

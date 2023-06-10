@@ -9,11 +9,14 @@ import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
 import edu.skillbox.skillcinema.data.GalleryAdapter
@@ -22,10 +25,10 @@ import edu.skillbox.skillcinema.data.StaffInfoAdapter
 import edu.skillbox.skillcinema.databinding.FragmentSerialBinding
 import edu.skillbox.skillcinema.models.SimilarFilm
 import edu.skillbox.skillcinema.models.StaffInfo
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 import kotlin.math.roundToInt
+
+private const val TAG = "Serial.Fragment"
 
 private const val ARG_FILM_ID = "filmId"
 
@@ -50,10 +53,6 @@ class SerialFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val filmId = arguments?.getInt(ARG_FILM_ID) ?: 0
-        Log.d(
-            "FilmVM",
-            "onCreate Film Fragment. VM.filmId = ${viewModel.filmId}, arguments.filmId = $filmId"
-        )
         if (viewModel.filmId == 0 && filmId != 0) {
             viewModel.filmId = filmId
             viewModel.loadSerialData(filmId)
@@ -64,6 +63,9 @@ class SerialFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        val bottomNavigation: BottomNavigationView? = activity?.findViewById(R.id.bottom_navigation)
+        if (bottomNavigation != null) bottomNavigation.isGone = false
+
         _binding = FragmentSerialBinding.inflate(inflater, container, false)
         return binding.root
     }
@@ -75,6 +77,18 @@ class SerialFragment : Fragment() {
         binding.staffRecycler.adapter = staffAdapter
         binding.galleryRecycler.adapter = galleryAdapter
         binding.similarsRecycler.adapter = similarsAdapter
+
+        binding.favorite.setOnClickListener {
+            viewModel.onCollectionButtonClick("Любимое")
+        }
+
+        binding.wantedToWatch.setOnClickListener {
+            viewModel.onCollectionButtonClick("Хочу посмотреть")
+        }
+
+        binding.viewed.setOnClickListener {
+            viewModel.onViewedButtonClick()
+        }
 
         binding.shortDescription.setOnClickListener {
             applyLayoutTransition()
@@ -121,18 +135,24 @@ class SerialFragment : Fragment() {
             findNavController().navigate(R.id.action_SerialFragment_to_BottomFragment, bundle)
         }
 
+        // При отключении диалога BottomDialogFragment инициирую проверку данных о включении
+        // фильма в "Любимое" и "Хочу посмотреть"
+        val currentFragment = findNavController().getBackStackEntry(R.id.SerialFragment)
+        val dialogObserver = LifecycleEventObserver{ _, event ->
+            if (event == Lifecycle.Event.ON_RESUME){
+                viewModel.checkFilmInCollections()
+            }
+        }
+        val dialogLifecycle = currentFragment.lifecycle
+        dialogLifecycle.addObserver(dialogObserver)
+        viewLifecycleOwner.lifecycle.addObserver(LifecycleEventObserver{ _, event ->
+            if(event == Lifecycle.Event.ON_DESTROY) {
+                dialogLifecycle.removeObserver(dialogObserver)
+            }
+        })
+
         binding.backButton.setOnClickListener {
             findNavController().popBackStack()
-        }
-
-        binding.mainButton.setOnClickListener {
-            findNavController().navigate(R.id.action_SerialFragment_to_MainFragment)
-        }
-
-        binding.searchButton.setOnClickListener {
-            findNavController().navigate(
-                R.id.action_SerialFragment_to_SearchFragment
-            )
         }
 
         binding.buttonAllSeasonsAndEpisodes.setOnClickListener {
@@ -206,6 +226,49 @@ class SerialFragment : Fragment() {
                 bundle
             )
         }
+
+        viewLifecycleOwner.lifecycleScope
+            .launchWhenStarted {
+                viewModel.favoriteChannel.collect { isFavorite ->
+                    if (isFavorite) {
+                        binding.favorite.setColorFilter(resources.getColor(R.color.blue, null))
+                        Log.d(TAG, "Фильм ${viewModel.filmId} в коллекции \"Любимое\"")
+                    } else {
+                        binding.favorite.setColorFilter(resources.getColor(R.color.grey_4, null))
+                        Log.d(TAG, "Фильм ${viewModel.filmId} отсутствует в коллекции \"Любимое\"")
+                    }
+                }
+            }
+
+        viewLifecycleOwner.lifecycleScope
+            .launchWhenStarted {
+                viewModel.wantedToWatchChannel.collect { isWantedToWatch ->
+                    if (isWantedToWatch) {
+                        binding.wantedToWatch.setColorFilter(resources.getColor(R.color.blue, null))
+                        Log.d(TAG, "Фильм ${viewModel.filmId} в коллекции \"Хочу посмотреть\"")
+
+                    } else {
+                        binding.wantedToWatch.setColorFilter(resources.getColor(R.color.grey_4, null))
+                        Log.d(TAG, "Фильм ${viewModel.filmId} отсутствует в коллекции \"Хочу посмотреть\"")
+                    }
+                }
+            }
+
+        viewLifecycleOwner.lifecycleScope
+            .launchWhenStarted {
+                viewModel.viewedChannel.collect { viewed ->
+                    if (viewed) {
+                        binding.viewed.setImageResource(R.drawable.watched)
+                        binding.viewed.setColorFilter(resources.getColor(R.color.blue, null))
+                        Log.d(TAG, "Фильм ${viewModel.filmId} просмотрен")
+
+                    } else {
+                        binding.viewed.setImageResource(R.drawable.not_watched)
+                        binding.viewed.setColorFilter(resources.getColor(R.color.grey_4, null))
+                        Log.d(TAG, "Фильм ${viewModel.filmId} не просмотрен")
+                    }
+                }
+            }
 
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {

@@ -5,13 +5,16 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.core.view.children
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
 import edu.skillbox.skillcinema.data.FilmPremieresAdapter
@@ -47,8 +50,10 @@ class ListPagePremieresFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        val bottomNavigation: BottomNavigationView? = activity?.findViewById(R.id.bottom_navigation)
+        if (bottomNavigation != null) bottomNavigation.isGone = false
+        bottomNavigation?.menu?.getItem(0)?.isChecked = false
         _binding = FragmentListPagePremieresBinding.inflate(inflater, container, false)
-
         return binding.root
     }
 
@@ -70,10 +75,6 @@ class ListPagePremieresFragment : Fragment() {
 
         binding.backButton.setOnClickListener {
             findNavController().popBackStack()
-        }
-
-        binding.mainButton.setOnClickListener {
-            findNavController().navigate(R.id.action_ListPagePremieresFragment_to_MainFragment)
         }
 
         viewLifecycleOwner.lifecycleScope

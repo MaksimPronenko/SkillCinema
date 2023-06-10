@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
-private const val TAG = "FilmVM"
+private const val TAG = "Film.VM"
 
 class FilmViewModel(
     private val repository: Repository
@@ -73,6 +73,10 @@ class FilmViewModel(
     var wantedToWatch = false
     private val _wantedToWatchChannel = Channel<Boolean>()
     val wantedToWatchChannel = _wantedToWatchChannel.receiveAsFlow()
+
+    var viewed = false
+    private val _viewedChannel = Channel<Boolean>()
+    val viewedChannel = _viewedChannel.receiveAsFlow()
 
 //    private val _actors = MutableStateFlow<List<StaffInfo>>(emptyList())
 //    val actors = _actors.asStateFlow()
@@ -150,25 +154,29 @@ class FilmViewModel(
                         repository.getFilmInfo(filmId)
                     }.fold(
                         onSuccess = {
-                            name = it.nameRu ?: it.nameEn ?: it.nameOriginal ?: ""
-                            poster = it.posterUrl ?: ""
-                            posterSmall = it.posterUrlPreview ?: ""
-                            rating = it.ratingKinopoisk
-                            year = it.year
+                            name = it?.nameRu ?: it?.nameEn ?: it?.nameOriginal ?: ""
+                            poster = it?.posterUrl ?: ""
+                            posterSmall = it?.posterUrlPreview ?: ""
+                            rating = it?.ratingKinopoisk
+                            year = it?.year
 
-                            length = it.filmLength
+                            length = it?.filmLength
                             filmLength = repository.convertLength(length)
 
-                            ratingAgeLimits = it.ratingAgeLimits
+                            ratingAgeLimits = it?.ratingAgeLimits
                             ageLimit = repository.convertAgeLimit(ratingAgeLimits)
 
-                            shortDescription = it.shortDescription
-                            description = it.description
+                            shortDescription = it?.shortDescription
+                            description = it?.description
 
-                            countryList = repository.convertClassListToStringList(it.countries)
+                            if (it != null) {
+                                countryList = repository.convertClassListToStringList(it.countries)
+                            }
                             countries = repository.convertStringListToString(countryList)
 
-                            genreList = repository.convertClassListToStringList(it.genres)
+                            if (it != null) {
+                                genreList = repository.convertClassListToStringList(it.genres)
+                            }
                             genres = repository.convertStringListToString(genreList)
                             Log.d(TAG, "Загружена из Api FilmInfo: $it")
                         },
@@ -257,8 +265,11 @@ class FilmViewModel(
             _favoriteChannel.send(element = favorite)
             wantedToWatch = repository.isFilmExistsInCollection(filmId, "Хочу посмотреть")
             _wantedToWatchChannel.send(element = wantedToWatch)
+            viewed = repository.isFilmExistsInViewed(filmId)
+            _viewedChannel.send(element = viewed)
             Log.d(TAG, "Коллекция \"Любимое\": $favorite")
             Log.d(TAG, "Коллекция \"Хочу посмотреть\": $wantedToWatch")
+            Log.d(TAG, "Просмотрен: $viewed")
 
             if (error) {
                 _state.value = ViewModelState.Error
@@ -266,6 +277,14 @@ class FilmViewModel(
             } else {
                 _state.value = ViewModelState.Loaded
                 Log.d(TAG, "Состояние уcпешного завершения загрузки VM")
+
+                // Запись в список "Вам было инетересно"
+                repository.addInterested(
+                    InterestedTable(
+                        id = filmId,
+                        type = 0
+                    )
+                )
             }
         }
     }
@@ -286,22 +305,40 @@ class FilmViewModel(
             if (collectionName == "Любимое") {
                 favorite = !filmExistsInCollection
                 _favoriteChannel.send(element = favorite)
-            }
-            else if (collectionName == "Хочу посмотреть"){
+                Log.d(TAG, "Коллекция \"Любимое\": $favorite")
+            } else if (collectionName == "Хочу посмотреть") {
                 wantedToWatch = !filmExistsInCollection
                 _wantedToWatchChannel.send(element = wantedToWatch)
+                Log.d(TAG, "Коллекция \"Хочу посмотреть\": $wantedToWatch")
             }
         }
     }
 
-//    private fun checkFilmInCollections() {
-//        viewModelScope.launch(Dispatchers.IO) {
-//            favorite = repository.isFilmExistsInCollection(filmId, "Любимое")
-//            _favoriteChannel.send(element = favorite)
-//            wantedToWatch = repository.isFilmExistsInCollection(filmId, "Хочу посмотреть")
-//            _wantedToWatchChannel.send(element = wantedToWatch)
-//            Log.d(TAG,"Коллекция \"Любимое\": $favorite")
-//            Log.d(TAG,"Коллекция \"Хочу посмотреть\": $wantedToWatch")
-//        }
-//    }
+    fun onViewedButtonClick() {
+        viewModelScope.launch(Dispatchers.IO) {
+            val filmViewed = repository.isFilmExistsInViewed(filmId)
+            if (filmViewed) {
+                repository.removeViewedFilm(filmId)
+            } else {
+                repository.addViewedFilm(ViewedTable(filmId = filmId))
+            }
+            viewed = !filmViewed
+            _viewedChannel.send(element = viewed)
+            Log.d(TAG, "Просмотрен: $viewed")
+        }
+    }
+
+    fun checkFilmInCollections() {
+        viewModelScope.launch(Dispatchers.IO) {
+            favorite = repository.isFilmExistsInCollection(filmId, "Любимое")
+            _favoriteChannel.send(element = favorite)
+            wantedToWatch = repository.isFilmExistsInCollection(filmId, "Хочу посмотреть")
+            _wantedToWatchChannel.send(element = wantedToWatch)
+            viewed = repository.isFilmExistsInViewed(filmId)
+            _viewedChannel.send(element = viewed)
+            Log.d(TAG, "Коллекция \"Любимое\": $favorite")
+            Log.d(TAG, "Коллекция \"Хочу посмотреть\": $wantedToWatch")
+            Log.d(TAG, "Просмотрен: $viewed")
+        }
+    }
 }

@@ -418,4 +418,18 @@ class PresentationModule {
     fun provideProfileViewModelFactory(profileViewModel: ProfileViewModel): ProfileViewModelFactory {
         return ProfileViewModelFactory(profileViewModel)
     }
+
+    @Provides
+    fun provideCollectionViewModel(
+        repository: Repository,
+    ): CollectionViewModel {
+        return CollectionViewModel(
+            repository
+        )
+    }
+
+    @Provides
+    fun provideCollectionViewModelFactory(collectionViewModel: CollectionViewModel): CollectionViewModelFactory {
+        return CollectionViewModelFactory(collectionViewModel)
+    }
 }

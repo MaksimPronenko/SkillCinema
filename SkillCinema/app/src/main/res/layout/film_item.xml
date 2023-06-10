@@ -19,9 +19,10 @@
 
     <FrameLayout
         android:id="@+id/rating_frame"
-        android:layout_width="17dp"
+        android:layout_width="wrap_content"
         android:layout_height="10dp"
         android:layout_margin="6dp"
+        android:paddingHorizontal="4dp"
         android:background="@drawable/rating"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -34,6 +35,20 @@
             android:text="0.0"
             android:textAppearance="@style/TextMainStyle.Rating" />
     </FrameLayout>
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/viewed"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="4dp"
+        android:background="@color/transparent"
+        android:scaleType="fitCenter"
+        android:visibility="invisible"
+        android:src="@drawable/watched"
+        android:tint="@color/blue"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/title"

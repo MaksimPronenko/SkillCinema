@@ -15,28 +15,36 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
-import edu.skillbox.skillcinema.data.AllStaffFilmsAdapter
-import edu.skillbox.skillcinema.databinding.FragmentAllFilmsOfStaffBinding
-import edu.skillbox.skillcinema.models.FilmOfStaff
+import edu.skillbox.skillcinema.data.ViewedAdapter
+import edu.skillbox.skillcinema.databinding.FragmentCollectionBinding
+import edu.skillbox.skillcinema.models.FilmDbViewed
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 private const val TAG = "Collection.Fragment"
 
+private const val ARG_COLLECTION_NAME = "collectionName"
+
 @AndroidEntryPoint
 class CollectionFragment : Fragment() {
 
-    private var _binding: FragmentAllFilmsOfStaffBinding? = null
+    private var _binding: FragmentCollectionBinding? = null
     private val binding get() = _binding!!
 
-    private val filmsAdapter =
-        AllStaffFilmsAdapter { film -> onFilmItemClick(film) }
+    private val viewedAdapter =
+        ViewedAdapter(limited = true) { filmDbViewed -> onViewedItemClick(filmDbViewed) }
 
     @Inject
-    lateinit var allFilmsOfStaffViewModelFactory: AllFilmsOfStaffViewModelFactory
-    private val viewModel: AllFilmsOfStaffViewModel by viewModels {
-        allFilmsOfStaffViewModelFactory
+    lateinit var collectionViewModelFactory: CollectionViewModelFactory
+    private val viewModel: CollectionViewModel by viewModels {
+        collectionViewModelFactory
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        val collectionName = arguments?.getString(ARG_COLLECTION_NAME) ?: ""
+        viewModel.loadData(collectionName)
     }
 
     override fun onCreateView(
@@ -44,7 +52,7 @@ class CollectionFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentAllFilmsOfStaffBinding.inflate(inflater, container, false)
+        _binding = FragmentCollectionBinding.inflate(inflater, container, false)
 
         return binding.root
     }
@@ -52,7 +60,7 @@ class CollectionFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.listPageRecycler.adapter = filmsAdapter
+        binding.listPageRecycler.adapter = viewedAdapter
 
         val dividerItemDecorationVertical = DividerItemDecoration(context, RecyclerView.VERTICAL)
         val dividerItemDecorationHorizontal =
@@ -70,7 +78,7 @@ class CollectionFragment : Fragment() {
         }
 
         binding.mainButton.setOnClickListener {
-            findNavController().navigate(R.id.action_AllFilmsOfStaffFragment_to_MainFragment)
+            findNavController().navigate(R.id.action_CollectionFragment_to_MainFragment)
         }
 
         viewLifecycleOwner.lifecycleScope
@@ -81,38 +89,35 @@ class CollectionFragment : Fragment() {
                             ViewModelState.Loading -> {
                                 binding.progress.isGone = false
                             }
-                            ViewModelState.Loaded -> {
+                            else -> {
                                 binding.progress.isGone = true
-                                binding.staffName.text = viewModel.name
-
-                                viewModel.filmsFlow.onEach {
-                                    filmsAdapter.setData(it)
-                                    Log.d(TAG, "filmsAdapter.setData. Размер= ${it.size}")
-                                    Log.d(TAG, "filmsAdapter.itemCount = ${filmsAdapter.itemCount}")
+                                if (viewModel.collection.isNotBlank())
+                                    binding.listName.text = viewModel.collection
+                                viewModel.filmsListFlow.onEach {
+                                    viewedAdapter.setData(it)
+                                    Log.d(TAG, "viewedAdapter.setData. Размер= ${it.size}")
+                                    Log.d(
+                                        TAG,
+                                        "viewedAdapter.itemCount = ${viewedAdapter.itemCount}"
+                                    )
                                 }.launchIn(viewLifecycleOwner.lifecycleScope)
-
-                                viewModel.loadAllFilmsDetailed()
-                            }
-                            ViewModelState.Error -> {
-                                binding.progress.isGone = true
-                                findNavController().navigate(R.id.action_AllFilmsOfStaffFragment_to_ErrorBottomFragment)
                             }
                         }
                     }
             }
     }
-    private fun onFilmItemClick(
-        item: FilmOfStaff
+
+    private fun onViewedItemClick(
+        item: FilmDbViewed
     ) {
-        val bundle =
-            Bundle().apply {
-                putInt(
-                    "filmId",
-                    item.filmId
-                )
-            }
+        val bundle = Bundle().apply {
+            putInt(
+                "filmId",
+                item.filmDb.filmTable.filmId
+            )
+        }
         findNavController().navigate(
-            R.id.action_AllFilmsOfStaffFragment_to_FilmFragment,
+            R.id.action_CollectionFragment_to_FilmFragment,
             bundle
         )
     }

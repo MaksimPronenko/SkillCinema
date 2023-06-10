@@ -52,7 +52,7 @@ interface FilmListApi {
 
     @Headers("X-API-KEY: $api_key")
     @GET("/api/v2.2/films/{filmId}")
-    suspend fun getFilmInfo(@Path("filmId") filmId: Int): FilmInfo
+    suspend fun getFilmInfo(@Path("filmId") filmId: Int): FilmInfo?
 
     @Headers("X-API-KEY: $api_key")
     @GET("/api/v2.2/films/{filmId}/seasons")

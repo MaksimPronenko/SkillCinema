@@ -4,9 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.skillbox.skillcinema.data.Repository
-import edu.skillbox.skillcinema.models.CollectionExisting
-import edu.skillbox.skillcinema.models.CollectionInfo
-import edu.skillbox.skillcinema.models.FilmTable
+import edu.skillbox.skillcinema.models.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -26,17 +24,19 @@ class ProfileViewModel(
     val state = _state.asStateFlow()
 
     var viewedQuantity = 0
-    private val _viewedFlow = MutableStateFlow<List<FilmTable>>(emptyList())
+    var viewedFilmsIds: List<Int> = listOf()
+    var viewed: MutableList<FilmDbViewed> = mutableListOf()
+    private val _viewedFlow = MutableStateFlow<List<FilmDbViewed>>(emptyList())
     val viewedFlow = _viewedFlow.asStateFlow()
 
     var collectionInfoList: List<CollectionInfo> = emptyList()
     private val _collectionChannel = Channel<List<CollectionInfo>>()
     val collectionChannel = _collectionChannel.receiveAsFlow()
 
-    var newCollectionName = ""
-
     var interestedQuantity = 0
-    private val _interestedFlow = MutableStateFlow<List<FilmTable>>(emptyList())
+    var interestedIds: List<InterestedTable> = listOf()
+    var interested: MutableList<Pair<Int, InterestedItem>> = mutableListOf()
+    private val _interestedFlow = MutableStateFlow<List<Pair<Int, InterestedItem>>>(emptyList())
     val interestedFlow = _interestedFlow.asStateFlow()
 
     init {
@@ -58,18 +58,32 @@ class ProfileViewModel(
         Log.d(TAG, "Запущена loadProfileData()")
         viewModelScope.launch(Dispatchers.IO) {
             _state.value = ViewModelState.Loading
-            var error = false
+
+            viewedQuantity = repository.getViewedFilmsQuantity()
+            viewedFilmsIds = repository.getViewedFilmsIds()
+            interestedQuantity = repository.getInterestedQuantity()
+            interestedIds = repository.getInterestedList()
 
             synchronizeCollectionNames()
             collectionInfoList = repository.getCollectionInfoList()
             _collectionChannel.send(element = collectionInfoList)
 
-            if (error) {
-                _state.value = ViewModelState.Error
-                Log.d(TAG, "Состояние ошибки")
-            } else {
-                _state.value = ViewModelState.Loaded
-                Log.d(TAG, "Состояние успешного завершения загрузки")
+            _state.value = ViewModelState.Loaded
+            Log.d(TAG, "Состояние завершения загрузки")
+
+            viewedFilmsIds.forEach { filmId ->
+                val filmDbViewed = repository.getFilmDbViewed(filmId)
+                if (filmDbViewed != null) viewed.add(filmDbViewed)
+                _viewedFlow.value = viewed.toList()
+            }
+
+            interestedIds.forEach { interestedTable ->
+                val interestedItem: InterestedItem? = when (interestedTable.type) {
+                    0, 1 -> repository.getFilmDbViewed(interestedTable.id)
+                    else -> repository.getPersonTable(interestedTable.id)
+                }
+                if (interestedItem != null) interested.add(Pair(interestedTable.type, interestedItem))
+                _interestedFlow.value = interested.toList()
             }
         }
     }
@@ -87,6 +101,23 @@ class ProfileViewModel(
             repository.deleteCollection(collectionName)
             collectionInfoList = repository.getCollectionInfoList()
             _collectionChannel.send(element = collectionInfoList)
+        }
+    }
+
+    fun removeAllViewedFilms() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _state.value = ViewModelState.Loading
+            Log.d(TAG, "Состояние загрузки")
+            repository.removeAllViewedFilms()
+            viewedFilmsIds = repository.getViewedFilmsIds()
+
+            _state.value = ViewModelState.Loaded
+            Log.d(TAG, "Состояние рабочее")
+            viewedFilmsIds.forEach { filmId ->
+                val filmDbViewed = repository.getFilmDbViewed(filmId)
+                if (filmDbViewed != null) viewed.add(filmDbViewed)
+                _viewedFlow.value = viewed.toList()
+            }
         }
     }
 }

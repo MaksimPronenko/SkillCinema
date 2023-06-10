@@ -20,17 +20,14 @@ class BottomDialogViewModel(
     private val repository: Repository,
 ) : ViewModel() {
 
-//    private val _state = MutableStateFlow<ViewModelState>(
-//        ViewModelState.Loading
-//    )
-//    val state = _state.asStateFlow()
-
     var filmId: Int = 0
     var posterSmall = ""
     var name = ""
     var year = ""
     var genres = ""
-    var newCollectionName = ""
+
+    var favorite = false
+    var wantedToWatch = false
 
     var collectionFilmList: List<CollectionFilm> = emptyList()
     private val _collectionChannel = Channel<List<CollectionFilm>>()

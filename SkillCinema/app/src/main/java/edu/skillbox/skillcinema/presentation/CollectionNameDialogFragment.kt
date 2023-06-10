@@ -102,7 +102,7 @@ class CollectionNameDialogFragment : AppCompatDialogFragment() {
 
         binding.readyButton.setOnClickListener {
             findNavController().previousBackStackEntry?.savedStateHandle?.set(
-                "key",
+                "newCollectionName",
                 viewModel.newCollectionName
             )
             dialog?.dismiss()

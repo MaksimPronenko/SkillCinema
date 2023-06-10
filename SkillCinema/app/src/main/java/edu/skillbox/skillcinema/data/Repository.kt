@@ -135,7 +135,7 @@ class Repository @Inject constructor(private val dao: FilmDao) {
         return result
     }
 
-    suspend fun getFilmInfo(filmId: Int): FilmInfo {
+    suspend fun getFilmInfo(filmId: Int): FilmInfo? {
         return retrofit.getFilmInfo(filmId)
     }
 
@@ -156,7 +156,7 @@ class Repository @Inject constructor(private val dao: FilmDao) {
         val similarFilms: MutableList<SimilarFilmTable> =
             emptyList<SimilarFilmTable>().toMutableList()
 
-        filmInfo.countries.forEach { countryClass ->
+        filmInfo?.countries?.forEach { countryClass ->
             countries.add(
                 CountryTable(
                     filmId = filmId,
@@ -164,7 +164,7 @@ class Repository @Inject constructor(private val dao: FilmDao) {
                 )
             )
         }
-        filmInfo.genres.forEach { genreClass ->
+        filmInfo?.genres?.forEach { genreClass ->
             genres.add(
                 GenreTable(
                     filmId = filmId,
@@ -210,15 +210,15 @@ class Repository @Inject constructor(private val dao: FilmDao) {
         return FilmInfoDb(
             filmTable = FilmTable(
                 filmId = filmId,
-                name = filmInfo.nameRu ?: filmInfo.nameEn ?: filmInfo.nameOriginal ?: "",
-                poster = filmInfo.posterUrl,
-                posterSmall = filmInfo.posterUrlPreview,
-                rating = filmInfo.ratingKinopoisk,
-                year = filmInfo.year,
-                length = filmInfo.filmLength,
-                description = filmInfo.description,
-                shortDescription = filmInfo.shortDescription,
-                ratingAgeLimits = filmInfo.ratingAgeLimits
+                name = filmInfo?.nameRu ?: filmInfo?.nameEn ?: filmInfo?.nameOriginal ?: "",
+                poster = filmInfo?.posterUrl ?: "",
+                posterSmall = filmInfo?.posterUrlPreview ?: "",
+                rating = filmInfo?.ratingKinopoisk,
+                year = filmInfo?.year,
+                length = filmInfo?.filmLength,
+                description = filmInfo?.description,
+                shortDescription = filmInfo?.shortDescription,
+                ratingAgeLimits = filmInfo?.ratingAgeLimits
             ),
             countries = countries.toList(),
             genres = genres.toList(),
@@ -626,7 +626,18 @@ class Repository @Inject constructor(private val dao: FilmDao) {
         }
     }
 
-    // Запрос на добавление в БД данных фильма
+    // Запрос на добавление в БД данных фильма FilmDb
+    suspend fun addFilmDb(filmDb: FilmDb) {
+        dao.addFilmTable(filmDb.filmTable)
+        filmDb.countries.forEach { countryTable ->
+            dao.addCountryTable(countryTable)
+        }
+        filmDb.genres.forEach { genreTable ->
+            dao.addGenreTable(genreTable)
+        }
+    }
+
+    // Запрос на добавление в БД данных фильма FilmInfoDb
     suspend fun addFilmInfoDb(filmInfoDb: FilmInfoDb) {
         dao.addFilmTable(filmInfoDb.filmTable)
         filmInfoDb.countries.forEach { countryTable ->
@@ -672,6 +683,68 @@ class Repository @Inject constructor(private val dao: FilmDao) {
         )
     }
 
+    // Запрос на получение данных фильма FilmDb по filmId
+    suspend fun getFilmDbViewed(filmId: Int): FilmDbViewed? {
+        var filmDb: FilmDb? = dao.getFilmDbFromDao(filmId)
+        val viewed: Boolean = dao.isFilmExistsInViewed(filmId)
+        var filmInfo: FilmInfo?
+        val countries: MutableList<CountryTable> =
+            emptyList<CountryTable>().toMutableList()
+        val genres: MutableList<GenreTable> =
+            emptyList<GenreTable>().toMutableList()
+        if (filmDb == null) {
+            kotlin.runCatching {
+                getFilmInfo(filmId)
+            }.fold(
+                onSuccess = {
+                    filmInfo = it
+
+                    filmInfo?.countries?.forEach { countryClass ->
+                        countries.add(
+                            CountryTable(
+                                filmId = filmId,
+                                country = countryClass.country
+                            )
+                        )
+                    }
+                    filmInfo?.genres?.forEach { genreClass ->
+                        genres.add(
+                            GenreTable(
+                                filmId = filmId,
+                                genre = genreClass.genre
+                            )
+                        )
+                    }
+                    if (filmInfo != null) {
+                        filmDb = FilmDb(
+                            filmTable = FilmTable(
+                                filmId = filmInfo!!.kinopoiskId,
+                                name = filmInfo!!.nameRu ?: filmInfo!!.nameEn
+                                ?: filmInfo!!.nameOriginal ?: "",
+                                poster = filmInfo!!.posterUrl,
+                                posterSmall = filmInfo!!.posterUrlPreview,
+                                rating = filmInfo!!.ratingKinopoisk,
+                                year = filmInfo!!.year,
+                                length = filmInfo!!.filmLength,
+                                description = filmInfo!!.description,
+                                shortDescription = filmInfo!!.shortDescription,
+                                ratingAgeLimits = filmInfo!!.ratingAgeLimits
+                            ),
+                            countries = countries.toList(),
+                            genres = genres.toList()
+                        )
+                        addFilmDb(filmDb!!)
+                        Log.d(TAG, "Фильм $filmId записан в БД")
+                    }
+                },
+                onFailure = {
+                    Log.d(TAG, "Фильм не загрузился ни из БД, ни из Api")
+                }
+            )
+        } else Log.d(TAG, "Фильм $filmId загружен из БД")
+        return filmDb?.let { FilmDbViewed(filmDb = it, viewed = viewed) }
+    }
+
     // Запрос на получение данных фильма по filmId
     suspend fun getFilmInfoDb(filmId: Int): FilmInfoDb? {
         return dao.getFilmInfoDb(
@@ -702,6 +775,11 @@ class Repository @Inject constructor(private val dao: FilmDao) {
         return dao.isPersonDataExists(
             searchedPersonId
         )
+    }
+
+    // Запрос на проверку наличия записи данных персонала в БД
+    suspend fun getPersonTable(searchedPersonId: Int): PersonTable? {
+        return dao.getPersonTable(searchedPersonId)
     }
 
     // Запрос на получение данных персонала по personId, и сортировка по убыванию рейтинга
@@ -767,6 +845,11 @@ class Repository @Inject constructor(private val dao: FilmDao) {
         dao.removeCollectionTable(filmId, collectionName)
     }
 
+    // Запрос на получение списка id фильмов коллекции
+    suspend fun getCollectionFilmsIds(collectionName: String): List<Int> {
+        return dao.getCollectionFilmsIds(collectionName)
+    }
+
     // Запрос на получение списка имен коллекций, относящихся к фильмам
     suspend fun getCollectionNamesOfFilms(): List<String> {
         return dao.getCollectionNamesOfFilms()
@@ -796,7 +879,8 @@ class Repository @Inject constructor(private val dao: FilmDao) {
         val collectionNamesList: List<String> = dao.getCollectionNames()
         collectionNamesList.forEach { collectionName ->
             val filmsQuantity: Int = dao.getCollectionFilmsQuantity(collectionName)
-            val isFilmExistsInCollection: Boolean = dao.isFilmExistsInCollection(filmId, collectionName)
+            val isFilmExistsInCollection: Boolean =
+                dao.isFilmExistsInCollection(filmId, collectionName)
             collectionFilmList.add(
                 CollectionFilm(
                     collectionName = collectionName,
@@ -817,6 +901,56 @@ class Repository @Inject constructor(private val dao: FilmDao) {
     suspend fun deleteCollection(collectionName: String) {
         dao.removeCollectionFilms(collectionName)
         dao.removeCollection(collectionName)
+    }
+
+    // Запрос на добавление фильма в просмотренные
+    suspend fun addViewedFilm(viewedFilm: ViewedTable) {
+        dao.addViewedFilm(viewedFilm)
+    }
+
+    // Запрос на проверку наличия фильма в просмотренных
+    suspend fun isFilmExistsInViewed(filmId: Int): Boolean {
+        return dao.isFilmExistsInViewed(filmId)
+    }
+
+    // Запрос на получение количества просмотренных фильмов
+    suspend fun getViewedFilmsQuantity(): Int {
+        return dao.getViewedFilmsQuantity()
+    }
+
+    // Запрос на получение списка id просмотренных фильмов
+    suspend fun getViewedFilmsIds(): List<Int> {
+        return dao.getViewedFilmsIds()
+    }
+
+    // Запрос на удаление фильма из списка просмотренных
+    suspend fun removeViewedFilm(viewedFilmId: Int) {
+        dao.removeViewedFilm(viewedFilmId)
+    }
+
+    // Запрос на удаление всех просмотренных фильмов
+    suspend fun removeAllViewedFilms() {
+        dao.removeAllViewedFilms()
+    }
+
+    // Запрос на добавление фильма, сериала или человека в список "Вам было интересно"
+    suspend fun addInterested(interested: InterestedTable) {
+        dao.addInterested(interested)
+    }
+
+    // Запрос на получение количества элементов в списке "Вам было интересно"
+    suspend fun getInterestedQuantity(): Int {
+        return dao.getInterestedQuantity()
+    }
+
+    // Запрос на получение списка id просмотренных фильмов
+    suspend fun getInterestedList(): List<InterestedTable> {
+        return dao.getInterestedList()
+    }
+
+    // Запрос на удаление всех элементов в списке "Вам было интересно"
+    suspend fun removeAllInterested() {
+        dao.removeAllInterested()
     }
 
     fun convertStaffTableListToStaffInfoList(staffTableList: List<StaffTable>): List<StaffInfo> {

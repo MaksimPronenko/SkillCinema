@@ -6,22 +6,33 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import edu.skillbox.skillcinema.R
+import edu.skillbox.skillcinema.databinding.CollectionCreateItemBinding
 import edu.skillbox.skillcinema.databinding.CollectionExistingItemBinding
 import edu.skillbox.skillcinema.models.CollectionFilm
+import edu.skillbox.skillcinema.models.EmptyRecyclerItem
+import edu.skillbox.skillcinema.models.RecyclerViewItem
 
 private const val TAG = "CollectionFilm.Adapter"
 
-class CollectionFilmAdapter(
-    private val onCollectionItemClick: (CollectionFilm) -> Unit
-) : RecyclerView.Adapter<CollectionFilmViewHolder>() {
+const val VIEW_TYPE_COLLECTION = 0
+const val VIEW_TYPE_ADD_COLLECTION = 1
 
-    private var data: List<CollectionFilm> = emptyList()
+class CollectionFilmAdapter(
+    private val onCollectionItemClick: (CollectionFilm) -> Unit,
+    private val onAddCollectionItemClick: () -> Unit
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+//    private var data: List<CollectionFilm> = emptyList()
 //    private var mutableData: MutableList<CollectionFilm> = emptyList<CollectionFilm>().toMutableList()
+    var data = listOf<RecyclerViewItem>()
+    var mutableData = mutableListOf<RecyclerViewItem>()
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setData(receivedData: List<CollectionFilm>) {
-        this.data = receivedData
-        Log.d(TAG, "В адаптер пришёл список размера: ${data.size}")
+    fun setAdapterData(receivedData: List<CollectionFilm>) {
+        Log.d(TAG, "В адаптер пришёл список размера: ${receivedData.size}")
+        mutableData = receivedData.toMutableList()
+        mutableData.add(EmptyRecyclerItem())
+        data = mutableData.toList()
         notifyDataSetChanged()
     }
 
@@ -40,38 +51,60 @@ class CollectionFilmAdapter(
 
     override fun getItemCount(): Int = data.size
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CollectionFilmViewHolder {
-        return CollectionFilmViewHolder(
-            CollectionExistingItemBinding.inflate(
-                LayoutInflater.from(parent.context),
-                parent,
-                false
-            )
-        )
+    override fun getItemViewType(position: Int): Int {
+        return if (position != data.lastIndex) VIEW_TYPE_COLLECTION
+        else VIEW_TYPE_ADD_COLLECTION
     }
 
-    override fun onBindViewHolder(holder: CollectionFilmViewHolder, position: Int) {
-        val collectionFilm = data.getOrNull(position)
-        with(holder.binding) {
-            if (collectionFilm != null) {
-                if (collectionFilm.filmIncluded) {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return if (viewType == VIEW_TYPE_COLLECTION) {
+            CollectionFilmViewHolder(
+                CollectionExistingItemBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false
+                )
+            )
+        } else {
+            CollectionCreateViewHolder(
+                CollectionCreateItemBinding.inflate(
+                    LayoutInflater.from(parent.context),
+                    parent,
+                    false
+                )
+            )
+        }
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        val item = data[position]
+        if (holder is CollectionFilmViewHolder && item is CollectionFilm) {
+            with(holder.binding) {
+                if (item.filmIncluded) {
                     collectionLabel.setImageResource(R.drawable.collection_chosen)
                 } else {
                     collectionLabel.setImageResource(R.drawable.collection_not_chosen)
                 }
-                collectionName.text = collectionFilm.collectionName
-                collectionQuantity.text = collectionFilm.filmsQuantity.toString()
-            } else {
-                Log.d(TAG, "collection = null")
+                collectionName.text = item.collectionName
+                collectionQuantity.text = item.filmsQuantity.toString()
+
+                collectionButton.setOnClickListener {
+                    onCollectionItemClick(item)
+                }
             }
         }
-        holder.binding.root.setOnClickListener {
-            collectionFilm?.let {
-                onCollectionItemClick(it)
+        if (holder is CollectionCreateViewHolder && item is EmptyRecyclerItem) {
+            with(holder.binding) {
+                collectionButton.setOnClickListener {
+                    onAddCollectionItemClick()
+                }
             }
         }
     }
 }
 
 class CollectionFilmViewHolder(val binding: CollectionExistingItemBinding) :
+    RecyclerView.ViewHolder(binding.root)
+
+class CollectionCreateViewHolder(val binding: CollectionCreateItemBinding) :
     RecyclerView.ViewHolder(binding.root)

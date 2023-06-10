@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
 import edu.skillbox.skillcinema.data.SearchPagedListAdapter
@@ -47,8 +48,10 @@ class SearchFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentSearchBinding.inflate(inflater, container, false)
+        val bottomNavigation: BottomNavigationView? = activity?.findViewById(R.id.bottom_navigation)
+        if (bottomNavigation != null) bottomNavigation.isGone = false
 
+        _binding = FragmentSearchBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -70,10 +73,6 @@ class SearchFragment : Fragment() {
 
         binding.settings.setOnClickListener {
             findNavController().navigate(R.id.action_SearchFragment_to_SearchSettings1Fragment)
-        }
-
-        binding.mainButton.setOnClickListener {
-            findNavController().navigate(R.id.action_SearchFragment_to_MainFragment)
         }
 
         Log.d(TAG, "viewModel.searchText = ${viewModel.searchText}")
