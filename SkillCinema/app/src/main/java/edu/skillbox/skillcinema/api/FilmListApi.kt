@@ -13,19 +13,19 @@ import retrofit2.http.Query
 interface FilmListApi {
     @Headers("X-API-KEY: $api_key")
     @GET("/api/v2.2/films/premieres")
-    suspend fun getPremieres(@Query("year") year: Int, @Query("month") month: String): FilmList
+    suspend fun getPremieres(@Query("year") year: Int, @Query("month") month: String): FilmList?
 
     @Headers("X-API-KEY: $api_key")
     @GET("/api/v2.2/films/top?type=TOP_100_POPULAR_FILMS")
-    suspend fun getTop100Popular(@Query("page") page: Int): PagedFilmTopList
+    suspend fun getTop100Popular(@Query("page") page: Int): PagedFilmTopList?
 
     @Headers("X-API-KEY: $api_key")
     @GET("/api/v2.2/films/top?type=TOP_250_BEST_FILMS")
-    suspend fun getTop250(@Query("page") page: Int): PagedFilmTopList
+    suspend fun getTop250(@Query("page") page: Int): PagedFilmTopList?
 
     @Headers("X-API-KEY: $api_key")
     @GET("/api/v2.2/films?type=TV_SERIES&ratingFrom=8")
-    suspend fun getSeries(@Query("page") page: Int): PagedFilmFilteredList
+    suspend fun getSerials(@Query("page") page: Int): PagedFilmFilteredList?
 
     @Headers("X-API-KEY: $api_key")
     @GET("/api/v2.2/films?type=FILM&ratingFrom=6")
@@ -33,7 +33,7 @@ interface FilmListApi {
         @Query("genres") genres: Int,
         @Query("countries") countries: Int,
         @Query("page") page: Int
-    ): PagedFilmFilteredList
+    ): PagedFilmFilteredList?
 
     @Headers("X-API-KEY: $api_key")
     @GET("/api/v2.2/films")

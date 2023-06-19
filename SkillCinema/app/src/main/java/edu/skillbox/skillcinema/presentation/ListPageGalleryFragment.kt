@@ -157,10 +157,6 @@ class ListPageGalleryFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-        binding.mainButton.setOnClickListener {
-            findNavController().navigate(R.id.action_ListPageGalleryFragment_to_MainFragment)
-        }
-
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
                 viewModel.state

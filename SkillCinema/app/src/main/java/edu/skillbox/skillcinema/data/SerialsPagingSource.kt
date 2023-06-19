@@ -4,14 +4,14 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import edu.skillbox.skillcinema.models.FilmItemData
 
-class FilmsTop100PopularPagingSource(val repository: Repository) : PagingSource<Int, FilmItemData>() {
+class SerialsPagingSource (val repository: Repository): PagingSource<Int, FilmItemData>() {
 
     override fun getRefreshKey(state: PagingState<Int, FilmItemData>): Int = FIRST_PAGE
 
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, FilmItemData> {
         val page = params.key ?: FIRST_PAGE
         return kotlin.runCatching {
-            repository.getTop100PopularExtended(page)
+            repository.getSerialsExtended(page)
         }.fold(
             onSuccess = {
                 LoadResult.Page(

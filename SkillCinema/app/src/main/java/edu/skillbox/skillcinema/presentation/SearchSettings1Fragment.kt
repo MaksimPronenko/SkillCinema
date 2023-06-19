@@ -5,9 +5,11 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
 import edu.skillbox.skillcinema.databinding.FragmentSearchSettings1Binding
@@ -33,8 +35,10 @@ class SearchSettings1Fragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentSearchSettings1Binding.inflate(inflater, container, false)
+        val bottomNavigation: BottomNavigationView? = activity?.findViewById(R.id.bottom_navigation)
+        if (bottomNavigation != null) bottomNavigation.isGone = true
 
+        _binding = FragmentSearchSettings1Binding.inflate(inflater, container, false)
         return binding.root
     }
 

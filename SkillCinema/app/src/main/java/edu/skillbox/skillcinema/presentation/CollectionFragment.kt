@@ -77,9 +77,9 @@ class CollectionFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-        binding.mainButton.setOnClickListener {
-            findNavController().navigate(R.id.action_CollectionFragment_to_MainFragment)
-        }
+//        binding.mainButton.setOnClickListener {
+//            findNavController().navigate(R.id.action_CollectionFragment_to_MainFragment)
+//        }
 
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {

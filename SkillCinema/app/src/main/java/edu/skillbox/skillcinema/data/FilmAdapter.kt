@@ -7,16 +7,16 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import edu.skillbox.skillcinema.databinding.FilmItemBinding
-import edu.skillbox.skillcinema.models.FilmDbViewed
+import edu.skillbox.skillcinema.models.FilmItemData
 
-class ViewedAdapter(
+class FilmAdapter(
     val limited: Boolean,
-    private val onClick: (FilmDbViewed) -> Unit
+    private val onClick: (FilmItemData) -> Unit
 ) : RecyclerView.Adapter<FilmViewHolder>() {
-    private var data: List<FilmDbViewed> = emptyList()
+    private var data: List<FilmItemData> = emptyList()
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setData(data: List<FilmDbViewed>) {
+    fun setData(data: List<FilmItemData>) {
         this.data = data
         notifyDataSetChanged()
     }
@@ -37,27 +37,23 @@ class ViewedAdapter(
     }
 
     override fun onBindViewHolder(holder: FilmViewHolder, position: Int) {
-        val filmDbViewed = data.getOrNull(position)
-        if (filmDbViewed != null) {
+        val filmItemData = data.getOrNull(position)
+        if (filmItemData != null) {
             with(holder.binding) {
-                title.text = filmDbViewed.filmDb.filmTable.name
-                genres.text = filmDbViewed.filmDb.genres.joinToString(", ") { it.genre }
-                viewed.isVisible = filmDbViewed.viewed
-                val image: String =
-                    filmDbViewed.filmDb.filmTable.posterSmall.ifEmpty { filmDbViewed.filmDb.filmTable.poster }
+                title.text = filmItemData.name
+                genres.text = filmItemData.genres
+                viewed.isVisible = filmItemData.viewed
                 Glide
                     .with(poster.context)
-                    .load(image)
+                    .load(filmItemData.poster)
                     .into(poster)
-                if (filmDbViewed.filmDb.filmTable.rating != null) {
+                if (filmItemData.rating != null) {
                     ratingFrame.isVisible = true
-                    rating.text = filmDbViewed.filmDb.filmTable.rating.toString()
-                } else {
-                    ratingFrame.isVisible = false
-                }
+                    rating.text = filmItemData.rating
+                } else ratingFrame.isVisible = false
             }
             holder.binding.root.setOnClickListener {
-                onClick(filmDbViewed)
+                onClick(filmItemData)
             }
         }
     }

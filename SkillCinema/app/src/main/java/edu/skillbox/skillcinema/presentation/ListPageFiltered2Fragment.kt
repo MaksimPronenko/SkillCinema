@@ -1,6 +1,7 @@
 package edu.skillbox.skillcinema.presentation
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -8,7 +9,6 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -16,12 +16,17 @@ import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.App
 import edu.skillbox.skillcinema.R
-import edu.skillbox.skillcinema.data.FilmsFilteredPagedListAdapter
+import edu.skillbox.skillcinema.data.FilmsPagedListAdapter
 import edu.skillbox.skillcinema.databinding.FragmentListPageFiltered2Binding
-import edu.skillbox.skillcinema.models.FilmFiltered
+import edu.skillbox.skillcinema.models.FilmItemData
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
+
+private const val TAG = "ListPageFiltered2.Fragment"
+
+private const val ARG_GENRE_2_KEY = "genre2Key"
+private const val ARG_COUNTRY_2_KEY = "country2Key"
 
 @AndroidEntryPoint
 class ListPageFiltered2Fragment : Fragment() {
@@ -29,8 +34,11 @@ class ListPageFiltered2Fragment : Fragment() {
     private var _binding: FragmentListPageFiltered2Binding? = null
     private val binding get() = _binding!!
 
+    var genre2Key: Int? = null
+    var country2Key: Int? = null
+
     private val filmFiltered2Adapter =
-        FilmsFilteredPagedListAdapter { filmFiltered -> onFilmFilteredItemClick(filmFiltered) }
+        FilmsPagedListAdapter { filmItemData -> onItemClick(filmItemData) }
 
 //    private val viewModel: ListPageFiltered2ViewModel by viewModels {
 //        ListPageFiltered2ViewModelFactory(
@@ -53,6 +61,12 @@ class ListPageFiltered2Fragment : Fragment() {
 //        DaggerAppComponent.create().listPageFiltered2ViewModelFactory()
 //    }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        genre2Key = arguments?.getInt(ARG_GENRE_2_KEY)
+        country2Key = arguments?.getInt(ARG_COUNTRY_2_KEY)
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -65,6 +79,11 @@ class ListPageFiltered2Fragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        if (genre2Key != null && country2Key != null) {
+            viewModel.loadFilmsFiltered2(genre2Key!!, country2Key!!)
+            Log.d(TAG, "loadFilmsFiltered2($genre2Key, $country2Key)")
+        }
 
         val application = requireContext().applicationContext as App
         binding.listName.text = application.filteredFilms2title
@@ -86,9 +105,9 @@ class ListPageFiltered2Fragment : Fragment() {
             findNavController().popBackStack()
         }
 
-        binding.mainButton.setOnClickListener {
-            findNavController().navigate(R.id.action_ListPageFiltered2Fragment_to_MainFragment)
-        }
+//        binding.mainButton.setOnClickListener {
+//            findNavController().navigate(R.id.action_ListPageFiltered2Fragment_to_MainFragment)
+//        }
 
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
@@ -112,14 +131,14 @@ class ListPageFiltered2Fragment : Fragment() {
             }
     }
 
-    private fun onFilmFilteredItemClick(
-        item: FilmFiltered
+    private fun onItemClick(
+        item: FilmItemData
     ) {
         val bundle =
             Bundle().apply {
                 putInt(
                     "filmId",
-                    item.kinopoiskId
+                    item.filmId
                 )
             }
         findNavController().navigate(

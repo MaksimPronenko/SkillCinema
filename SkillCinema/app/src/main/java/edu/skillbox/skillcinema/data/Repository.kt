@@ -26,11 +26,14 @@ class Repository @Inject constructor(private val dao: FilmDao) {
         val datePlus15DaysMonth = calendar.get(Calendar.MONTH) // Получили месяц новый
 
         val premieresThisMonth =
-            retrofit.getPremieres(currentYear, monthToString(currentMonth)).items
+            retrofit.getPremieres(currentYear, monthToString(currentMonth))?.items ?: emptyList()
 
         var premieresNextMonth: List<FilmPremiere> = emptyList()
         if (datePlus15DaysMonth != currentMonth) premieresNextMonth =
-            retrofit.getPremieres(datePlus15DaysYear, monthToString(datePlus15DaysMonth)).items
+            retrofit.getPremieres(
+                datePlus15DaysYear,
+                monthToString(datePlus15DaysMonth)
+            )?.items ?: emptyList()
 
         val premieres2Months = premieresThisMonth + premieresNextMonth
 
@@ -71,39 +74,168 @@ class Repository @Inject constructor(private val dao: FilmDao) {
         }
     }
 
-    suspend fun getTop100Popular(page: Int): PagedFilmTopList {
+    suspend fun extendPremiereData(filmPremiere: FilmPremiere): FilmItemData? {
+        val filmId = filmPremiere.kinopoiskId
+        val name = filmPremiere.nameRu ?: filmPremiere.nameEn
+        val genres = filmPremiere.genres.joinToString(", ") { it.genre }
+        val viewed: Boolean = dao.isFilmExistsInViewed(filmId)
+        return if (name != null)
+            FilmItemData(
+                filmId = filmId,
+                name = name,
+                genres = genres,
+                poster = filmPremiere.posterUrlPreview,
+                rating = null,
+                viewed = viewed
+            )
+        else null
+    }
+
+    suspend fun getTop100Popular(page: Int): PagedFilmTopList? {
         return retrofit.getTop100Popular(page)
     }
 
-    suspend fun getTop250(page: Int): PagedFilmTopList {
+    suspend fun getTop100PopularExtended(page: Int): List<FilmItemData>? {
+        val pagedFilmTopList: PagedFilmTopList? = retrofit.getTop100Popular(page)
+        return if (pagedFilmTopList != null) extendTop(pagedFilmTopList)
+        else null
+    }
+
+    suspend fun getTop250(page: Int): PagedFilmTopList? {
         return retrofit.getTop250(page)
     }
 
-    suspend fun getSeries(page: Int): PagedFilmFilteredList {
-        return retrofit.getSeries(page)
+    suspend fun getTop250Extended(page: Int): List<FilmItemData>? {
+        val pagedFilmTopList: PagedFilmTopList? = retrofit.getTop250(page)
+        return if (pagedFilmTopList != null) extendTop(pagedFilmTopList)
+        else null
     }
 
-    suspend fun getFilmFiltered(genres: Int, countries: Int, page: Int): PagedFilmFilteredList {
-
-        val apiResult: PagedFilmFilteredList = retrofit.getFilmFiltered(genres, countries, page)
-        var newTotal: Int = apiResult.total
-        var newTotalPages = apiResult.totalPages
-
-        val filmsFilteredRatingAbove6: MutableList<FilmFiltered> =
-            emptyList<FilmFiltered>().toMutableList()
-        apiResult.items.forEach {
-            if (it.ratingKinopoisk != null) filmsFilteredRatingAbove6.add(it)
-            else {
-                newTotal -= 1
-                newTotalPages = ceil(newTotal / 20.0).toInt()
+    private suspend fun extendTop(topList: PagedFilmTopList): List<FilmItemData> {
+        val topExtended: MutableList<FilmItemData> = mutableListOf()
+        topList.films.forEach { filmTop ->
+            val filmId = filmTop.filmId
+            val name = filmTop.nameRu ?: filmTop.nameEn
+            val genres = filmTop.genres.joinToString(", ") { it.genre }
+            val rating: String? =
+                if (filmTop.rating == null || filmTop.rating.contains("%", true)) null
+                else filmTop.rating
+            val viewed: Boolean = dao.isFilmExistsInViewed(filmId)
+            if (name != null) {
+                topExtended.add(
+                    FilmItemData(
+                        filmId = filmId,
+                        name = name,
+                        genres = genres,
+                        poster = filmTop.posterUrlPreview,
+                        rating = rating,
+                        viewed = viewed
+                    )
+                )
             }
         }
+        return topExtended.toList()
+    }
 
-        return PagedFilmFilteredList(
-            total = newTotal,
-            totalPages = newTotalPages,
-            items = filmsFilteredRatingAbove6
-        )
+    suspend fun extendTopFilmData(filmTop: FilmTop): FilmItemData? {
+        val filmId = filmTop.filmId
+        val name = filmTop.nameRu ?: filmTop.nameEn
+        val genres = filmTop.genres.joinToString(", ") { it.genre }
+        val rating: String? = if (filmTop.rating == null || filmTop.rating.contains("%", true)) null
+        else filmTop.rating
+        val viewed: Boolean = dao.isFilmExistsInViewed(filmId)
+        return if (name != null)
+            FilmItemData(
+                filmId = filmId,
+                name = name,
+                genres = genres,
+                poster = filmTop.posterUrlPreview,
+                rating = rating,
+                viewed = viewed
+            )
+        else null
+    }
+
+    suspend fun getSerials(page: Int): PagedFilmFilteredList? {
+        return retrofit.getSerials(page)
+    }
+
+    suspend fun getSerialsExtended(page: Int): List<FilmItemData>? {
+        val pagedFilmFilteredList: PagedFilmFilteredList? = retrofit.getSerials(page)
+        return if (pagedFilmFilteredList != null) extendFilmFiltered(pagedFilmFilteredList)
+        else null
+    }
+
+    suspend fun getFilmsFiltered(genre: Int, country: Int, page: Int): PagedFilmFilteredList? {
+        val apiResult: PagedFilmFilteredList? = retrofit.getFilmFiltered(genre, country, page)
+        if (apiResult == null) return null
+        else {
+            var newTotal: Int = apiResult.total
+            var newTotalPages = apiResult.totalPages
+            val filmsFilteredRatingAbove6: MutableList<FilmFiltered> = mutableListOf()
+            apiResult.items.forEach {
+                if (it.ratingKinopoisk != null) filmsFilteredRatingAbove6.add(it)
+                else {
+                    newTotal -= 1
+                    newTotalPages = ceil(newTotal / 20.0).toInt()
+                }
+            }
+            return PagedFilmFilteredList(
+                total = newTotal,
+                totalPages = newTotalPages,
+                items = filmsFilteredRatingAbove6
+            )
+        }
+    }
+
+    suspend fun getFilmsFilteredExtended(genre: Int, country: Int, page: Int): List<FilmItemData>? {
+        val pagedFilmFilteredList: PagedFilmFilteredList? = retrofit.getFilmFiltered(genre, country, page)
+        return if (pagedFilmFilteredList != null) extendFilmFiltered(pagedFilmFilteredList)
+        else null
+    }
+
+    private suspend fun extendFilmFiltered(filmsList: PagedFilmFilteredList): List<FilmItemData> {
+        val filmsDataExtended: MutableList<FilmItemData> = mutableListOf()
+        filmsList.items.forEach { filmFiltered ->
+            val filmId = filmFiltered.kinopoiskId
+            val name = filmFiltered.nameRu ?: filmFiltered.nameEn ?: filmFiltered.nameOriginal
+            val genres = filmFiltered.genres.joinToString(", ") { it.genre }
+            val rating: String? = if (filmFiltered.ratingKinopoisk == null) null
+            else filmFiltered.ratingKinopoisk.toString()
+            val viewed: Boolean = dao.isFilmExistsInViewed(filmId)
+            if (name != null) {
+                filmsDataExtended.add(
+                    FilmItemData(
+                        filmId = filmId,
+                        name = name,
+                        genres = genres,
+                        poster = filmFiltered.posterUrlPreview,
+                        rating = rating,
+                        viewed = viewed
+                    )
+                )
+            }
+        }
+        return filmsDataExtended.toList()
+    }
+
+    suspend fun extendFilteredFilmData(filmFiltered: FilmFiltered): FilmItemData? {
+        val filmId = filmFiltered.kinopoiskId
+        val name = filmFiltered.nameRu ?: filmFiltered.nameEn ?: filmFiltered.nameOriginal
+        val genres = filmFiltered.genres.joinToString(", ") { it.genre }
+        val rating: String? = if (filmFiltered.ratingKinopoisk == null) null
+        else filmFiltered.ratingKinopoisk.toString()
+        val viewed: Boolean = dao.isFilmExistsInViewed(filmId)
+        return if (name != null)
+            FilmItemData(
+                filmId = filmId,
+                name = name,
+                genres = genres,
+                poster = filmFiltered.posterUrlPreview,
+                rating = rating,
+                viewed = viewed
+            )
+        else null
     }
 
     suspend fun searchFilms(

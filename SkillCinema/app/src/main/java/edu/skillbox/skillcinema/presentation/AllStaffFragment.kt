@@ -82,9 +82,9 @@ class AllStaffFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-        binding.mainButton.setOnClickListener {
-            findNavController().navigate(R.id.action_AllFilmsOfStaffFragment_to_MainFragment)
-        }
+//        binding.mainButton.setOnClickListener {
+//            findNavController().navigate(R.id.action_AllFilmsOfStaffFragment_to_MainFragment)
+//        }
 
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {

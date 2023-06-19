@@ -62,12 +62,6 @@
         tools:layout="@layout/fragment_main">
 
         <action
-            android:id="@+id/action_MainFragment_to_SearchFragment"
-            app:destination="@id/SearchFragment" />
-        <action
-            android:id="@+id/action_MainFragment_to_ProfileFragment"
-            app:destination="@id/ProfileFragment" />
-        <action
             android:id="@+id/action_MainFragment_to_ListPagePremieresFragment"
             app:destination="@id/ListPagePremieresFragment" />
         <action
@@ -84,7 +78,7 @@
             app:destination="@id/ListPageFiltered2Fragment" />
         <action
             android:id="@+id/action_MainFragment_to_ListPageSeriesFragment"
-            app:destination="@id/ListPageSeriesFragment" />
+            app:destination="@id/ListPageSerialsFragment" />
         <action
             android:id="@+id/action_MainFragment_to_FilmFragment"
             app:destination="@id/FilmFragment" />
@@ -101,9 +95,6 @@
         android:name="edu.skillbox.skillcinema.presentation.ListPagePremieresFragment"
         tools:layout="@layout/fragment_list_page_premieres">
         <action
-            android:id="@+id/action_ListPagePremieresFragment_to_MainFragment"
-            app:destination="@id/MainFragment" />
-        <action
             android:id="@+id/action_ListPagePremieresFragment_to_FilmFragment"
             app:destination="@id/FilmFragment" />
     </fragment>
@@ -113,9 +104,6 @@
         android:name="edu.skillbox.skillcinema.presentation.ListPagePopularFragment"
         tools:layout="@layout/fragment_list_page_popular">
         <action
-            android:id="@+id/action_ListPagePopularFragment_to_MainFragment"
-            app:destination="@id/MainFragment" />
-        <action
             android:id="@+id/action_ListPagePopularFragment_to_FilmFragment"
             app:destination="@id/FilmFragment" />
     </fragment>
@@ -124,9 +112,12 @@
         android:id="@+id/ListPageFiltered1Fragment"
         android:name="edu.skillbox.skillcinema.presentation.ListPageFiltered1Fragment"
         tools:layout="@layout/fragment_list_page_filtered_1">
-        <action
-            android:id="@+id/action_ListPageFiltered1Fragment_to_MainFragment"
-            app:destination="@id/MainFragment" />
+        <argument
+            android:name="genre1Key"
+            app:argType="integer" />
+        <argument
+            android:name="country1Key"
+            app:argType="integer" />
         <action
             android:id="@+id/action_ListPageFiltered1Fragment_to_FilmFragment"
             app:destination="@id/FilmFragment" />
@@ -137,9 +128,6 @@
         android:name="edu.skillbox.skillcinema.presentation.ListPageTop250Fragment"
         tools:layout="@layout/fragment_list_page_top_250">
         <action
-            android:id="@+id/action_ListPageTop250Fragment_to_MainFragment"
-            app:destination="@id/MainFragment" />
-        <action
             android:id="@+id/action_ListPageTop250Fragment_to_FilmFragment"
             app:destination="@id/FilmFragment" />
     </fragment>
@@ -148,21 +136,21 @@
         android:id="@+id/ListPageFiltered2Fragment"
         android:name="edu.skillbox.skillcinema.presentation.ListPageFiltered2Fragment"
         tools:layout="@layout/fragment_list_page_filtered_2">
-        <action
-            android:id="@+id/action_ListPageFiltered2Fragment_to_MainFragment"
-            app:destination="@id/MainFragment" />
+        <argument
+            android:name="genre2Key"
+            app:argType="integer" />
+        <argument
+            android:name="country2Key"
+            app:argType="integer" />
         <action
             android:id="@+id/action_ListPageFiltered2Fragment_to_FilmFragment"
             app:destination="@id/FilmFragment" />
     </fragment>
 
     <fragment
-        android:id="@+id/ListPageSeriesFragment"
-        android:name="edu.skillbox.skillcinema.presentation.ListPageSeriesFragment"
-        tools:layout="@layout/fragment_list_page_series">
-        <action
-            android:id="@+id/action_ListPageSeriesFragment_to_MainFragment"
-            app:destination="@id/MainFragment" />
+        android:id="@+id/ListPageSerialsFragment"
+        android:name="edu.skillbox.skillcinema.presentation.ListPageSerialsFragment"
+        tools:layout="@layout/fragment_list_page_serials">
         <action
             android:id="@+id/action_ListPageSeriesFragment_to_FilmFragment"
             app:destination="@id/FilmFragment" />
@@ -176,12 +164,6 @@
             android:name="filmId"
             android:defaultValue="0"
             app:argType="integer" />
-        <action
-            android:id="@+id/action_FilmFragment_to_MainFragment"
-            app:destination="@id/MainFragment" />
-        <action
-            android:id="@+id/action_FilmFragment_to_SearchFragment"
-            app:destination="@id/SearchFragment" />
         <action
             android:id="@+id/action_FilmFragment_to_AllStaffFragment"
             app:destination="@id/AllStaffFragment" />
@@ -216,12 +198,6 @@
             android:name="filmId"
             android:defaultValue="0"
             app:argType="integer" />
-        <action
-            android:id="@+id/action_SerialFragment_to_MainFragment"
-            app:destination="@id/MainFragment" />
-        <action
-            android:id="@+id/action_SerialFragment_to_SearchFragment"
-            app:destination="@id/SearchFragment" />
         <action
             android:id="@+id/action_SerialFragment_to_SerialContentFragment"
             app:destination="@id/SerialContentFragment" />
@@ -263,9 +239,6 @@
             android:name="name"
             android:defaultValue=""
             app:argType="string" />
-        <action
-            android:id="@+id/action_SerialContentFragment_to_MainFragment"
-            app:destination="@id/MainFragment" />
         <action
             android:id="@+id/action_SerialContentFragment_to_BottomFragment"
             app:destination="@id/BottomDialogFragment" />
@@ -356,9 +329,6 @@
             android:defaultValue="0"
             app:argType="integer" />
         <action
-            android:id="@+id/action_ListPageGalleryFragment_to_MainFragment"
-            app:destination="@id/MainFragment" />
-        <action
             android:id="@+id/action_ListPageGalleryFragment_to_ImagePagerFragment"
             app:destination="@id/ImagePagerFragment" />
     </fragment>
@@ -371,9 +341,6 @@
             android:name="filmId"
             android:defaultValue="0"
             app:argType="integer" />
-        <action
-            android:id="@+id/action_ListPageSimilarsFragment_to_MainFragment"
-            app:destination="@id/MainFragment" />
         <action
             android:id="@+id/action_ListPageSimilarsFragment_to_FilmFragment"
             app:destination="@id/FilmFragment" />
@@ -418,9 +385,6 @@
             android:id="@+id/action_StaffFragment_to_ListPageFilmographyFragment"
             app:destination="@id/ListPageFilmographyFragment" />
         <action
-            android:id="@+id/action_StaffFragment_to_MainFragment"
-            app:destination="@id/MainFragment" />
-        <action
             android:id="@+id/action_StaffFragment_to_ErrorBottomFragment"
             app:destination="@id/ErrorBottomDialogFragment" />
     </fragment>
@@ -433,9 +397,6 @@
             android:name="staffId"
             android:defaultValue="0"
             app:argType="integer" />
-        <action
-            android:id="@+id/action_ListPageFilmographyFragment_to_MainFragment"
-            app:destination="@id/MainFragment" />
         <action
             android:id="@+id/action_ListPageFilmographyFragment_to_FilmFragment"
             app:destination="@id/FilmFragment" />
@@ -453,9 +414,6 @@
             android:defaultValue="0"
             app:argType="integer" />
         <action
-            android:id="@+id/action_AllFilmsOfStaffFragment_to_MainFragment"
-            app:destination="@id/MainFragment" />
-        <action
             android:id="@+id/action_AllFilmsOfStaffFragment_to_FilmFragment"
             app:destination="@id/FilmFragment" />
         <action
@@ -470,9 +428,6 @@
         <action
             android:id="@+id/action_SearchFragment_to_FilmFragment"
             app:destination="@id/FilmFragment" />
-        <action
-            android:id="@+id/action_SearchFragment_to_MainFragment"
-            app:destination="@id/MainFragment" />
         <action
             android:id="@+id/action_SearchFragment_to_SearchSettings1Fragment"
             app:destination="@id/SearchSettings1Fragment" />
@@ -534,12 +489,6 @@
             android:id="@+id/action_ProfileFragment_to_CollectionNameDialogFragment"
             app:destination="@id/CollectionNameDialogFragment" />
         <action
-            android:id="@+id/action_ProfileFragment_to_MainFragment"
-            app:destination="@id/MainFragment" />
-        <action
-            android:id="@+id/action_ProfileFragment_to_SearchFragment"
-            app:destination="@id/SearchFragment" />
-        <action
             android:id="@+id/action_ProfileFragment_to_AllInterestedFragment"
             app:destination="@id/AllInterestedFragment" />
         <action
@@ -565,12 +514,6 @@
             android:defaultValue=""
             app:argType="string" />
         <action
-            android:id="@+id/action_CollectionFragment_to_MainFragment"
-            app:destination="@id/MainFragment" />
-        <action
-            android:id="@+id/action_CollectionFragment_to_SearchFragment"
-            app:destination="@id/SearchFragment" />
-        <action
             android:id="@+id/action_CollectionFragment_to_FilmFragment"
             app:destination="@id/FilmFragment" />
     </fragment>
@@ -579,12 +522,6 @@
         android:id="@+id/AllInterestedFragment"
         android:name="edu.skillbox.skillcinema.presentation.AllInterestedFragment"
         tools:layout="@layout/fragment_all_interested">
-        <action
-            android:id="@+id/action_AllInterestedFragment_to_MainFragment"
-            app:destination="@id/MainFragment" />
-        <action
-            android:id="@+id/action_AllInterestedFragment_to_SearchFragment"
-            app:destination="@id/SearchFragment" />
         <action
             android:id="@+id/action_AllInterestedFragment_to_FilmFragment"
             app:destination="@id/FilmFragment" />

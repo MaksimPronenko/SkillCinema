@@ -12,28 +12,31 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
-import edu.skillbox.skillcinema.data.FilmsFilteredPagedListAdapter
-import edu.skillbox.skillcinema.databinding.FragmentListPageSeriesBinding
-import edu.skillbox.skillcinema.models.FilmFiltered
+import edu.skillbox.skillcinema.data.FilmsPagedListAdapter
+import edu.skillbox.skillcinema.databinding.FragmentListPageSerialsBinding
+import edu.skillbox.skillcinema.models.FilmItemData
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class ListPageSeriesFragment : Fragment() {
+class ListPageSerialsFragment : Fragment() {
 
-    private var _binding: FragmentListPageSeriesBinding? = null
+    private var _binding: FragmentListPageSerialsBinding? = null
     private val binding get() = _binding!!
 
-    private val filmSeriesAdapter =
-        FilmsFilteredPagedListAdapter { filmFiltered -> onFilmFilteredItemClick(filmFiltered) }
+    //    private val filmSeriesAdapter =
+//        FilmsFilteredPagedListAdapter { filmFiltered -> onFilmFilteredItemClick(filmFiltered) }
+    private val serialsAdapter =
+        FilmsPagedListAdapter { filmItemData -> onItemClick(filmItemData) }
 
     @Inject
-    lateinit var listPageSeriesViewModelFactory: ListPageSeriesViewModelFactory
-    private val viewModel: ListPageSeriesViewModel by viewModels {
-        listPageSeriesViewModelFactory
+    lateinit var listPageSerialsViewModelFactory: ListPageSerialsViewModelFactory
+    private val viewModel: ListPageSerialsViewModel by viewModels {
+        listPageSerialsViewModelFactory
     }
 
 //    private val viewModel: ListPageSeriesViewModel by viewModels {
@@ -47,15 +50,19 @@ class ListPageSeriesFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentListPageSeriesBinding.inflate(inflater, container, false)
+        val bottomNavigation: BottomNavigationView? = activity?.findViewById(R.id.bottom_navigation)
+        if (bottomNavigation != null) bottomNavigation.isGone = false
 
+        _binding = FragmentListPageSerialsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.listPageRecycler.adapter = filmSeriesAdapter
+        viewModel.loadSerials()
+
+        binding.listPageRecycler.adapter = serialsAdapter
 
         val dividerItemDecorationVertical = DividerItemDecoration(context, RecyclerView.VERTICAL)
         val dividerItemDecorationHorizontal =
@@ -72,9 +79,9 @@ class ListPageSeriesFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-        binding.mainButton.setOnClickListener {
-            findNavController().navigate(R.id.action_ListPageSeriesFragment_to_MainFragment)
-        }
+//        binding.mainButton.setOnClickListener {
+//            findNavController().navigate(R.id.action_ListPageSeriesFragment_to_MainFragment)
+//        }
 
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
@@ -86,8 +93,8 @@ class ListPageSeriesFragment : Fragment() {
                             }
                             ViewModelState.Loaded -> {
                                 binding.progress.isGone = true
-                                viewModel.pagedSeries.onEach {
-                                    filmSeriesAdapter.submitData(it)
+                                viewModel.pagedSerials.onEach {
+                                    serialsAdapter.submitData(it)
                                 }.launchIn(viewLifecycleOwner.lifecycleScope)
                             }
                             ViewModelState.Error -> {
@@ -98,14 +105,14 @@ class ListPageSeriesFragment : Fragment() {
             }
     }
 
-    private fun onFilmFilteredItemClick(
-        item: FilmFiltered
+    private fun onItemClick(
+        item: FilmItemData
     ) {
         val bundle =
             Bundle().apply {
                 putInt(
                     "filmId",
-                    item.kinopoiskId
+                    item.filmId
                 )
             }
         findNavController().navigate(

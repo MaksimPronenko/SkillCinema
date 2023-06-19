@@ -2,29 +2,31 @@ package edu.skillbox.skillcinema.data
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import edu.skillbox.skillcinema.App
-import edu.skillbox.skillcinema.models.FilmFiltered
+import edu.skillbox.skillcinema.models.FilmItemData
 
 //class FilmsFiltered1PagingSource @Inject constructor(val genre:Int, val country:Int) : PagingSource<Int, FilmFiltered>() {
-class FilmsFiltered1PagingSource (private val application: App, dao: FilmDao) :
-    PagingSource<Int, FilmFiltered>() {
-    private val repository = Repository(dao)
-    override fun getRefreshKey(state: PagingState<Int, FilmFiltered>): Int = FIRST_PAGE
+class FilmsFilteredPagingSource(
+    val repository: Repository,
+    private val genreKey: Int,
+    private val countryKey: Int
+) : PagingSource<Int, FilmItemData>() {
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, FilmFiltered> {
+    override fun getRefreshKey(state: PagingState<Int, FilmItemData>): Int = FIRST_PAGE
+
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, FilmItemData> {
         val page = params.key ?: FIRST_PAGE
         return kotlin.runCatching {
-            repository.getFilmFiltered(
-                application.genre1key,
-                application.country1key,
+            repository.getFilmsFilteredExtended(
+                genreKey,
+                countryKey,
                 page
-            ).items.shuffled()
+            )
         }.fold(
             onSuccess = {
                 LoadResult.Page(
-                    data = it,
+                    data = it.orEmpty(),
                     prevKey = null,
-                    nextKey = if (it.isEmpty()) null else page + 1
+                    nextKey = if (it.isNullOrEmpty()) null else page + 1
                 )
             },
             onFailure = { LoadResult.Error(it) }

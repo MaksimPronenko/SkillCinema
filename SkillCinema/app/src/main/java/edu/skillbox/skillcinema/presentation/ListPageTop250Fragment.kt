@@ -14,9 +14,9 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
-import edu.skillbox.skillcinema.data.FilmsTopPagedListAdapter
+import edu.skillbox.skillcinema.data.FilmsPagedListAdapter
 import edu.skillbox.skillcinema.databinding.FragmentListPageTop250Binding
-import edu.skillbox.skillcinema.models.FilmTop
+import edu.skillbox.skillcinema.models.FilmItemData
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
@@ -27,7 +27,7 @@ class ListPageTop250Fragment : Fragment() {
     private var _binding: FragmentListPageTop250Binding? = null
     private val binding get() = _binding!!
 
-    private val filmTop250Adapter = FilmsTopPagedListAdapter { filmTop -> onItemClick(filmTop) }
+    private val filmTop250Adapter = FilmsPagedListAdapter { filmItemData -> onItemClick(filmItemData) }
 
     @Inject
     lateinit var listPageTop250ViewModelFactory: ListPageTop250ViewModelFactory
@@ -54,6 +54,8 @@ class ListPageTop250Fragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        viewModel.loadTop250()
+
         binding.listPageRecycler.adapter = filmTop250Adapter
 
         val dividerItemDecorationVertical = DividerItemDecoration(context, RecyclerView.VERTICAL)
@@ -71,9 +73,9 @@ class ListPageTop250Fragment : Fragment() {
             findNavController().popBackStack()
         }
 
-        binding.mainButton.setOnClickListener {
-            findNavController().navigate(R.id.action_ListPageTop250Fragment_to_MainFragment)
-        }
+//        binding.mainButton.setOnClickListener {
+//            findNavController().navigate(R.id.action_ListPageTop250Fragment_to_MainFragment)
+//        }
 
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
@@ -85,7 +87,7 @@ class ListPageTop250Fragment : Fragment() {
                             }
                             ViewModelState.Loaded -> {
                                 binding.progress.isGone = true
-                                viewModel.pagedFilmsTop250.onEach {
+                                viewModel.pagedFilmsTop250Extended.onEach {
                                     filmTop250Adapter.submitData(it)
                                 }.launchIn(viewLifecycleOwner.lifecycleScope)
                             }
@@ -97,7 +99,7 @@ class ListPageTop250Fragment : Fragment() {
             }
     }
 
-    private fun onItemClick(item: FilmTop) {
+    private fun onItemClick(item: FilmItemData) {
         val bundle = Bundle().apply {
             putInt("filmId", item.filmId)
         }

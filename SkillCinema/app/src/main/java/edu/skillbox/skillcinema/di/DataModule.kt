@@ -45,21 +45,26 @@ class DataModule {
     }
 
     @Provides
-    fun provideSeriesPagingSource(repository: Repository): SeriesPagingSource {
-        return SeriesPagingSource(repository)
+    fun provideSeriesPagingSource(repository: Repository): SerialsPagingSource {
+        return SerialsPagingSource(repository)
     }
 
-    @Provides
-    @Singleton
-    fun provideFilmsFiltered1PagingSource(application: App, dao: FilmDao): FilmsFiltered1PagingSource {
-        return FilmsFiltered1PagingSource(application, dao)
-    }
+//    @Provides
+//    fun provideFilmsFilteredPagingSource(repository: Repository): FilmsFilteredPagingSource {
+//        return FilmsFilteredPagingSource(repository)
+//    }
 
-    @Provides
-    @Singleton
-    fun provideFilmsFiltered2PagingSource(application: App, dao: FilmDao): FilmsFiltered2PagingSource {
-        return FilmsFiltered2PagingSource(application, dao)
-    }
+//    @Provides
+//    @Singleton
+//    fun provideFilmsFiltered1PagingSource(application: App, dao: FilmDao): FilmsFiltered1PagingSource {
+//        return FilmsFiltered1PagingSource(application, dao)
+//    }
+
+//    @Provides
+//    @Singleton
+//    fun provideFilmsFiltered2PagingSource(application: App, dao: FilmDao): FilmsFiltered2PagingSource {
+//        return FilmsFiltered2PagingSource(application, dao)
+//    }
 
     @Provides
     @Singleton

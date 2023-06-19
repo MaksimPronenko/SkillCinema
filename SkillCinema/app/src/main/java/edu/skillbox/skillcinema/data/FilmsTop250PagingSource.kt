@@ -2,23 +2,22 @@ package edu.skillbox.skillcinema.data
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import edu.skillbox.skillcinema.models.FilmTop
+import edu.skillbox.skillcinema.models.FilmItemData
 
-class FilmsTop250PagingSource (val repository: Repository): PagingSource<Int, FilmTop>() {
-//    private val dao = application.db.favoriteDao()
-//    private val repository = Repository(dao)
-    override fun getRefreshKey(state: PagingState<Int, FilmTop>): Int = FIRST_PAGE
+class FilmsTop250PagingSource (val repository: Repository): PagingSource<Int, FilmItemData>() {
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, FilmTop> {
+    override fun getRefreshKey(state: PagingState<Int, FilmItemData>): Int = FIRST_PAGE
+
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, FilmItemData> {
         val page = params.key ?: FIRST_PAGE
         return kotlin.runCatching {
-            repository.getTop250(page).films.shuffled()
+            repository.getTop250Extended(page)
         }.fold(
             onSuccess = {
                 LoadResult.Page(
-                    data = it,
+                    data = it.orEmpty(),
                     prevKey = null,
-                    nextKey = if (it.isEmpty()) null else page + 1
+                    nextKey = if (it.isNullOrEmpty()) null else page + 1
                 )
             },
             onFailure = { LoadResult.Error(it) }

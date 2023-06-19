@@ -1,7 +1,6 @@
 package edu.skillbox.skillcinema.presentation
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,22 +14,14 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.App
 import edu.skillbox.skillcinema.R
-import edu.skillbox.skillcinema.data.FilmPremieresAdapter
-import edu.skillbox.skillcinema.data.FilmsFilteredPagedListAdapter
-import edu.skillbox.skillcinema.data.FilmsTopPagedListAdapter
+import edu.skillbox.skillcinema.data.FilmAdapter
 import edu.skillbox.skillcinema.databinding.FragmentMainBinding
-import edu.skillbox.skillcinema.models.FilmFiltered
-import edu.skillbox.skillcinema.models.FilmPremiere
-import edu.skillbox.skillcinema.models.FilmTop
+import edu.skillbox.skillcinema.models.FilmItemData
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-//private const val TAG = "Main"
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+private const val TAG = "Main.Fragment"
 
 @AndroidEntryPoint
 class MainFragment : Fragment() {
@@ -59,70 +50,42 @@ class MainFragment : Fragment() {
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
 
-    var bottomNavigation: BottomNavigationView? = null
+//    private val filmPremieresAdapter =
+//        FilmPremieresAdapter(limited = true) { filmPremiere -> onPremiereItemClick(filmPremiere) }
 
     private val filmPremieresAdapter =
-        FilmPremieresAdapter(limited = true) { filmPremiere -> onPremiereItemClick(filmPremiere) }
+        FilmAdapter(limited = true) { filmItemData -> onItemClick(filmItemData) }
 
-//    private val filmPremieresAdapter = FilmPremieresAdapter(limited = true)
-//    private val filmTop100PopularAdapter = FilmsTopPagedListAdapter()
+//    private val filmTop100PopularAdapter =
+//        FilmsTopPagedListAdapter { filmItemData -> onItemClick(filmItemData) }
 
-    private
-    val filmTop100PopularAdapter =
-        FilmsTopPagedListAdapter { filmTop -> onItemClick(filmTop) }
+    private val filmTop100PopularExtendedAdapter =
+        FilmAdapter(limited = true) { filmItemData -> onItemClick(filmItemData) }
 
-    private
-    val filmsFiltered1Adapter =
-        FilmsFilteredPagedListAdapter { filmFiltered -> onFilmFilteredItemClick(filmFiltered) }
+//        FilmsFilteredPagedListAdapter { filmFiltered -> onFilmFilteredItemClick(filmFiltered) }
+    private val filmsFiltered1Adapter =
+        FilmAdapter(limited = true) { filmItemData -> onItemClick(filmItemData) }
 
-    //    { filmTop -> onItemClick(filmTop) }
-//    private val filmTop250Adapter = FilmsTopPagedListAdapter()
-    private
-    val filmTop250Adapter =
-        FilmsTopPagedListAdapter { filmTop -> onItemClick(filmTop) }
+//    private val filmTop250Adapter =
+//        FilmsTopPagedListAdapter { filmItemData -> onItemClick(filmItemData) }
+    private val filmTop250ExtendedAdapter =
+        FilmAdapter(limited = true) { filmItemData -> onItemClick(filmItemData) }
 
-    //    { filmTop -> onItemClick(filmTop) }
-    private
-    val filmsFiltered2Adapter =
-        FilmsFilteredPagedListAdapter { filmFiltered -> onFilmFilteredItemClick(filmFiltered) }
+//    private val filmsFiltered2Adapter =
+//        FilmsFilteredPagedListAdapter { filmFiltered -> onFilmFilteredItemClick(filmFiltered) }
+    private val filmsFiltered2Adapter =
+        FilmAdapter(limited = true) { filmItemData -> onItemClick(filmItemData) }
 
-    //    { filmTop -> onItemClick(filmTop) }
-    private
-    val seriesAdapter =
-        FilmsFilteredPagedListAdapter { filmFiltered -> onSerialItemClick(filmFiltered) }
-
-    // TODO: Rename and change types of parameters
-    private
-    var param1: String? = null
-
-    private
-    var param2: String? =
-        null
-
-    override fun onCreate(
-        savedInstanceState: Bundle?
-    ) {
-        super.onCreate(
-            savedInstanceState
-        )
-        arguments?.let {
-            param1 =
-                it.getString(
-                    ARG_PARAM1
-                )
-            param2 =
-                it.getString(
-                    ARG_PARAM2
-                )
-        }
-    }
+    //    private val seriesAdapter =
+//        FilmsFilteredPagedListAdapter { filmFiltered -> onSerialItemClick(filmFiltered) }
+    private val serialsAdapter =
+        FilmAdapter(limited = true) { filmItemData -> onItemClick(filmItemData) }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        bottomNavigation = activity?.findViewById(R.id.bottom_navigation)
-        if (bottomNavigation != null) bottomNavigation!!.isGone = false
-        bottomNavigation?.invalidate()
+        val bottomNavigation: BottomNavigationView? = activity?.findViewById(R.id.bottom_navigation)
+        if (bottomNavigation != null) bottomNavigation.isGone = false
 
         _binding = FragmentMainBinding.inflate(inflater, container, false)
         return binding.root
@@ -138,41 +101,23 @@ class MainFragment : Fragment() {
         )
 
         binding.premieresRecycler.adapter = filmPremieresAdapter
-        binding.popularRecycler.adapter = filmTop100PopularAdapter
+        binding.popularRecycler.adapter = filmTop100PopularExtendedAdapter
         binding.filmsFiltered1Recycler.adapter = filmsFiltered1Adapter
-        binding.top250Recycler.adapter = filmTop250Adapter
+        binding.top250Recycler.adapter = filmTop250ExtendedAdapter
         binding.filmsFiltered2Recycler.adapter = filmsFiltered2Adapter
-        binding.serialsRecycler.adapter = seriesAdapter
+        binding.serialsRecycler.adapter = serialsAdapter
 
         val application = requireContext().applicationContext as App
         binding.filmsFiltered1.text = application.filteredFilms1title
         binding.filmsFiltered2.text = application.filteredFilms2title
 
-//        binding.buttonAllPremieres.setOnClickListener(Navigation.createNavigateOnClickListener(R.id.action_MainFragment_to_ListPagePremieresFragment, null))
+        if (viewModel.top100Popular != null && viewModel.top250 != null &&
+            viewModel.serials != null && viewModel.filmsFiltered1 != null &&
+            viewModel.filmsFiltered2 != null) {
+            viewModel.loadExtendedFilmData()
+        }
 
         binding.buttonAllPremieres.setOnClickListener {
-//            Navigation.findNavController(it).navigate(
-//                R.id.action_MainFragment_to_ListPagePremieresFragment
-//            )
-
-            // Use the navigate() method that takes a navOptions DSL Builder
-//            navController.navigate(selectedBottomNavRoute) {
-//                launchSingleTop = true
-//                restoreState = true
-//                popUpTo(navController.graph.findStartDestination().id) {
-//                    saveState = true
-//                }
-//            }
-//
-//            FragmentNavigatorExtras(image_cover to "image_cover")
-
-//            findNavController().navigate(
-//                "@id/ListPagePremieresFragment"
-//            ) {
-//                launchSingleTop = true
-//                restoreState = true
-//            }
-
             findNavController().navigate(
                 R.id.action_MainFragment_to_ListPagePremieresFragment
             )
@@ -185,8 +130,20 @@ class MainFragment : Fragment() {
         }
 
         binding.buttonAllFilmsFiltered1.setOnClickListener {
+            val bundle =
+                Bundle().apply {
+                    putInt(
+                        "genre1Key",
+                        viewModel.genre1Key
+                    )
+                    putInt(
+                        "country1Key",
+                        viewModel.country1Key
+                    )
+                }
             findNavController().navigate(
-                R.id.action_MainFragment_to_ListPageFiltered1Fragment
+                R.id.action_MainFragment_to_ListPageFiltered1Fragment,
+                bundle
             )
         }
 
@@ -197,8 +154,20 @@ class MainFragment : Fragment() {
         }
 
         binding.buttonAllFilmsFiltered2.setOnClickListener {
+            val bundle =
+                Bundle().apply {
+                    putInt(
+                        "genre2Key",
+                        viewModel.genre2Key
+                    )
+                    putInt(
+                        "country2Key",
+                        viewModel.country2Key
+                    )
+                }
             findNavController().navigate(
-                R.id.action_MainFragment_to_ListPageFiltered2Fragment
+                R.id.action_MainFragment_to_ListPageFiltered2Fragment,
+                bundle
             )
         }
 
@@ -213,90 +182,58 @@ class MainFragment : Fragment() {
                 .collect { state ->
                     when (state) {
                         ViewModelState.Loading -> {
-                            binding.scrollView.isGone =
-                                true
-                            binding.appNameImageLoading.isGone =
-                                false
-                            binding.progress.isGone =
-                                false
-                            binding.welcome1Image.isGone =
-                                false
+                            binding.scrollView.isGone = true
+                            binding.appNameImageLoading.isGone = false
+                            binding.progress.isGone = false
+                            binding.welcome1Image.isGone = false
                         }
                         ViewModelState.Loaded -> {
-                            binding.scrollView.isGone =
-                                false
-                            binding.appNameImageLoading.isGone =
-                                true
-                            binding.progress.isGone =
-                                true
-                            binding.welcome1Image.isGone =
-                                true
+                            binding.scrollView.isGone = false
+                            binding.appNameImageLoading.isGone = true
+                            binding.progress.isGone = true
+                            binding.welcome1Image.isGone = true
 
-                            binding.buttonAllPremieres.isVisible =
-                                viewModel.premieresQuantity > 20
-                            viewModel.premieres.onEach {
-                                filmPremieresAdapter.setData(
-                                    it
-                                )
-                            }
-                                .launchIn(
-                                    viewLifecycleOwner.lifecycleScope
-                                )
+                            binding.buttonAllPremieres.isVisible = viewModel.premieresQuantity > 20
+                            viewModel.premieresExtendedFlow.onEach {
+                                filmPremieresAdapter.setData(it)
+                            }.launchIn(viewLifecycleOwner.lifecycleScope)
 
                             binding.buttonAllPopular.isVisible =
                                 viewModel.top100PopularPagesQuantity > 1
-                            viewModel.pagedFilmsTop100Popular.onEach {
-                                filmTop100PopularAdapter.submitData(
-                                    it
-                                )
-                            }
-                                .launchIn(
-                                    viewLifecycleOwner.lifecycleScope
-                                )
+//                            viewModel.pagedFilmsTop100PopularExtended.onEach {
+//                                filmTop100PopularAdapter.submitData(
+//                                    it
+//                                )
+//                            }.launchIn(
+//                                viewLifecycleOwner.lifecycleScope
+//                            )
+                            viewModel.top100PopularExtendedFlow.onEach {
+                                filmTop100PopularExtendedAdapter.setData(it)
+                            }.launchIn(viewLifecycleOwner.lifecycleScope)
 
                             binding.buttonAllFilmsFiltered1.isVisible =
                                 viewModel.filmsFiltered1PagesQuantity > 1
-                            viewModel.pagedFilmsFiltered1.onEach {
-                                filmsFiltered1Adapter.submitData(
-                                    it
-                                )
-                            }
-                                .launchIn(
-                                    viewLifecycleOwner.lifecycleScope
-                                )
+                            viewModel.filmsFiltered1ExtendedFlow.onEach {
+                                filmsFiltered1Adapter.setData(it)
+                            }.launchIn(viewLifecycleOwner.lifecycleScope)
 
                             binding.buttonAllTop250.isVisible =
                                 viewModel.top250PagesQuantity > 1
-                            viewModel.pagedFilmsTop250.onEach {
-                                filmTop250Adapter.submitData(
-                                    it
-                                )
-                            }
-                                .launchIn(
-                                    viewLifecycleOwner.lifecycleScope
-                                )
+                            viewModel.top250ExtendedFlow.onEach {
+                                filmTop250ExtendedAdapter.setData(it)
+                            }.launchIn(viewLifecycleOwner.lifecycleScope)
 
                             binding.buttonAllFilmsFiltered2.isVisible =
                                 viewModel.filmsFiltered2PagesQuantity > 1
-                            viewModel.pagedFilmsFiltered2.onEach {
-                                filmsFiltered2Adapter.submitData(
-                                    it
-                                )
-                            }
-                                .launchIn(
-                                    viewLifecycleOwner.lifecycleScope
-                                )
+                            viewModel.filmsFiltered2ExtendedFlow.onEach {
+                                filmsFiltered2Adapter.setData(it)
+                            }.launchIn(viewLifecycleOwner.lifecycleScope)
 
                             binding.buttonAllSeries.isVisible =
-                                viewModel.seriesPagesQuantity > 1
-                            viewModel.pagedSeries.onEach {
-                                seriesAdapter.submitData(
-                                    it
-                                )
-                            }
-                                .launchIn(
-                                    viewLifecycleOwner.lifecycleScope
-                                )
+                                viewModel.serialsPagesQuantity > 1
+                            viewModel.serialsExtendedFlow.onEach {
+                                serialsAdapter.setData(it)
+                            }.launchIn(viewLifecycleOwner.lifecycleScope)
                         }
                         ViewModelState.Error -> {
                             binding.scrollView.isGone = true
@@ -311,9 +248,8 @@ class MainFragment : Fragment() {
     }
 
     private fun onItemClick(
-        item: FilmTop
+        item: FilmItemData
     ) {
-        Log.d("FilmVM", "MainFragment. FilmID called = ${item.filmId}")
         val bundle =
             Bundle().apply {
                 putInt(
@@ -327,54 +263,54 @@ class MainFragment : Fragment() {
         )
     }
 
-    private fun onPremiereItemClick(
-        item: FilmPremiere
-    ) {
-        Log.d("FilmVM", "MainFragment. FilmID called = ${item.kinopoiskId}")
-        val bundle =
-            Bundle().apply {
-                putInt(
-                    "filmId",
-                    item.kinopoiskId
-                )
-            }
-        findNavController().navigate(
-            R.id.action_MainFragment_to_FilmFragment,
-            bundle
-        )
-    }
+//    private fun onPremiereItemClick(
+//        item: FilmPremiere
+//    ) {
+//        Log.d("FilmVM", "MainFragment. FilmID called = ${item.kinopoiskId}")
+//        val bundle =
+//            Bundle().apply {
+//                putInt(
+//                    "filmId",
+//                    item.kinopoiskId
+//                )
+//            }
+//        findNavController().navigate(
+//            R.id.action_MainFragment_to_FilmFragment,
+//            bundle
+//        )
+//    }
 
-    private fun onFilmFilteredItemClick(
-        item: FilmFiltered
-    ) {
-        Log.d("FilmVM", "MainFragment. FilmID called = ${item.kinopoiskId}")
-        val bundle =
-            Bundle().apply {
-                putInt(
-                    "filmId",
-                    item.kinopoiskId
-                )
-            }
-        findNavController().navigate(
-            R.id.action_MainFragment_to_FilmFragment,
-            bundle
-        )
-    }
+//    private fun onFilmFilteredItemClick(
+//        item: FilmFiltered
+//    ) {
+//        Log.d("FilmVM", "MainFragment. FilmID called = ${item.kinopoiskId}")
+//        val bundle =
+//            Bundle().apply {
+//                putInt(
+//                    "filmId",
+//                    item.kinopoiskId
+//                )
+//            }
+//        findNavController().navigate(
+//            R.id.action_MainFragment_to_FilmFragment,
+//            bundle
+//        )
+//    }
 
-    private fun onSerialItemClick(
-        item: FilmFiltered
-    ) {
-        Log.d("FilmVM", "MainFragment. FilmID called = ${item.kinopoiskId}")
-        val bundle =
-            Bundle().apply {
-                putInt(
-                    "filmId",
-                    item.kinopoiskId
-                )
-            }
-        findNavController().navigate(
-            R.id.action_MainFragment_to_SerialFragment,
-            bundle
-        )
-    }
+//    private fun onSerialItemClick(
+//        item: FilmFiltered
+//    ) {
+//        Log.d("FilmVM", "MainFragment. FilmID called = ${item.kinopoiskId}")
+//        val bundle =
+//            Bundle().apply {
+//                putInt(
+//                    "filmId",
+//                    item.kinopoiskId
+//                )
+//            }
+//        findNavController().navigate(
+//            R.id.action_MainFragment_to_SerialFragment,
+//            bundle
+//        )
+//    }
 }

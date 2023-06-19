@@ -5,24 +5,24 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
-import androidx.core.view.children
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
-import edu.skillbox.skillcinema.data.FilmPremieresAdapter
+import edu.skillbox.skillcinema.data.FilmAdapter
 import edu.skillbox.skillcinema.databinding.FragmentListPagePremieresBinding
-import edu.skillbox.skillcinema.models.FilmPremiere
+import edu.skillbox.skillcinema.models.FilmItemData
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
+
+private const val TAG = "ListPagePremieres.Fragment"
 
 @AndroidEntryPoint
 class ListPagePremieresFragment : Fragment() {
@@ -31,19 +31,15 @@ class ListPagePremieresFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val filmPremieresAdapter =
-        FilmPremieresAdapter(limited = false) { filmPremiere -> onPremiereItemClick(filmPremiere) }
+        FilmAdapter(limited = false) { filmItemData -> onItemClick(filmItemData) }
+//    private val filmPremieresAdapter =
+//        FilmPremieresAdapter(limited = false) { filmPremiere -> onPremiereItemClick(filmPremiere) }
 
     @Inject
     lateinit var listPagePremieresViewModelFactory: ListPagePremieresViewModelFactory
     private val viewModel: ListPagePremieresViewModel by viewModels {
         listPagePremieresViewModelFactory
     }
-
-//    private val viewModel: ListPagePremieresViewModel by viewModels {
-//        ListPagePremieresViewModelFactory(
-//            requireContext().applicationContext as App
-//        )
-//    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -73,6 +69,10 @@ class ListPagePremieresFragment : Fragment() {
         binding.listPageRecycler.addItemDecoration(dividerItemDecorationVertical)
         binding.listPageRecycler.addItemDecoration(dividerItemDecorationHorizontal)
 
+        if (viewModel.premieres.isNotEmpty()) {
+            viewModel.loadExtendedFilmData()
+        }
+
         binding.backButton.setOnClickListener {
             findNavController().popBackStack()
         }
@@ -88,35 +88,9 @@ class ListPagePremieresFragment : Fragment() {
                             ViewModelState.Loaded -> {
                                 binding.progress.isGone = true
 
-                                viewModel.premieres.onEach {
+                                viewModel.premieresExtendedFlow.onEach {
                                     filmPremieresAdapter.setData(it)
                                 }.launchIn(viewLifecycleOwner.lifecycleScope)
-
-//                                    1 -> {
-//                                        viewModel.premieres.onEach {
-//                                            filmPremieresAdapter.setData(it)
-//                                        }.launchIn(viewLifecycleOwner.lifecycleScope)
-//                                    }
-//                                    2 -> {
-//                                        viewModel.premieres.onEach {
-//                                            filmPremieresAdapter.setData(it)
-//                                        }.launchIn(viewLifecycleOwner.lifecycleScope)
-//                                    }
-//                                    3 -> {
-//                                        viewModel.premieres.onEach {
-//                                            filmPremieresAdapter.setData(it)
-//                                        }.launchIn(viewLifecycleOwner.lifecycleScope)
-//                                    }
-//                                    4 -> {
-//                                        viewModel.premieres.onEach {
-//                                            filmPremieresAdapter.setData(it)
-//                                        }.launchIn(viewLifecycleOwner.lifecycleScope)
-//                                    }
-//                                    else -> {
-//                                        viewModel.premieres.onEach {
-//                                            filmPremieresAdapter.setData(it)
-//                                        }.launchIn(viewLifecycleOwner.lifecycleScope)
-//                                    }
                             }
                             ViewModelState.Error -> {
                                 binding.progress.isGone = true
@@ -125,14 +99,14 @@ class ListPagePremieresFragment : Fragment() {
                     }
             }
     }
-    private fun onPremiereItemClick(
-        item: FilmPremiere
+    private fun onItemClick(
+        item: FilmItemData
     ) {
         val bundle =
             Bundle().apply {
                 putInt(
                     "filmId",
-                    item.kinopoiskId
+                    item.filmId
                 )
             }
         findNavController().navigate(

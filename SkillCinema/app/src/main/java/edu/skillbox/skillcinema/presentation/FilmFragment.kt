@@ -74,16 +74,14 @@ class FilmFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val bottomNavigation: BottomNavigationView? = activity?.findViewById(R.id.bottom_navigation)
-        if (bottomNavigation != null) {
-            bottomNavigation.isGone = false
+        if (bottomNavigation != null) bottomNavigation.isGone = false
 
-            val menu = bottomNavigation.menu
-            menu.setGroupCheckable(0, true, false)
-            for (i in 0 until menu.size()) {
-                menu.getItem(i).isChecked = false
-            }
-            menu.setGroupCheckable(0, true, true)
-        }
+//            val menu = bottomNavigation.menu
+//            menu.setGroupCheckable(0, true, false)
+//            for (i in 0 until menu.size()) {
+//                menu.getItem(i).isChecked = false
+//            }
+//            menu.setGroupCheckable(0, true, true)
 
         _binding = FragmentFilmBinding.inflate(inflater, container, false)
         return binding.root

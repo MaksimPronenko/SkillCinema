@@ -10,11 +10,11 @@ import androidx.lifecycle.ViewModelProvider
 //    }
 //}
 
-class ListPageSeriesViewModelFactory (private val listPageSeriesViewModel: ListPageSeriesViewModel) :
+class ListPageSerialsViewModelFactory (private val listPageSerialsViewModel: ListPageSerialsViewModel) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(ListPageSeriesViewModel::class.java)) {
-            return listPageSeriesViewModel as T
+        if (modelClass.isAssignableFrom(ListPageSerialsViewModel::class.java)) {
+            return listPageSerialsViewModel as T
         }
         throw IllegalArgumentException("Unknown class name")
     }

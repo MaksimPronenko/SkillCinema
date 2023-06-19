@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
 import edu.skillbox.skillcinema.databinding.FragmentSearchSettings3Binding
@@ -36,8 +37,10 @@ class SearchSettings3Fragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentSearchSettings3Binding.inflate(inflater, container, false)
+        val bottomNavigation: BottomNavigationView? = activity?.findViewById(R.id.bottom_navigation)
+        if (bottomNavigation != null) bottomNavigation.isGone = true
 
+        _binding = FragmentSearchSettings3Binding.inflate(inflater, container, false)
         return binding.root
     }
 

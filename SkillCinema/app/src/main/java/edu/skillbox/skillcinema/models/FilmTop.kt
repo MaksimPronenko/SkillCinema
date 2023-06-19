@@ -9,7 +9,7 @@ data class FilmTop(
     val countries: List<Country>,
     val genres: List<Genre>,
     val rating: String?,
-    val ratingVoteCount: Int,
-    val posterUrl: String?,
-    val posterUrlPreview: String?
+    val ratingVoteCount: Int?,
+    val posterUrl: String,
+    val posterUrlPreview: String
 )

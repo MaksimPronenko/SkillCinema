@@ -4,13 +4,14 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.skillbox.skillcinema.data.Repository
+import edu.skillbox.skillcinema.models.FilmItemData
 import edu.skillbox.skillcinema.models.FilmPremiere
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-private const val TAG = "ListPagePremieres"
+private const val TAG = "ListPagePremieres.VM"
 
 class ListPagePremieresViewModel(
     private val repository: Repository
@@ -22,64 +23,48 @@ class ListPagePremieresViewModel(
     val state = _state.asStateFlow()
 
     var premieresQuantity = 0
-    private val _premieres = MutableStateFlow<List<FilmPremiere>>(emptyList())
-    val premieres = _premieres.asStateFlow()
-
-//    val pagedFilmsTop100Popular: Flow<PagingData<FilmTop>> = Pager(
-//        config = PagingConfig(pageSize = 20),
-//        pagingSourceFactory = { FilmTop100PopularPagingSource() }
-//    ).flow.cachedIn(viewModelScope)
-//
-//    val pagedFilmsTop250: Flow<PagingData<FilmTop>> = Pager(
-//        config = PagingConfig(pageSize = 20),
-//        pagingSourceFactory = { FilmTop250PagingSource() }
-//    ).flow.cachedIn(viewModelScope)
-//
-//    val pagedSeries: Flow<PagingData<FilmFiltered>> = Pager(
-//        config = PagingConfig(pageSize = 20),
-//        pagingSourceFactory = { SeriesPagingSource() }
-//    ).flow.cachedIn(viewModelScope)
-//
-//    val pagedFilmsFiltered1: Flow<PagingData<FilmFiltered>> = Pager(
-//        config = PagingConfig(pageSize = 20),
-//        pagingSourceFactory = {
-//            FilmFilteredPagingSource(
-//                application.genre1key,
-//                application.country1key
-//            )
-//        }
-//    ).flow.cachedIn(viewModelScope)
-//
-//    val pagedFilmsFiltered2: Flow<PagingData<FilmFiltered>> = Pager(
-//        config = PagingConfig(pageSize = 20),
-//        pagingSourceFactory = {
-//            FilmFilteredPagingSource(
-//                application.genre2key,
-//                application.country2key
-//            )
-//        }
-//    ).flow.cachedIn(viewModelScope)
+    var premieres: List<FilmPremiere> = emptyList()
+    var premieresExtended: MutableList<FilmItemData> = mutableListOf()
+    private val _premieresExtendedFlow = MutableStateFlow<List<FilmItemData>>(emptyList())
+    val premieresExtendedFlow = _premieresExtendedFlow.asStateFlow()
 
     init {
+        loadPremieres()
+    }
+
+    private fun loadPremieres() {
         viewModelScope.launch(Dispatchers.IO) {
-            loadPremieres()
+            var error = false
+            _state.value = ViewModelState.Loading
+            Log.d(TAG, "Cостояние = ${_state.value}")
+                kotlin.runCatching {
+                    repository.getPremieres()
+                }.fold(
+                    onSuccess = {
+                        premieres = it
+                        premieresQuantity = it.size
+                        _state.value = ViewModelState.Loaded
+                        Log.d(TAG, "Cостояние = ${_state.value}")
+                        loadExtendedFilmData()
+                    },
+                    onFailure = {
+                        _state.value = ViewModelState.Error
+                        Log.d(TAG, "Cостояние = ${_state.value}")
+                    }
+                )
         }
     }
 
-    private suspend fun loadPremieres() {
-        _state.value = ViewModelState.Loading
-        val jobLoading = viewModelScope.launch(Dispatchers.IO) {
-            kotlin.runCatching {
-                repository.getPremieres()
-            }.fold(
-                onSuccess = {
-                    _premieres.value = it
-                    premieresQuantity = it.size
-                },
-                onFailure = { Log.d(TAG, it.message ?: "Ошибка загрузки премьер") }
-            )
+    fun loadExtendedFilmData() {
+        viewModelScope.launch(Dispatchers.IO) {
+            premieresExtended = mutableListOf()
+            premieres.forEach { filmPremiere ->
+                val extendedPremiereData = repository.extendPremiereData(filmPremiere)
+                if (extendedPremiereData != null) {
+                    premieresExtended.add(extendedPremiereData)
+                    _premieresExtendedFlow.value = premieresExtended.toList()
+                }
+            }
         }
-        jobLoading.join()
-        _state.value = ViewModelState.Loaded
     }
 }

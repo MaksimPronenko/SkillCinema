@@ -224,15 +224,15 @@ class ProfileFragment : Fragment() {
                 )
             }
 
-        activity?.findNavController(R.id.ProfileFragment)?.navigate(
-            R.id.action_ProfileFragment_to_FilmFragment,
-            bundle
-        )
-
-//        findNavController().navigate(
+//        activity?.findNavController(R.id.ProfileFragment)?.navigate(
 //            R.id.action_ProfileFragment_to_FilmFragment,
 //            bundle
 //        )
+
+        findNavController().navigate(
+            R.id.action_ProfileFragment_to_FilmFragment,
+            bundle
+        )
     }
 
     private fun onSerialClick(

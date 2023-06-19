@@ -29,20 +29,20 @@ class PresentationModule {
     @Singleton
     fun provideMainViewModel(
         repository: Repository,
-        filmsTop100PopularPagingSource: FilmsTop100PopularPagingSource,
-        filmsTop250PagingSource: FilmsTop250PagingSource,
-        seriesPagingSource: SeriesPagingSource,
-        filmsFiltered1PagingSource: FilmsFiltered1PagingSource,
-        filmsFiltered2PagingSource: FilmsFiltered2PagingSource,
+//        filmsTop100PopularPagingSource: FilmsTop100PopularPagingSource,
+//        filmsTop250PagingSource: FilmsTop250PagingSource,
+//        seriesPagingSource: SerialsPagingSource,
+//        filmsFiltered1PagingSource: FilmsFiltered1PagingSource,
+//        filmsFiltered2PagingSource: FilmsFiltered2PagingSource,
         application: App
     ): MainViewModel {
         return MainViewModel(
             repository,
-            filmsTop100PopularPagingSource,
-            filmsTop250PagingSource,
-            seriesPagingSource,
-            filmsFiltered1PagingSource,
-            filmsFiltered2PagingSource,
+//            filmsTop100PopularPagingSource,
+//            filmsTop250PagingSource,
+//            seriesPagingSource,
+//            filmsFiltered1PagingSource,
+//            filmsFiltered2PagingSource,
             application
         )
     }
@@ -104,57 +104,45 @@ class PresentationModule {
     }
 
     @Provides
-    @Singleton
     fun provideListPageFiltered1ViewModel(
-        repository: Repository,
-        application: App,
-        dao: FilmDao
+        repository: Repository
     ): ListPageFiltered1ViewModel {
         return ListPageFiltered1ViewModel(
-            repository,
-            application,
-            dao
-        )
-    }
-
-    @Provides
-    @Singleton
-    fun provideListPageFiltered1ViewModelFactory(listPageFiltered1ViewModel: ListPageFiltered1ViewModel): ListPageFiltered1ViewModelFactory {
-        return ListPageFiltered1ViewModelFactory(listPageFiltered1ViewModel)
-    }
-
-    @Provides
-    @Singleton
-    fun provideListPageFiltered2ViewModel(
-        repository: Repository,
-        application: App,
-        dao: FilmDao
-    ): ListPageFiltered2ViewModel {
-        return ListPageFiltered2ViewModel(
-            repository,
-            application,
-            dao
-        )
-    }
-
-    @Provides
-    @Singleton
-    fun provideListPageFiltered2ViewModelFactory(listPageFiltered2ViewModel: ListPageFiltered2ViewModel): ListPageFiltered2ViewModelFactory {
-        return ListPageFiltered2ViewModelFactory(listPageFiltered2ViewModel)
-    }
-
-    @Provides
-    fun provideListPageSeriesViewModel(
-        repository: Repository
-    ): ListPageSeriesViewModel {
-        return ListPageSeriesViewModel(
             repository
         )
     }
 
     @Provides
-    fun provideListPageSeriesViewModelFactory(listPageSeriesViewModel: ListPageSeriesViewModel): ListPageSeriesViewModelFactory {
-        return ListPageSeriesViewModelFactory(listPageSeriesViewModel)
+    fun provideListPageFiltered1ViewModelFactory(listPageFiltered1ViewModel: ListPageFiltered1ViewModel): ListPageFiltered1ViewModelFactory {
+        return ListPageFiltered1ViewModelFactory(listPageFiltered1ViewModel)
+    }
+
+    @Provides
+    fun provideListPageFiltered2ViewModel(
+        repository: Repository
+    ): ListPageFiltered2ViewModel {
+        return ListPageFiltered2ViewModel(
+            repository
+        )
+    }
+
+    @Provides
+    fun provideListPageFiltered2ViewModelFactory(listPageFiltered2ViewModel: ListPageFiltered2ViewModel): ListPageFiltered2ViewModelFactory {
+        return ListPageFiltered2ViewModelFactory(listPageFiltered2ViewModel)
+    }
+
+    @Provides
+    fun provideListPageSerialsViewModel(
+        repository: Repository
+    ): ListPageSerialsViewModel {
+        return ListPageSerialsViewModel(
+            repository
+        )
+    }
+
+    @Provides
+    fun provideListPageSerialsViewModelFactory(listPageSerialsViewModel: ListPageSerialsViewModel): ListPageSerialsViewModelFactory {
+        return ListPageSerialsViewModelFactory(listPageSerialsViewModel)
     }
 
 //    @Provides

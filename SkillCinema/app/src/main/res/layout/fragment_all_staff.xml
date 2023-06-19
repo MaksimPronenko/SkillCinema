@@ -59,51 +59,10 @@
         android:layout_marginTop="24dp"
         android:orientation="vertical"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintBottom_toTopOf="@+id/bottom_menu_background"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/film_name"
         tools:listitem="@layout/all_staff_item" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/bottom_menu_background"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        android:background="@drawable/bottom_menu_background"
-        android:elevation="8dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/mainButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="63dp"
-            android:src="@drawable/main"
-            android:tint="@color/grey_4"
-            app:layout_constraintBottom_toBottomOf="@+id/searchButton"
-            app:layout_constraintEnd_toStartOf="@+id/searchButton"
-            app:layout_constraintTop_toTopOf="@+id/searchButton" />
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/searchButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="24dp"
-            android:src="@drawable/search"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/profileButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="63dp"
-            android:src="@drawable/profile"
-            app:layout_constraintBottom_toBottomOf="@+id/searchButton"
-            app:layout_constraintStart_toEndOf="@+id/searchButton"
-            app:layout_constraintTop_toTopOf="@+id/searchButton" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

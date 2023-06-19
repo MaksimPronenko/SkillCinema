@@ -68,9 +68,9 @@ class StaffFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-        binding.mainButton.setOnClickListener {
-            findNavController().navigate(R.id.action_StaffFragment_to_MainFragment)
-        }
+//        binding.mainButton.setOnClickListener {
+//            findNavController().navigate(R.id.action_StaffFragment_to_MainFragment)
+//        }
 
         binding.buttonAllFilms.setOnClickListener {
             val bundle =

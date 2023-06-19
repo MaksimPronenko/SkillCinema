@@ -14,9 +14,9 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
-import edu.skillbox.skillcinema.data.FilmsTopPagedListAdapter
+import edu.skillbox.skillcinema.data.FilmsPagedListAdapter
 import edu.skillbox.skillcinema.databinding.FragmentListPagePopularBinding
-import edu.skillbox.skillcinema.models.FilmTop
+import edu.skillbox.skillcinema.models.FilmItemData
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
@@ -28,7 +28,7 @@ class ListPagePopularFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val filmTop100PopularAdapter =
-        FilmsTopPagedListAdapter { filmTop -> onItemClick(filmTop) }
+        FilmsPagedListAdapter { filmItemData -> onItemClick(filmItemData) }
 
     @Inject
     lateinit var listPagePopularViewModelFactory: ListPagePopularViewModelFactory
@@ -55,6 +55,8 @@ class ListPagePopularFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        viewModel.loadTop100Popular()
+
         binding.listPageRecycler.adapter = filmTop100PopularAdapter
 
         val dividerItemDecorationVertical = DividerItemDecoration(context, RecyclerView.VERTICAL)
@@ -72,9 +74,9 @@ class ListPagePopularFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-        binding.mainButton.setOnClickListener {
-            findNavController().navigate(R.id.action_ListPagePopularFragment_to_MainFragment)
-        }
+//        binding.mainButton.setOnClickListener {
+//            findNavController().navigate(R.id.action_ListPagePopularFragment_to_MainFragment)
+//        }
 
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
@@ -86,7 +88,7 @@ class ListPagePopularFragment : Fragment() {
                             }
                             ViewModelState.Loaded -> {
                                 binding.progress.isGone = true
-                                viewModel.pagedFilmsTop100Popular.onEach {
+                                viewModel.pagedFilmsTop100PopularExtended.onEach {
                                     filmTop100PopularAdapter.submitData(it)
                                 }.launchIn(viewLifecycleOwner.lifecycleScope)
                             }
@@ -98,7 +100,7 @@ class ListPagePopularFragment : Fragment() {
             }
     }
 
-    private fun onItemClick(item: FilmTop) {
+    private fun onItemClick(item: FilmItemData) {
         val bundle = Bundle().apply {
             putInt("filmId", item.filmId)
         }
