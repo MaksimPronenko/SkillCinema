@@ -1,12 +1,12 @@
 package edu.skillbox.skillcinema.data
 
 import androidx.recyclerview.widget.DiffUtil
-import edu.skillbox.skillcinema.models.FilmFiltered
+import edu.skillbox.skillcinema.models.FilmItemData
 
-class FilmsFilteredDiffUtilCallback : DiffUtil.ItemCallback<FilmFiltered>() {
-    override fun areItemsTheSame(oldItem: FilmFiltered, newItem: FilmFiltered): Boolean =
-        oldItem.kinopoiskId == newItem.kinopoiskId
+class FilmsFilteredDiffUtilCallback : DiffUtil.ItemCallback<FilmItemData>() {
+    override fun areItemsTheSame(oldItem: FilmItemData, newItem: FilmItemData): Boolean =
+        oldItem.filmId == newItem.filmId
 
-    override fun areContentsTheSame(oldItem: FilmFiltered, newItem: FilmFiltered): Boolean =
+    override fun areContentsTheSame(oldItem: FilmItemData, newItem: FilmItemData): Boolean =
         oldItem == newItem
 }

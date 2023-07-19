@@ -57,6 +57,3 @@ class FilmPremieresAdapter(
     }
 }
 
-class FilmViewHolder(val binding: FilmItemBinding) :
-    RecyclerView.ViewHolder(binding.root)
-

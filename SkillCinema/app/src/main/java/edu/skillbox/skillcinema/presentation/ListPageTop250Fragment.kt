@@ -35,12 +35,6 @@ class ListPageTop250Fragment : Fragment() {
         listPageTop250ViewModelFactory
     }
 
-//    private val viewModel: ListPageTop250ViewModel by viewModels {
-//        ListPageTop250ViewModelFactory(
-//            requireContext().applicationContext as App
-//        )
-//    }
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -73,10 +67,6 @@ class ListPageTop250Fragment : Fragment() {
             findNavController().popBackStack()
         }
 
-//        binding.mainButton.setOnClickListener {
-//            findNavController().navigate(R.id.action_ListPageTop250Fragment_to_MainFragment)
-//        }
-
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
                 viewModel.state
@@ -93,6 +83,8 @@ class ListPageTop250Fragment : Fragment() {
                             }
                             ViewModelState.Error -> {
                                 binding.progress.isGone = true
+                                binding.listPageRecycler.isGone = true
+                                findNavController().navigate(R.id.action_ListPageTop250Fragment_to_ErrorBottomFragment)
                             }
                         }
                     }
@@ -104,5 +96,10 @@ class ListPageTop250Fragment : Fragment() {
             putInt("filmId", item.filmId)
         }
         findNavController().navigate(R.id.action_ListPageTop250Fragment_to_FilmFragment, bundle)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

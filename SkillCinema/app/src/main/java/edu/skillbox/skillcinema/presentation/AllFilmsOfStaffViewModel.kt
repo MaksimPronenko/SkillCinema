@@ -4,10 +4,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.skillbox.skillcinema.data.Repository
-import edu.skillbox.skillcinema.models.FilmOfPersonTable
-import edu.skillbox.skillcinema.models.FilmOfStaff
-import edu.skillbox.skillcinema.models.PersonInfoDb
+import edu.skillbox.skillcinema.models.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -27,65 +26,28 @@ class AllFilmsOfStaffViewModel(
 
     var name: String? = null
 
-    var personFilms: List<FilmOfPersonTable> = emptyList()
-    var filmsDetailed: MutableList<FilmOfStaff> = emptyList<FilmOfStaff>().toMutableList()
-    private val _filmsFlow = MutableStateFlow<List<FilmOfStaff>>(emptyList())
+    var personFilms: List<FilmOfPersonTable>? = null
+    private var filmsExtended: MutableList<FilmItemData> = mutableListOf()
+    private val _filmsFlow = MutableStateFlow<List<FilmItemData>>(emptyList())
     val filmsFlow = _filmsFlow.asStateFlow()
+
+    var jobLoadFilmsExtended: Job? = null
 
     fun loadPersonData(staffId: Int) {
         Log.d(TAG, "loadAllFilmsOfStaff($staffId)")
         viewModelScope.launch(Dispatchers.IO) {
             _state.value = ViewModelState.Loading
+            var personInfoDbResult: Pair<PersonInfoDb?, Boolean>
+            var personInfoDb: PersonInfoDb?
             var error = false
 
             val jobGetPersonData = viewModelScope.launch(Dispatchers.IO) {
-                var personDataFoundInDb = false
-                var personInfoDb: PersonInfoDb? = null
-                val jobCheckPersonDataInDb = viewModelScope.launch(Dispatchers.IO) {
-                    personDataFoundInDb = repository.isPersonDataExists(staffId)
-                }
-                jobCheckPersonDataInDb.join()
-                Log.d(TAG, "Данные уже есть в БД: $personDataFoundInDb")
+                personInfoDbResult = repository.getPersonInfoDb(staffId)
+                personInfoDb = personInfoDbResult.first
+                error = personInfoDbResult.second
 
-                if (personDataFoundInDb) {
-                    val jobGetPersonDataFromDb = viewModelScope.launch {
-                        personInfoDb = repository.getPersonInfoDb(staffId)
-                    }
-                    jobGetPersonDataFromDb.join()
-                    Log.d(TAG, "Загружена из БД PersonInfoDb: $personInfoDb")
-
-                    if (personInfoDb == null) error = true
-                    else {
-                        personInfoDbToVMData(personInfoDb!!)
-                    }
-                } else {
-                    val jobGetPersonDataFromApi = viewModelScope.launch {
-                        kotlin.runCatching {
-                            repository.getFromApiPersonInfoDb(staffId)
-                        }.fold(
-                            onSuccess = {
-                                personInfoDb = it
-                                personInfoDbToVMData(personInfoDb!!)
-                                Log.d(TAG, "Данные человека загружены из Api: $personInfoDb")
-                            },
-                            onFailure = {
-                                Log.d(
-                                    TAG,
-                                    "Данные человека из Api. Ошибка загрузки. ${it.message ?: ""}"
-                                )
-                                error = true
-                            }
-                        )
-                    }
-                    jobGetPersonDataFromApi.join()
-
-                    // Запись данных человека в базу данных после загрузки из Api
-                    val jobAddPersonDataToDb = viewModelScope.launch {
-                        personInfoDb?.let { repository.addPersonInfoDb(it) }
-                    }
-                    jobAddPersonDataToDb.join()
-                    Log.d(TAG, "Данные человека записаны в базу данных")
-                }
+                if (personInfoDb == null) error = true
+                else personInfoDbToVMData(personInfoDb!!)
             }
             jobGetPersonData.join()
 
@@ -96,30 +58,28 @@ class AllFilmsOfStaffViewModel(
                 _state.value = ViewModelState.Loaded
                 Log.d(TAG, "Состояние успешного завершения загрузки")
             }
+
+            Log.d(TAG, "Запускаем loadFilmsExtended() из loadPersonData()")
+            loadFilmsExtended()
         }
     }
 
-    fun loadAllFilmsDetailed() {
-        viewModelScope.launch(Dispatchers.IO) {
-            val jobLoadAndSend = viewModelScope.launch(Dispatchers.IO) {
-                personFilms.onEach { filmOfPersonTable ->
-                    val newDownloadedFilm =
-                        repository.getPersonFilmDetailed(filmOfPersonTable)
-                    if (newDownloadedFilm != null) {
-                        Log.d(TAG, "Загружен ${newDownloadedFilm.filmId}")
-                        if (!filmsDetailed.any { filmOfStaff -> filmOfStaff.filmId == newDownloadedFilm.filmId }) {
-                            filmsDetailed.add(newDownloadedFilm)
-                            _filmsFlow.value = filmsDetailed.toList()
-                            Log.d(TAG, "Доб-н ${newDownloadedFilm.filmId}")
-                        } else {
-                            Log.d(TAG, "Уже ${newDownloadedFilm.filmId}")
-                        }
+    fun loadFilmsExtended() {
+        if (jobLoadFilmsExtended?.isActive != true) {
+            jobLoadFilmsExtended = viewModelScope.launch(Dispatchers.IO) {
+                filmsExtended = mutableListOf()
+                Log.d(TAG, "loadFilmsExtended(). Внутри Job.")
+                personFilms?.forEach { filmOfPersonTable ->
+                    val filmDbViewed: FilmDbViewed? =
+                        repository.getFilmDbViewed(filmOfPersonTable.filmId).first
+                    if (filmDbViewed != null) {
+                        val filmItemData: FilmItemData = filmDbViewed.convertToFilmItemData()
+                        Log.d(TAG, "Загружен ${filmItemData.filmId}")
+                        filmsExtended.add(filmItemData)
+                        _filmsFlow.value = filmsExtended.toList()
                     }
                 }
             }
-            jobLoadAndSend.join()
-            _filmsFlow.value = filmsDetailed.toList()
-            Log.d(TAG, "Финальный список длины ${filmsDetailed.size}")
         }
     }
 

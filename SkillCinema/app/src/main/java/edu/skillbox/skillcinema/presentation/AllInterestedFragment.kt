@@ -15,9 +15,10 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
-import edu.skillbox.skillcinema.data.AllStaffFilmsAdapter
-import edu.skillbox.skillcinema.databinding.FragmentAllFilmsOfStaffBinding
-import edu.skillbox.skillcinema.models.FilmOfStaff
+import edu.skillbox.skillcinema.data.InterestedAdapter
+import edu.skillbox.skillcinema.databinding.FragmentAllInterestedBinding
+import edu.skillbox.skillcinema.models.FilmItemData
+import edu.skillbox.skillcinema.models.PersonTable
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
@@ -27,16 +28,21 @@ private const val TAG = "AllInterested.Fragment"
 @AndroidEntryPoint
 class AllInterestedFragment : Fragment() {
 
-    private var _binding: FragmentAllFilmsOfStaffBinding? = null
+    private var _binding: FragmentAllInterestedBinding? = null
     private val binding get() = _binding!!
 
-    private val filmsAdapter =
-        AllStaffFilmsAdapter { film -> onFilmItemClick(film) }
+    private val interestedAdapter = InterestedAdapter(
+        limited = false,
+        onFilmClick = { filmItemData -> onFilmClick(filmItemData) },
+        onSerialClick = { filmItemData -> onSerialClick(filmItemData) },
+        onPersonClick = { personTable -> onPersonClick(personTable) },
+        clear = { viewModel.clearAllInterested() }
+    )
 
     @Inject
-    lateinit var allFilmsOfStaffViewModelFactory: AllFilmsOfStaffViewModelFactory
-    private val viewModel: AllFilmsOfStaffViewModel by viewModels {
-        allFilmsOfStaffViewModelFactory
+    lateinit var allInterestedViewModelFactory: AllInterestedViewModelFactory
+    private val viewModel: AllInterestedViewModel by viewModels {
+        allInterestedViewModelFactory
     }
 
     override fun onCreateView(
@@ -44,7 +50,7 @@ class AllInterestedFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentAllFilmsOfStaffBinding.inflate(inflater, container, false)
+        _binding = FragmentAllInterestedBinding.inflate(inflater, container, false)
 
         return binding.root
     }
@@ -52,7 +58,10 @@ class AllInterestedFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.listPageRecycler.adapter = filmsAdapter
+        binding.listPageRecycler.adapter = interestedAdapter
+
+        Log.d(TAG, "Запускаем viewModel.createAndSendToAdapterInterestedList() из onViewCreated")
+        viewModel.createAndSendToAdapterInterestedList()
 
         val dividerItemDecorationVertical = DividerItemDecoration(context, RecyclerView.VERTICAL)
         val dividerItemDecorationHorizontal =
@@ -69,10 +78,6 @@ class AllInterestedFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-//        binding.mainButton.setOnClickListener {
-//            findNavController().navigate(R.id.action_AllFilmsOfStaffFragment_to_MainFragment)
-//        }
-
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
                 viewModel.state
@@ -81,28 +86,41 @@ class AllInterestedFragment : Fragment() {
                             ViewModelState.Loading -> {
                                 binding.progress.isGone = false
                             }
-                            ViewModelState.Loaded -> {
+                            else -> {
                                 binding.progress.isGone = true
-                                binding.staffName.text = viewModel.name
-
-                                viewModel.filmsFlow.onEach {
-                                    filmsAdapter.setData(it)
-                                    Log.d(TAG, "filmsAdapter.setData. Размер= ${it.size}")
-                                    Log.d(TAG, "filmsAdapter.itemCount = ${filmsAdapter.itemCount}")
+                                viewModel.interestedFlow.onEach {
+                                    interestedAdapter.setAdapterData(it)
+                                    Log.d(TAG, "interestedAdapter.setData. Размер= ${it.size}")
+                                    Log.d(
+                                        TAG,
+                                        "interestedAdapter.itemCount = ${interestedAdapter.itemCount}"
+                                    )
                                 }.launchIn(viewLifecycleOwner.lifecycleScope)
-
-                                viewModel.loadAllFilmsDetailed()
-                            }
-                            ViewModelState.Error -> {
-                                binding.progress.isGone = true
-                                findNavController().navigate(R.id.action_AllFilmsOfStaffFragment_to_ErrorBottomFragment)
                             }
                         }
                     }
             }
     }
-    private fun onFilmItemClick(
-        item: FilmOfStaff
+
+    private fun onFilmClick(
+        item: FilmItemData
+    ) {
+        val bundle =
+            Bundle().apply {
+                putInt(
+                    "filmId",
+                    item.filmId
+                )
+            }
+
+        findNavController().navigate(
+            R.id.action_ProfileFragment_to_FilmFragment,
+            bundle
+        )
+    }
+
+    private fun onSerialClick(
+        item: FilmItemData
     ) {
         val bundle =
             Bundle().apply {
@@ -112,7 +130,23 @@ class AllInterestedFragment : Fragment() {
                 )
             }
         findNavController().navigate(
-            R.id.action_AllFilmsOfStaffFragment_to_FilmFragment,
+            R.id.action_ProfileFragment_to_SerialFragment,
+            bundle
+        )
+    }
+
+    private fun onPersonClick(
+        item: PersonTable
+    ) {
+        val bundle =
+            Bundle().apply {
+                putInt(
+                    "staffId",
+                    item.personId
+                )
+            }
+        findNavController().navigate(
+            R.id.action_AllInterestedFragment_to_StaffFragment,
             bundle
         )
     }

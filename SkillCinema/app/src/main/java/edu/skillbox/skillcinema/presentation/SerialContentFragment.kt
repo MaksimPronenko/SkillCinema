@@ -21,7 +21,7 @@ import edu.skillbox.skillcinema.data.SerialAdapter
 import edu.skillbox.skillcinema.databinding.FragmentSerialContentBinding
 import javax.inject.Inject
 
-private const val TAG = "SerialContentFragment"
+private const val TAG = "SerialContent.Fragment"
 
 private const val ARG_FILM_ID = "filmId"
 private const val ARG_NAME = "name"
@@ -75,20 +75,17 @@ class SerialContentFragment : Fragment() {
         binding.episodesRecycler.addItemDecoration(dividerItemDecorationVertical)
 
         binding.seasonsFilterGroup.setOnCheckedStateChangeListener { _, checkedIds ->
-
-            viewModel.chosenSeason = checkedIds[0] ?: 1
+            Log.d(TAG, "Сработала setOnCheckedStateChangeListener{}: checkedIds = $checkedIds")
+            Log.d(TAG, "setOnCheckedStateChangeListener{}: viewModel.firstSeason = ${viewModel.firstSeason}")
+            viewModel.chosenSeason = checkedIds[0] ?: viewModel.firstSeason ?: 1
             refreshRecycler()
 
-            Log.d(TAG, "chosenSeason = ${viewModel.chosenSeason}")
+            Log.d(TAG, "setOnCheckedStateChangeListener{}: chosenSeason = ${viewModel.chosenSeason}")
         }
 
         binding.backButton.setOnClickListener {
             findNavController().popBackStack()
         }
-
-//        binding.mainButton.setOnClickListener {
-//            findNavController().navigate(R.id.action_SerialContentFragment_to_MainFragment)
-//        }
 
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
@@ -104,6 +101,7 @@ class SerialContentFragment : Fragment() {
 
                             }
                             ViewModelState.Loaded -> {
+                                Log.d(TAG, "ViewModelState.Loaded")
                                 binding.progress.isGone = true
                                 binding.serialName.text = viewModel.name
                                 binding.chipSeasonTitle.isGone = false
@@ -113,10 +111,10 @@ class SerialContentFragment : Fragment() {
                                 refreshRecycler()
 
                                 viewModel.seasonsList.forEach { season ->
-                                    binding.seasonsFilterGroup.addView(createTagChip(binding.seasonsFilterGroup, season.number))
-                                    Log.d(TAG, "Создаём чип под номером ${season.number}")
+                                    binding.seasonsFilterGroup.addView(createTagChip(binding.seasonsFilterGroup, season.seasonTable.seasonNumber))
+                                    Log.d(TAG, "Создаём чип под номером ${season.seasonTable.seasonNumber}")
                                 }
-                                binding.seasonsFilterGroup.check(viewModel.chosenSeason)
+                                binding.seasonsFilterGroup.check(viewModel.firstSeason ?: 1)
                                 Log.d(TAG, "onViewCreated, Loaded. Размер списка чипов = ${viewModel.seasonsList.size}")
                             }
                             ViewModelState.Error -> {
@@ -131,31 +129,27 @@ class SerialContentFragment : Fragment() {
             }
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
     private fun createTagChip(chipGroup: ChipGroup, chipNumber: Int): Chip {
         val chip = layoutInflater.inflate(R.layout.single_chip_layout, chipGroup, false) as Chip
         chip.id = chipNumber
         chip.text = chipNumber.toString()
         return chip
-
-//        return Chip(context).apply {
-//            id = chipNumber
-//            text = chipNumber.toString()
-//            setTextAppearance(R.style.TextMainStyle_ChipStyle)
-//            isCloseIconVisible = false
-//            setChipBackgroundColorResource(R.color.chip_background)
-//            setChipStrokeColorResource(R.color.chip_stroke)
-//            chipStrokeWidth = 1F
-
-//            if (id == 1) check(true)
-//            setTextColor(ContextCompat.getColor(context, R.color.white))
-//        }
     }
 
     private fun refreshRecycler() {
-        binding.seasonNumberAndEpisodeQuantity.text =
-            "${viewModel.chosenSeason} сезон, ${
-                viewModel.episodeQuantityToText(viewModel.seasonsList[viewModel.chosenSeason - 1].episodes.size)
-            }"
-        serialAdapter.setData(viewModel.seasonsList[viewModel.chosenSeason - 1].episodes)
+        Log.d(TAG, "Вызвана refreshRecycler(): viewModel.seasonsList.size = ${viewModel.seasonsList.size}")
+        if (viewModel.firstSeason != null) {
+            val currentSeasonIndex = viewModel.chosenSeason - viewModel.firstSeason!!
+            binding.seasonNumberAndEpisodeQuantity.text =
+                "${viewModel.chosenSeason} сезон, ${
+                    viewModel.episodeQuantityToText(viewModel.seasonsList[currentSeasonIndex].episodes.size)
+                }"
+            serialAdapter.setData(viewModel.seasonsList[currentSeasonIndex].episodes)
+        }
     }
 }

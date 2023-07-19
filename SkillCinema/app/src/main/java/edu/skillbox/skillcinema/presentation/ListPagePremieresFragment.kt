@@ -1,6 +1,7 @@
 package edu.skillbox.skillcinema.presentation
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -30,8 +31,12 @@ class ListPagePremieresFragment : Fragment() {
     private var _binding: FragmentListPagePremieresBinding? = null
     private val binding get() = _binding!!
 
-    private val filmPremieresAdapter =
-        FilmAdapter(limited = false) { filmItemData -> onItemClick(filmItemData) }
+    private val filmPremieresAdapter = FilmAdapter(limited = false,
+        onClick = { filmItemData -> onItemClick(filmItemData) },
+        showAll = {}
+    )
+//    private val filmPremieresAdapter =
+//        FilmAdapter(limited = false) { filmItemData -> onItemClick(filmItemData) }
 //    private val filmPremieresAdapter =
 //        FilmPremieresAdapter(limited = false) { filmPremiere -> onPremiereItemClick(filmPremiere) }
 
@@ -70,6 +75,7 @@ class ListPagePremieresFragment : Fragment() {
         binding.listPageRecycler.addItemDecoration(dividerItemDecorationHorizontal)
 
         if (viewModel.premieres.isNotEmpty()) {
+            Log.d(TAG, "Запускаем loadExtendedFilmData() из onViewCreated")
             viewModel.loadExtendedFilmData()
         }
 
@@ -89,11 +95,13 @@ class ListPagePremieresFragment : Fragment() {
                                 binding.progress.isGone = true
 
                                 viewModel.premieresExtendedFlow.onEach {
-                                    filmPremieresAdapter.setData(it)
+                                    filmPremieresAdapter.setAdapterData(it)
                                 }.launchIn(viewLifecycleOwner.lifecycleScope)
                             }
                             ViewModelState.Error -> {
                                 binding.progress.isGone = true
+                                binding.listPageRecycler.isGone = true
+                                findNavController().navigate(R.id.action_ListPagePremieresFragment_to_ErrorBottomFragment)
                             }
                         }
                     }

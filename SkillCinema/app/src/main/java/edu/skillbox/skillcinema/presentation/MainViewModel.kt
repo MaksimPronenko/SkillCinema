@@ -3,15 +3,13 @@ package edu.skillbox.skillcinema.presentation
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
 import edu.skillbox.skillcinema.App
-import edu.skillbox.skillcinema.data.*
-import edu.skillbox.skillcinema.models.*
+import edu.skillbox.skillcinema.data.Repository
+import edu.skillbox.skillcinema.models.FilmItemData
+import edu.skillbox.skillcinema.models.FilmPremiere
+import edu.skillbox.skillcinema.models.PagedFilmFilteredList
+import edu.skillbox.skillcinema.models.PagedFilmTopList
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -92,7 +90,8 @@ class MainViewModel(
 //    ).flow.cachedIn(viewModelScope)
 
     var serialsPagesQuantity = 0
-//    val pagedSeries: Flow<PagingData<FilmFiltered>> = Pager(
+
+    //    val pagedSeries: Flow<PagingData<FilmFiltered>> = Pager(
 //        config = PagingConfig(pageSize = 20, prefetchDistance = 0, maxSize = 20),
 //        pagingSourceFactory = { seriesPagingSource }
 //    ).flow.cachedIn(viewModelScope)
@@ -102,7 +101,8 @@ class MainViewModel(
     val serialsExtendedFlow = _serialsExtendedFlow.asStateFlow()
 
     var filmsFiltered1PagesQuantity = 0
-//    val pagedFilmsFiltered1: Flow<PagingData<FilmFiltered>> = Pager(
+
+    //    val pagedFilmsFiltered1: Flow<PagingData<FilmFiltered>> = Pager(
 //        config = PagingConfig(pageSize = 20, prefetchDistance = 0, maxSize = 20),
 //        pagingSourceFactory = { filmsFiltered1PagingSource }
 //    ).flow.cachedIn(viewModelScope)
@@ -112,7 +112,8 @@ class MainViewModel(
     val filmsFiltered1ExtendedFlow = _filmsFiltered1ExtendedFlow.asStateFlow()
 
     var filmsFiltered2PagesQuantity = 0
-//    val pagedFilmsFiltered2: Flow<PagingData<FilmFiltered>> = Pager(
+
+    //    val pagedFilmsFiltered2: Flow<PagingData<FilmFiltered>> = Pager(
 //        config = PagingConfig(pageSize = 20, prefetchDistance = 0, maxSize = 20),
 //        pagingSourceFactory = { filmsFiltered2PagingSource }
 //    ).flow.cachedIn(viewModelScope)
@@ -128,35 +129,46 @@ class MainViewModel(
     private fun loadFilms() {
         viewModelScope.launch(Dispatchers.IO) {
             _state.value = ViewModelState.Loading
-            kotlin.runCatching {
-                premieres = repository.getPremieres()
+            var error = false
 
-                top100Popular = repository.getTop100Popular(1)
-                top100PopularPagesQuantity = top100Popular?.pagesCount ?: 0
+            val premieresLoadResult = repository.getPremieresList()
+            premieres = premieresLoadResult.first
+            premieresQuantity = premieres.size
+            if (premieresLoadResult.second) error = true
 
-                top250 = repository.getTop250(1)
-                top250PagesQuantity = top250?.pagesCount ?: 0
+            val top100PopularLoadResult = repository.getTopList(type = "TOP_100_POPULAR_FILMS", page = 1)
+            top100Popular = top100PopularLoadResult.first
+            top100PopularPagesQuantity = top100Popular?.pagesCount ?: 0
+            if (top100PopularLoadResult.second) error = true
 
-                serials = repository.getSerials(1)
-                serialsPagesQuantity = serials?.totalPages ?: 0
+            val top250LoadResult = repository.getTopList(type = "TOP_250_BEST_FILMS", page = 1)
+            top250 = top250LoadResult.first
+            top250PagesQuantity = top250?.pagesCount ?: 0
+            if (top250LoadResult.second) error = true
 
-                filmsFiltered1 = repository.getFilmsFiltered(genre1Key, country1Key, 1)
-                filmsFiltered1PagesQuantity = filmsFiltered1?.totalPages ?: 0
+            val serialsLoadResult = repository.getSerials(page = 1)
+            serials = serialsLoadResult.first
+            serialsPagesQuantity = serials?.totalPages ?: 0
+            if (serialsLoadResult.second) error = true
 
-                filmsFiltered2 = repository.getFilmsFiltered(genre2Key, country2Key, 1)
-                filmsFiltered2PagesQuantity = filmsFiltered2?.totalPages ?: 0
-            }.fold(
-                onSuccess = {
-                    premieresQuantity = premieres.size
-                    _state.value = ViewModelState.Loaded
-                    Log.d(TAG, "ViewModel. Cостояние = ${_state.value}")
-                    loadExtendedFilmData()
-                },
-                onFailure = {
-                    _state.value = ViewModelState.Error
-                    Log.d(TAG, "ViewModel. Cостояние = ${_state.value}")
-                }
-            )
+            val filmsFiltered1LoadResult = repository.getFilmsFilteredClearedFromNullRating(genre = genre1Key, country = country1Key, page = 1)
+            filmsFiltered1 = filmsFiltered1LoadResult.first
+            filmsFiltered1PagesQuantity = filmsFiltered1?.totalPages ?: 0
+            if (filmsFiltered1LoadResult.second) error = true
+
+            val filmsFiltered2LoadResult = repository.getFilmsFilteredClearedFromNullRating(genre = genre2Key, country = country2Key, page = 1)
+            filmsFiltered2 = filmsFiltered2LoadResult.first
+            filmsFiltered2PagesQuantity = filmsFiltered2?.totalPages ?: 0
+            if (filmsFiltered2LoadResult.second) error = true
+
+            if (error) {
+                _state.value = ViewModelState.Error
+                Log.d(TAG, "Cостояние = ${_state.value}")
+            } else {
+                _state.value = ViewModelState.Loaded
+                Log.d(TAG, "Cостояние = ${_state.value}")
+                loadExtendedFilmData()
+            }
         }
     }
 
@@ -179,7 +191,7 @@ class MainViewModel(
                     _top100PopularExtendedFlow.value = top100PopularExtended.toList()
                 }
             }
-            Log.d(TAG,"Отправлен top100popular размера ${top100PopularExtended.size}")
+            Log.d(TAG, "Отправлен top100popular размера ${top100PopularExtended.size}")
 
             top250Extended = mutableListOf()
             top250?.films?.forEach { filmTop ->

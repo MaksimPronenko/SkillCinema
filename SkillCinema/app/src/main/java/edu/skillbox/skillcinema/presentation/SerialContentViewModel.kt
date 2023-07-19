@@ -4,13 +4,14 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.skillbox.skillcinema.data.Repository
-import edu.skillbox.skillcinema.models.*
+import edu.skillbox.skillcinema.models.SeasonsWithEpisodes
+import edu.skillbox.skillcinema.models.SerialInfoDb
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-private const val TAG = "SerialContentVM"
+private const val TAG = "SerialContent.VM"
 
 class SerialContentViewModel(
     private val repository: Repository
@@ -25,29 +26,30 @@ class SerialContentViewModel(
     var name: String = ""
 
     var chosenSeason: Int = 1
+    var firstSeason: Int? = null
 
     var quantityOfSeasons = 0
-    var seasonsList: List<Season> = emptyList()
+    var seasonsList: List<SeasonsWithEpisodes> = emptyList()
 
     fun loadSerialInfo(filmId: Int) {
+        Log.d(TAG, "Вызвана loadSerialInfo($filmId)")
         viewModelScope.launch(Dispatchers.IO) {
             _state.value = ViewModelState.Loading
             var error = false
             val jobLoading = viewModelScope.launch(Dispatchers.IO) {
-                kotlin.runCatching {
-                    repository.getSerialInfo(filmId)
-                }.fold(
-                    onSuccess = {
-                        quantityOfSeasons = it.total
-                        seasonsList = it.items
-                    },
-                    onFailure = {
-                        Log.d(TAG, "${it.message} Информация о сериале. Ошибка загрузки")
-                        error = true
-                    }
-                )
+                // Загрузка данных сериала из БД или из API с записью в БД
+                val serialInfoDbResult: Pair<SerialInfoDb?, Boolean> = repository.getSerialInfoDb(filmId)
+                val serialInfoDb: SerialInfoDb? = serialInfoDbResult.first
+                if (serialInfoDbResult.second) error = true
+                serialInfoDb?.let {
+                    quantityOfSeasons = it.serialTable.totalSeasons
+                    seasonsList = it.seasonsWithEpisodes
+                }
+                firstSeason = seasonsList[0].seasonTable.seasonNumber
+                Log.d(TAG, "loadSerialInfo($filmId): firstSeason = $firstSeason")
             }
             jobLoading.join()
+
             if (error) {
                 _state.value = ViewModelState.Error
             } else {
@@ -79,14 +81,6 @@ class SerialContentViewModel(
 //            else resultString += ", " + country.country
 //        }
 //        return resultString
-//    }
-
-//    private fun convertAgeLimit(ratingAgeLimits: String?): String? =
-//        if (ratingAgeLimits != null) ratingAgeLimits.removePrefix("age") + "+" else null
-//
-//    override fun onCleared() {
-//        super.onCleared()
-//        filmId = 0
 //    }
 
 //    fun seasonQuantityToText(quantity: Int): String {

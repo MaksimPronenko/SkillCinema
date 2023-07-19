@@ -9,7 +9,7 @@ import edu.skillbox.skillcinema.R
 import edu.skillbox.skillcinema.databinding.CollectionItemBinding
 import edu.skillbox.skillcinema.models.CollectionInfo
 
-private const val TAG = "Collection.Adapter"
+//private const val TAG = "Collection.Adapter"
 
 class CollectionAdapter(
     private val onOpenCollection: (CollectionInfo) -> Unit,
@@ -17,24 +17,10 @@ class CollectionAdapter(
 ) : RecyclerView.Adapter<CollectionViewHolder>() {
 
     private var data: List<CollectionInfo> = emptyList()
-    private var mutableData: MutableList<CollectionInfo> = emptyList<CollectionInfo>().toMutableList()
 
     @SuppressLint("NotifyDataSetChanged")
     fun setData(receivedData: List<CollectionInfo>) {
         data = receivedData
-        notifyDataSetChanged()
-    }
-
-    fun addItem(item: CollectionInfo) {
-        mutableData.add(item)
-        data = mutableData.toList()
-        val index = data.size - 1
-        notifyItemInserted(index)
-    }
-
-    @SuppressLint("NotifyDataSetChanged")
-    fun removeItem(item: CollectionInfo) {
-        mutableData.remove(item)
         notifyDataSetChanged()
     }
 

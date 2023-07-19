@@ -286,6 +286,7 @@ class ListPageGalleryFragment : Fragment() {
                             ViewModelState.Error -> {
                                 binding.progress.isGone = true
                                 binding.chipScrollView.isGone = true
+                                findNavController().navigate(R.id.action_ListPageGalleryFragment_to_ErrorBottomFragment)
                             }
                         }
                     }

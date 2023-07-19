@@ -74,10 +74,6 @@ class ListPagePopularFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-//        binding.mainButton.setOnClickListener {
-//            findNavController().navigate(R.id.action_ListPagePopularFragment_to_MainFragment)
-//        }
-
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
                 viewModel.state
@@ -94,6 +90,8 @@ class ListPagePopularFragment : Fragment() {
                             }
                             ViewModelState.Error -> {
                                 binding.progress.isGone = true
+                                binding.listPageRecycler.isGone = true
+                                findNavController().navigate(R.id.action_ListPagePopularFragment_to_ErrorBottomFragment)
                             }
                         }
                     }
@@ -105,5 +103,10 @@ class ListPagePopularFragment : Fragment() {
             putInt("filmId", item.filmId)
         }
         findNavController().navigate(R.id.action_ListPagePopularFragment_to_FilmFragment, bundle)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

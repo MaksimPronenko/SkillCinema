@@ -6,13 +6,13 @@ import android.view.ViewGroup
 import androidx.core.view.isGone
 import androidx.recyclerview.widget.RecyclerView
 import edu.skillbox.skillcinema.databinding.EpisodeItemBinding
-import edu.skillbox.skillcinema.models.Episode
+import edu.skillbox.skillcinema.models.EpisodeTable
 
 class SerialAdapter : RecyclerView.Adapter<EpisodeViewHolder>() {
-    private var data: List<Episode> = emptyList()
+    private var data: List<EpisodeTable> = emptyList()
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setData(data: List<Episode>) {
+    fun setData(data: List<EpisodeTable>) {
         this.data = data
         notifyDataSetChanged()
     }
@@ -35,7 +35,7 @@ class SerialAdapter : RecyclerView.Adapter<EpisodeViewHolder>() {
         val item = data.getOrNull(position)
         if (item != null) {
             with(holder.binding) {
-                val name = item.nameRu ?: item.nameEn ?: ""
+                val name = item.name
                 val episodeNumberAndName = "${item.episodeNumber} серия. $name"
                 numberAndName.text = episodeNumberAndName
 
@@ -45,9 +45,9 @@ class SerialAdapter : RecyclerView.Adapter<EpisodeViewHolder>() {
                 }
                 else synopsis.isGone = true
 
-                if (!item.releaseDate.isNullOrBlank()) {
+                if (!item.releaseDateConverted.isNullOrBlank()) {
                     date.isGone = false
-                    date.text = item.releaseDate
+                    date.text = item.releaseDateConverted
                 }
                 else date.isGone = true
             }

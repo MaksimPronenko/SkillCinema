@@ -329,13 +329,11 @@ class PresentationModule {
     @Singleton
     fun provideSearchViewModel(
         repository: Repository,
-        application: App,
-        dao: FilmDao
+        application: App
     ): SearchViewModel {
         return SearchViewModel(
             repository,
-            application,
-            dao
+            application
         )
     }
 
@@ -419,5 +417,19 @@ class PresentationModule {
     @Provides
     fun provideCollectionViewModelFactory(collectionViewModel: CollectionViewModel): CollectionViewModelFactory {
         return CollectionViewModelFactory(collectionViewModel)
+    }
+
+    @Provides
+    fun provideAllInterestedViewModel(
+        repository: Repository,
+    ): AllInterestedViewModel {
+        return AllInterestedViewModel(
+            repository
+        )
+    }
+
+    @Provides
+    fun provideAllInterestedViewModelFactory(allInterestedViewModel: AllInterestedViewModel): AllInterestedViewModelFactory {
+        return AllInterestedViewModelFactory(allInterestedViewModel)
     }
 }

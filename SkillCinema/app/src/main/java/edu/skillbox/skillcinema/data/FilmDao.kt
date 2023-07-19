@@ -68,7 +68,7 @@ interface FilmDao {
 
     // Запрос на получение данных фильма FilmDb по filmId
     @Query("SELECT * FROM film_table WHERE film_id LIKE :filmId")
-    suspend fun getFilmDbFromDao(filmId: Int): FilmDb?
+    suspend fun getFilmDb(filmId: Int): FilmDb?
 
     // Запрос на получение данных фильма FilmInfoDb по filmId
     @Transaction
@@ -78,15 +78,28 @@ interface FilmDao {
     // Запрос на получение данных сериала по filmId
     @Transaction
     @Query("SELECT * FROM serial_table WHERE film_id LIKE :filmId")
-    suspend fun getSerialInfoDb(filmId: Int): SerialInfoDb
+    suspend fun getSerialInfoDb(filmId: Int): SerialInfoDb?
 
+    // Запрос на получение данных персонала фильма по filmId
     @Query("SELECT * FROM staff_table WHERE film_id LIKE :filmId")
-    suspend fun getAllStaffFromDb(filmId: Int): List<StaffTable>?
+    suspend fun getStaffTableList(filmId: Int): List<StaffTable>?
+
+    // Запрос на получение галереи фильма по filmId
+    @Query("SELECT * FROM image_table WHERE film_id LIKE :filmId")
+    suspend fun getImageTableList(filmId: Int): List<ImageTable>?
+
+    // Запрос на получение изображений фильма определённого типа по filmId
+    @Query("SELECT image FROM image_table WHERE film_id LIKE :filmId AND type LIKE :type")
+    suspend fun getImagesOfType(filmId: Int, type: String): List<String>?
+
+    // Запрос на получение списка похожих фильмов по filmId
+    @Query("SELECT * FROM similar_film_table WHERE film_id LIKE :filmId")
+    suspend fun getSimilarFilmTableList(filmId: Int): List<SimilarFilmTable>?
 
     // Запрос на получение данных персонала по personId
     @Transaction
     @Query("SELECT * FROM person_table WHERE person_id LIKE :personId")
-    suspend fun getPersonInfoDb(personId: Int): PersonInfoDb
+    suspend fun getPersonInfoDb(personId: Int): PersonInfoDb?
 
     // Запрос на проверку наличия фильма в указанной коллекции
     @Query("SELECT EXISTS (SELECT * FROM collection_table WHERE film_id = :filmId AND collection = :collectionName)")
@@ -142,7 +155,7 @@ interface FilmDao {
 
     // Запрос на получение списка id просмотренных фильмов
     @Query("SELECT film_id FROM viewed_table")
-    suspend fun getViewedFilmsIds(): List<Int>
+    suspend fun getViewedFilmsIds(): List<Int>?
 
     // Запрос на удаление фильма из списка просмотренных
     @Query("DELETE FROM viewed_table WHERE film_id = :viewedFilmId")
@@ -152,9 +165,21 @@ interface FilmDao {
     @Query("DELETE FROM viewed_table")
     suspend fun removeAllViewedFilms()
 
+    // Запрос на проверку наличия фильма в просмотренных
+    @Query("SELECT EXISTS (SELECT * FROM interested_table WHERE id = :id AND type = :type)")
+    suspend fun isObjectExistsInInterested(id: Int, type: Int): Boolean
+
     // Запрос на добавление фильма, сериала или человека в список "Вам было интересно"
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addInterested(interested: InterestedTable)
+
+    // Запрос на удаление записи из таблицы "Вам было интересно"
+    @Query("DELETE FROM interested_table WHERE id = :id AND type = :type")
+    suspend fun removeInterestedTable(id: Int, type: Int)
+
+    // Запрос на удаление самой старой записи из таблицы "Вам было интересно"
+    @Query("DELETE FROM interested_table WHERE position = (SELECT MIN(position) FROM interested_table)")
+    suspend fun removeOldestInterested()
 
     // Запрос на получение количества элементов в списке "Вам было интересно"
     @Query("SELECT COUNT(*) FROM interested_table")
@@ -162,7 +187,7 @@ interface FilmDao {
 
     // Запрос на получение списка "Вам было интересно"
     @Query("SELECT * FROM interested_table")
-    suspend fun getInterestedList(): List<InterestedTable>
+    suspend fun getInterestedList(): List<InterestedTable>?
 
     // Запрос на удаление всех элементов в списке "Вам было интересно"
     @Query("DELETE FROM interested_table")

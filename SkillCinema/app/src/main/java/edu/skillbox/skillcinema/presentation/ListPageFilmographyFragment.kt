@@ -17,7 +17,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
 import edu.skillbox.skillcinema.data.StaffFilmsAdapter
 import edu.skillbox.skillcinema.databinding.FragmentListPageFilmographyBinding
-import edu.skillbox.skillcinema.models.FilmOfStaff
+import edu.skillbox.skillcinema.models.FilmItemData
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
@@ -32,16 +32,7 @@ class ListPageFilmographyFragment : Fragment() {
     private var _binding: FragmentListPageFilmographyBinding? = null
     private val binding get() = _binding!!
 
-    private val filmsAdapter = StaffFilmsAdapter { film -> onFilmItemClick(film) }
-//    private val actorFilmsAdapter = StaffFilmsAdapter { film -> onFilmItemClick(film) }
-//    private val actressFilmsAdapter = StaffFilmsAdapter { film -> onFilmItemClick(film) }
-//    private val himselfFilmsAdapter = StaffFilmsAdapter { film -> onFilmItemClick(film) }
-//    private val herselfFilmsAdapter = StaffFilmsAdapter { film -> onFilmItemClick(film) }
-//    private val hronoTitrMaleFilmsAdapter = StaffFilmsAdapter { film -> onFilmItemClick(film) }
-//    private val hronoTitrFemaleFilmsAdapter = StaffFilmsAdapter { film -> onFilmItemClick(film) }
-//    private val directorFilmsAdapter = StaffFilmsAdapter { film -> onFilmItemClick(film) }
-//    private val producerFilmsAdapter = StaffFilmsAdapter { film -> onFilmItemClick(film) }
-//    private val producerUSSRFilmsAdapter = StaffFilmsAdapter { film -> onFilmItemClick(film) }
+    private val filmsAdapter = StaffFilmsAdapter{ filmItemData -> onItemClick(filmItemData) }
 
     @Inject
     lateinit var listPageFilmographyViewModelFactory: ListPageFilmographyViewModelFactory
@@ -85,138 +76,29 @@ class ListPageFilmographyFragment : Fragment() {
         binding.listPageRecycler.addItemDecoration(dividerItemDecorationHorizontal)
 
         binding.filmsFilterGroup.setOnCheckedStateChangeListener { _, _ ->
-            if (binding.chipActor.isChecked) {
-                viewModel.chosenType = 0
-//                binding.listPageRecycler.adapter = actorFilmsAdapter
-//                viewModel.actorFilmsFlow.onEach {
-//                    Log.d(TAG, "actorFilmsFlow. Принят список размера: ${it.size}")
-//                    actorFilmsAdapter.setData(it)
-//                    actorFilmsAdapter.notifyDataSetChanged()
-//                }.launchIn(viewLifecycleOwner.lifecycleScope)
-                viewModel.loadActorFilms()
-            }
-            if (binding.chipActress.isChecked) {
-                viewModel.chosenType = 1
-//                binding.listPageRecycler.adapter = actressFilmsAdapter
-//                viewModel.actressFilmsFlow.onEach {
-//                    Log.d(TAG, "actressFilmsFlow. Принят список размера: ${it.size}")
-//                    actressFilmsAdapter.setData(it)
-//                    actressFilmsAdapter.notifyDataSetChanged()
-//                }.launchIn(viewLifecycleOwner.lifecycleScope)
-                viewModel.loadActressFilms()
-            }
-            if (binding.chipHimself.isChecked) {
-                viewModel.chosenType = 2
-//                binding.listPageRecycler.adapter = himselfFilmsAdapter
-//                viewModel.himselfFilmsFlow.onEach {
-//                    Log.d(TAG, "himselfFilmsFlow. Принят список размера: ${it.size}")
-//                    himselfFilmsAdapter.setData(it)
-//                    himselfFilmsAdapter.notifyDataSetChanged()
-//                }.launchIn(viewLifecycleOwner.lifecycleScope)
-                viewModel.loadHimselfFilms()
-            }
-            if (binding.chipHerself.isChecked) {
-                viewModel.chosenType = 3
-//                binding.listPageRecycler.adapter = herselfFilmsAdapter
-//                viewModel.herselfFilmsFlow.onEach {
-//                    Log.d(TAG, "herselfFilmsFlow. Принят список размера: ${it.size}")
-//                    herselfFilmsAdapter.setData(it)
-//                    herselfFilmsAdapter.notifyDataSetChanged()
-//                }.launchIn(viewLifecycleOwner.lifecycleScope)
-                viewModel.loadHerselfFilms()
-            }
-            if (binding.chipHronoTitrMale.isChecked) {
-                viewModel.chosenType = 4
-//                binding.listPageRecycler.adapter = hronoTitrMaleFilmsAdapter
-//                viewModel.hronoTitrMaleFilmsFlow.onEach {
-//                    Log.d(TAG, "hronoTitrMaleFilmsFlow. Принят список размера: ${it.size}")
-//                    hronoTitrMaleFilmsAdapter.setData(it)
-//                    hronoTitrMaleFilmsAdapter.notifyDataSetChanged()
-//                }.launchIn(viewLifecycleOwner.lifecycleScope)
-                viewModel.loadHronoTitrMaleFilms()
-            }
-            if (binding.chipHronoTitrFemale.isChecked) {
-                viewModel.chosenType = 5
-//                binding.listPageRecycler.adapter = hronoTitrFemaleFilmsAdapter
-//                viewModel.hronoTitrFemaleFilmsFlow.onEach {
-//                    Log.d(TAG, "hronoTitrFemaleFilmsFlow. Принят список размера: ${it.size}")
-//                    hronoTitrFemaleFilmsAdapter.setData(it)
-//                    hronoTitrFemaleFilmsAdapter.notifyDataSetChanged()
-//                }.launchIn(viewLifecycleOwner.lifecycleScope)
-                viewModel.loadHronoTitrFemaleFilms()
-            }
-            if (binding.chipDirector.isChecked) {
-                viewModel.chosenType = 6
-//                binding.listPageRecycler.adapter = directorFilmsAdapter
-//                viewModel.directorFilmsFlow.onEach {
-//                    Log.d(TAG, "directorFilmsFlow. Принят список размера: ${it.size}")
-//                    directorFilmsAdapter.setData(it)
-//                    directorFilmsAdapter.notifyDataSetChanged()
-//                }.launchIn(viewLifecycleOwner.lifecycleScope)
-                viewModel.loadDirectorFilms()
-            }
-            if (binding.chipProducer.isChecked) {
-                viewModel.chosenType = 7
-//                binding.listPageRecycler.adapter = producerFilmsAdapter
-//                viewModel.producerFilmsFlow.onEach {
-//                    Log.d(TAG, "producerFilmsFlow. Принят список размера: ${it.size}")
-//                    producerFilmsAdapter.setData(it)
-//                    producerFilmsAdapter.notifyDataSetChanged()
-//                }.launchIn(viewLifecycleOwner.lifecycleScope)
-                viewModel.loadProducerFilms()
-            }
-            if (binding.chipProducerUssr.isChecked) {
-                viewModel.chosenType = 8
-//                binding.listPageRecycler.adapter = producerUSSRFilmsAdapter
-//                viewModel.producerUSSRFilmsFlow.onEach {
-//                    Log.d(TAG, "producerUSSRFilmsFlow. Принят список размера: ${it.size}")
-//                    producerUSSRFilmsAdapter.setData(it)
-//                    producerUSSRFilmsAdapter.notifyDataSetChanged()
-//                }.launchIn(viewLifecycleOwner.lifecycleScope)
-                viewModel.loadProducerUSSRFilms()
-            }
-            if (binding.chipVoiceDirector.isChecked) {
-                viewModel.chosenType = 9
-                viewModel.loadVoiceDirectorFilms()
-            }
-            if (binding.chipWriter.isChecked) {
-                viewModel.chosenType = 10
-                viewModel.loadWriterFilms()
-            }
-            if (binding.chipOperator.isChecked) {
-                viewModel.chosenType = 11
-                viewModel.loadOperatorFilms()
-            }
-            if (binding.chipEditor.isChecked) {
-                viewModel.chosenType = 12
-                viewModel.loadEditorFilms()
-            }
-            if (binding.chipComposer.isChecked) {
-                viewModel.chosenType = 13
-                viewModel.loadComposerFilms()
-            }
-            if (binding.chipDesign.isChecked) {
-                viewModel.chosenType = 14
-                viewModel.loadDesignFilms()
-            }
-            if (binding.chipTranslator.isChecked) {
-                viewModel.chosenType = 15
-                viewModel.loadTranslatorFilms()
-            }
-            if (binding.chipUnknown.isChecked) {
-                viewModel.chosenType = 16
-                viewModel.loadUnknownFilms()
-            }
+            if (binding.chipActor.isChecked) viewModel.loadFilms(0)
+            if (binding.chipActress.isChecked) viewModel.loadFilms(1)
+            if (binding.chipHimself.isChecked) viewModel.loadFilms(2)
+            if (binding.chipHerself.isChecked) viewModel.loadFilms(3)
+            if (binding.chipHronoTitrMale.isChecked) viewModel.loadFilms(4)
+            if (binding.chipHronoTitrFemale.isChecked) viewModel.loadFilms(5)
+            if (binding.chipDirector.isChecked) viewModel.loadFilms(6)
+            if (binding.chipProducer.isChecked) viewModel.loadFilms(7)
+            if (binding.chipProducerUssr.isChecked) viewModel.loadFilms(8)
+            if (binding.chipVoiceDirector.isChecked) viewModel.loadFilms(9)
+            if (binding.chipWriter.isChecked) viewModel.loadFilms(10)
+            if (binding.chipOperator.isChecked) viewModel.loadFilms(11)
+            if (binding.chipEditor.isChecked) viewModel.loadFilms(12)
+            if (binding.chipComposer.isChecked) viewModel.loadFilms(13)
+            if (binding.chipDesign.isChecked) viewModel.loadFilms(14)
+            if (binding.chipTranslator.isChecked) viewModel.loadFilms(15)
+            if (binding.chipUnknown.isChecked) viewModel.loadFilms(16)
             Log.d(TAG, "Listener. chosenType = ${viewModel.chosenType}")
         }
 
         binding.backButton.setOnClickListener {
             findNavController().popBackStack()
         }
-
-//        binding.mainButton.setOnClickListener {
-//            findNavController().navigate(R.id.action_ListPageFilmographyFragment_to_MainFragment)
-//        }
 
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
@@ -407,79 +289,8 @@ class ListPageFilmographyFragment : Fragment() {
             }
     }
 
-//    private fun switchToActorFilms() {
-//        viewModel.actorFilmsFlow.onEach {
-//            Log.d(TAG, "actorFilmsFlow. Принят список размера: ${it.size}")
-//            filmsAdapter.setData(it)
-//        }.launchIn(viewLifecycleOwner.lifecycleScope)
-//        viewModel.loadActorFilms()
-//    }
-//    private fun switchToActressFilms() {
-//        viewModel.actressFilmsFlow.onEach {
-//            Log.d(TAG, "actressFilmsFlow. Принят список размера: ${it.size}")
-//            filmsAdapter.setData(it)
-//        }.launchIn(viewLifecycleOwner.lifecycleScope)
-//        viewModel.loadActressFilms()
-//    }
-
-//    private fun switchToHimselfFilms() {
-//        viewModel.himselfFilmsFlow.onEach {
-//            Log.d(TAG, "himselfFilmsFlow. Принят список размера: ${it.size}")
-//            filmsAdapter.setData(it)
-//        }.launchIn(viewLifecycleOwner.lifecycleScope)
-//        viewModel.loadHimselfFilms()
-//    }
-
-//    private fun switchToHerselfFilms() {
-//        viewModel.herselfFilmsFlow.onEach {
-//            Log.d(TAG, "herselfFilmsFlow. Принят список размера: ${it.size}")
-//            filmsAdapter.setData(it)
-//        }.launchIn(viewLifecycleOwner.lifecycleScope)
-//        viewModel.loadHerselfFilms()
-//    }
-
-//    private fun switchToHronoTitrMaleFilms() {
-//        viewModel.hronoTitrMaleFilmsFlow.onEach {
-//            Log.d(TAG, "hronoTitrMaleFilmsFlow. Принят список размера: ${it.size}")
-//            filmsAdapter.setData(it)
-//        }.launchIn(viewLifecycleOwner.lifecycleScope)
-//        viewModel.loadHronoTitrMaleFilms()
-//    }
-
-//    private fun switchToHronoTitrFemaleFilms() {
-//        viewModel.hronoTitrFemaleFilmsFlow.onEach {
-//            Log.d(TAG, "hronoTitrFemaleFilmsFlow. Принят список размера: ${it.size}")
-//            filmsAdapter.setData(it)
-//        }.launchIn(viewLifecycleOwner.lifecycleScope)
-//        viewModel.loadHronoTitrFemaleFilms()
-//    }
-
-//    private fun switchToDirectorFilms() {
-//        viewModel.directorFilmsFlow.onEach {
-//            Log.d(TAG, "directorFilmsFlow. Принят список размера: ${it.size}")
-//            filmsAdapter.setData(it)
-//        }.launchIn(viewLifecycleOwner.lifecycleScope)
-//        viewModel.loadDirectorFilms()
-//    }
-
-//    private fun switchToProducerFilms() {
-//        viewModel.producerFilmsFlow.onEach {
-//            Log.d(TAG, "producerFilmsFlow. Принят список размера: ${it.size}")
-//            filmsAdapter.setData(it)
-//        }.launchIn(viewLifecycleOwner.lifecycleScope)
-//        viewModel.loadProducerFilms()
-//    }
-
-//    private fun switchToProducerUSSRFilms() {
-//        viewModel.producerUSSRFilmsFlow.onEach {
-//            Log.d(TAG, "producerUSSRFilmsFlow. Принят список размера: ${it.size}")
-//            filmsAdapter.setData(it)
-//        }.launchIn(viewLifecycleOwner.lifecycleScope)
-//        viewModel.loadProducerUSSRFilms()
-//    }
-
-    private fun onFilmItemClick(
-        item: FilmOfStaff
+    private fun onItemClick(
+        item: FilmItemData
     ) {
         val bundle =
             Bundle().apply {

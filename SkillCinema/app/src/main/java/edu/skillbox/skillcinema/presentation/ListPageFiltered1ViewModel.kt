@@ -27,28 +27,6 @@ class ListPageFiltered1ViewModel(
     )
     val state = _state.asStateFlow()
 
-//    var genre1Key: Int? = null
-//    var country1Key: Int? = null
-
-//    private val _premieres = MutableStateFlow<List<FilmPremiere>>(emptyList())
-//    val premieres = _premieres.asStateFlow()
-//
-//    var top100PopularPagesQuantity = 0
-//    val pagedFilmsTop100Popular: Flow<PagingData<FilmTop>> = Pager(
-//        config = PagingConfig(pageSize = 20),
-//        pagingSourceFactory = { FilmTop100PopularPagingSource() }
-//    ).flow.cachedIn(viewModelScope)
-//
-//    val pagedFilmsTop250: Flow<PagingData<FilmTop>> = Pager(
-//        config = PagingConfig(pageSize = 20),
-//        pagingSourceFactory = { FilmTop250PagingSource() }
-//    ).flow.cachedIn(viewModelScope)
-//
-//    val pagedSeries: Flow<PagingData<FilmFiltered>> = Pager(
-//        config = PagingConfig(pageSize = 20),
-//        pagingSourceFactory = { SeriesPagingSource() }
-//    ).flow.cachedIn(viewModelScope)
-
     var filmsFiltered1PagesQuantity = 0
     lateinit var pagedFilmsFiltered1: Flow<PagingData<FilmItemData>>
 //    = Pager(
@@ -72,17 +50,17 @@ class ListPageFiltered1ViewModel(
 //        }
 //    ).flow.cachedIn(viewModelScope)
 
-//    init {
-//        loadFilmsFiltered1()
-//    }
-
     fun loadFilmsFiltered1(genre1Key: Int, country1Key: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             var error = false
             _state.value = ViewModelState.Loading
             Log.d(TAG, "Cостояние = ${_state.value}")
-            filmsFiltered1PagesQuantity =
-                repository.getFilmsFiltered(genre1Key, country1Key, 1)?.totalPages ?: 0
+
+            val filmsFiltered1LoadResult = repository.getFilmsFilteredClearedFromNullRating(genre1Key, country1Key, 1)
+            if (filmsFiltered1LoadResult.second) error = true
+            filmsFiltered1PagesQuantity = filmsFiltered1LoadResult.first?.totalPages ?: 0
+            if (filmsFiltered1PagesQuantity == 0) error = true
+
             pagedFilmsFiltered1 = Pager(
                 config = PagingConfig(pageSize = 20),
                 pagingSourceFactory = {
@@ -93,7 +71,6 @@ class ListPageFiltered1ViewModel(
                     )
                 }
             ).flow.cachedIn(viewModelScope)
-            if (filmsFiltered1PagesQuantity == 0) error = true
 
             if (error) {
                 _state.value = ViewModelState.Error

@@ -14,14 +14,16 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
-import edu.skillbox.skillcinema.data.SimilarsAdapter
+import edu.skillbox.skillcinema.data.FilmAdapter
 import edu.skillbox.skillcinema.databinding.FragmentListPageSimilarsBinding
-import edu.skillbox.skillcinema.models.SimilarFilm
+import edu.skillbox.skillcinema.models.FilmItemData
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
 private const val ARG_FILM_ID = "filmId"
+
+private const val TAG = "ListPageSimilars.Fragment"
 
 @AndroidEntryPoint
 class ListPageSimilarsFragment : Fragment() {
@@ -29,8 +31,10 @@ class ListPageSimilarsFragment : Fragment() {
     private var _binding: FragmentListPageSimilarsBinding? = null
     private val binding get() = _binding!!
 
-    private val similarsAdapter =
-        SimilarsAdapter(limited = false) { similarFilm -> onSimilarsItemClick(similarFilm) }
+    private val similarsAdapter = FilmAdapter(limited = false,
+        onClick = { filmItemData -> onItemClick(filmItemData) },
+        showAll = {}
+    )
 
     @Inject
     lateinit var listPageSimilarsViewModelFactory: ListPageSimilarsViewModelFactory
@@ -44,6 +48,8 @@ class ListPageSimilarsFragment : Fragment() {
         if (viewModel.filmId == 0 && filmId != 0) {
             viewModel.filmId = filmId
             viewModel.loadSimilars(filmId)
+        } else {
+            viewModel.loadSimilarFilmsData()
         }
     }
 
@@ -73,13 +79,13 @@ class ListPageSimilarsFragment : Fragment() {
         binding.listPageRecycler.addItemDecoration(dividerItemDecorationVertical)
         binding.listPageRecycler.addItemDecoration(dividerItemDecorationHorizontal)
 
+        if (!viewModel.similarFilmTableList.isNullOrEmpty()) {
+            viewModel.loadSimilarFilmsData()
+        }
+
         binding.backButton.setOnClickListener {
             findNavController().popBackStack()
         }
-
-//        binding.mainButton.setOnClickListener {
-//            findNavController().navigate(R.id.action_ListPageSimilarsFragment_to_MainFragment)
-//        }
 
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
@@ -92,8 +98,8 @@ class ListPageSimilarsFragment : Fragment() {
                             ViewModelState.Loaded -> {
                                 binding.progress.isGone = true
 
-                                viewModel.similars.onEach {
-                                    similarsAdapter.setData(it)
+                                viewModel.similarsFlow.onEach {
+                                    similarsAdapter.setAdapterData(it)
                                 }.launchIn(viewLifecycleOwner.lifecycleScope)
                             }
                             ViewModelState.Error -> {
@@ -103,8 +109,9 @@ class ListPageSimilarsFragment : Fragment() {
                     }
             }
     }
-    private fun onSimilarsItemClick(
-        item: SimilarFilm
+
+    private fun onItemClick(
+        item: FilmItemData
     ) {
         val bundle =
             Bundle().apply {

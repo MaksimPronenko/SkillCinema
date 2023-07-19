@@ -35,15 +35,18 @@ class ListPageSerialsViewModel(
             var error = false
             _state.value = ViewModelState.Loading
             Log.d(TAG, "Cостояние = ${_state.value}")
-            serialsPagesQuantity =
-                repository.getSerials(1)?.totalPages ?: 0
+
+            val serialsLoadResult = repository.getSerials(page = 1)
+            if (serialsLoadResult.second) error = true
+            serialsPagesQuantity = serialsLoadResult.first?.totalPages ?: 0
+            if (serialsPagesQuantity == 0) error = true
+
             pagedSerials = Pager(
                 config = PagingConfig(pageSize = 20),
                 pagingSourceFactory = {
                     SerialsPagingSource(repository)
                 }
             ).flow.cachedIn(viewModelScope)
-            if (serialsPagesQuantity == 0) error = true
 
             if (error) {
                 _state.value = ViewModelState.Error

@@ -6,16 +6,16 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import edu.skillbox.skillcinema.databinding.StaffItemBinding
-import edu.skillbox.skillcinema.models.StaffInfo
+import edu.skillbox.skillcinema.models.StaffTable
 
-class StaffInfoAdapter(
+class StaffAdapter(
     private val maxSize: Int,
-    private val onClick: (StaffInfo) -> Unit
+    private val onClick: (StaffTable) -> Unit
 ) : RecyclerView.Adapter<StaffViewHolder>() {
-    private var data: List<StaffInfo> = emptyList()
+    private var data: List<StaffTable> = emptyList()
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setData(data: List<StaffInfo>) {
+    fun setData(data: List<StaffTable>) {
         this.data = data
         notifyDataSetChanged()
     }
@@ -37,18 +37,16 @@ class StaffInfoAdapter(
 
     override fun onBindViewHolder(holder: StaffViewHolder, position: Int) {
         val item = data.getOrNull(position)
-        with(holder.binding) {
-            staffName.text = item?.nameRu ?: item?.nameEn ?: ""
-            role.text = item?.description ?: item?.professionText
-            item?.let {
+        if (item != null) {
+            with(holder.binding) {
+                staffName.text = item.name
+                role.text = item.description ?: item.professionText
                 Glide
                     .with(poster.context)
-                    .load(it.posterUrl)
+                    .load(item.posterUrl)
                     .into(poster)
             }
-        }
-        holder.binding.root.setOnClickListener {
-            item?.let {
+            holder.binding.root.setOnClickListener {
                 onClick(item)
             }
         }

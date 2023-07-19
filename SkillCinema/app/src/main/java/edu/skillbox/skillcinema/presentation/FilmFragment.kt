@@ -1,21 +1,17 @@
 package edu.skillbox.skillcinema.presentation
 
 import android.animation.LayoutTransition
-import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.view.children
-import androidx.core.view.contains
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,12 +19,14 @@ import com.bumptech.glide.Glide
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
+import edu.skillbox.skillcinema.data.FilmAdapter
 import edu.skillbox.skillcinema.data.GalleryAdapter
-import edu.skillbox.skillcinema.data.SimilarsAdapter
-import edu.skillbox.skillcinema.data.StaffInfoAdapter
+import edu.skillbox.skillcinema.data.StaffAdapter
 import edu.skillbox.skillcinema.databinding.FragmentFilmBinding
-import edu.skillbox.skillcinema.models.SimilarFilm
-import edu.skillbox.skillcinema.models.StaffInfo
+import edu.skillbox.skillcinema.models.FilmItemData
+import edu.skillbox.skillcinema.models.StaffTable
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
@@ -53,19 +51,21 @@ class FilmFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val actorsAdapter =
-        StaffInfoAdapter(maxSize = 20) { staffInfo -> onStaffItemClick(staffInfo) }
+        StaffAdapter(maxSize = 20) { staffTable -> onStaffItemClick(staffTable) }
     private val staffAdapter =
-        StaffInfoAdapter(maxSize = 6) { staffInfo -> onStaffItemClick(staffInfo) }
+        StaffAdapter(maxSize = 6) { staffTable -> onStaffItemClick(staffTable) }
     private val galleryAdapter = GalleryAdapter { currentImage -> onImageClick(currentImage) }
-    private val similarsAdapter =
-        SimilarsAdapter(limited = true) { similarFilm -> onSimilarsItemClick(similarFilm) }
+    private val similarsAdapter = FilmAdapter(limited = true,
+        onClick = { filmItemData -> onItemClick(filmItemData) },
+        showAll = { showListPageSimilars() }
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val filmId = arguments?.getInt(ARG_FILM_ID) ?: 0
         if (viewModel.filmId == 0 && filmId != 0) {
             viewModel.filmId = filmId
-            viewModel.loadFilmInfo(filmId)
+            viewModel.loadFilmData(filmId)
         }
     }
 
@@ -76,45 +76,8 @@ class FilmFragment : Fragment() {
         val bottomNavigation: BottomNavigationView? = activity?.findViewById(R.id.bottom_navigation)
         if (bottomNavigation != null) bottomNavigation.isGone = false
 
-//            val menu = bottomNavigation.menu
-//            menu.setGroupCheckable(0, true, false)
-//            for (i in 0 until menu.size()) {
-//                menu.getItem(i).isChecked = false
-//            }
-//            menu.setGroupCheckable(0, true, true)
-
         _binding = FragmentFilmBinding.inflate(inflater, container, false)
         return binding.root
-    }
-
-    override fun onStart() {
-        super.onStart()
-        Log.d(TAG, "onStart")
-    }
-
-    override fun onAttach(context: Context) {
-        super.onAttach(context)
-        Log.d(TAG, "onAttach")
-    }
-
-    override fun onDetach() {
-        super.onDetach()
-        Log.d(TAG, "onDetach")
-    }
-
-    override fun onPause() {
-        super.onPause()
-        Log.d(TAG, "onPause()")
-    }
-
-    override fun onResume() {
-        super.onResume()
-        Log.d(TAG, "onResume")
-    }
-
-    override fun onStop() {
-        super.onStop()
-        Log.d(TAG, "onStop")
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -125,6 +88,9 @@ class FilmFragment : Fragment() {
         binding.staffRecycler.adapter = staffAdapter
         binding.galleryRecycler.adapter = galleryAdapter
         binding.similarsRecycler.adapter = similarsAdapter
+
+        Log.d(TAG, "Запускаем viewModel.loadSimilarFilmsData() из onViewCreated")
+        viewModel.loadSimilarFilmsData()
 
         binding.favorite.setOnClickListener {
             viewModel.onCollectionButtonClick("Любимое")
@@ -186,15 +152,15 @@ class FilmFragment : Fragment() {
         // При отключении диалога BottomDialogFragment инициирую проверку данных о включении
         // фильма в "Любимое" и "Хочу посмотреть"
         val currentFragment = findNavController().getBackStackEntry(R.id.FilmFragment)
-        val dialogObserver = LifecycleEventObserver{ _, event ->
-            if (event == Lifecycle.Event.ON_RESUME){
+        val dialogObserver = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
                 viewModel.checkFilmInCollections()
             }
         }
         val dialogLifecycle = currentFragment.lifecycle
         dialogLifecycle.addObserver(dialogObserver)
-        viewLifecycleOwner.lifecycle.addObserver(LifecycleEventObserver{ _, event ->
-            if(event == Lifecycle.Event.ON_DESTROY) {
+        viewLifecycleOwner.lifecycle.addObserver(LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_DESTROY) {
                 dialogLifecycle.removeObserver(dialogObserver)
             }
         })
@@ -278,8 +244,16 @@ class FilmFragment : Fragment() {
                         Log.d(TAG, "Фильм ${viewModel.filmId} в коллекции \"Хочу посмотреть\"")
 
                     } else {
-                        binding.wantedToWatch.setColorFilter(resources.getColor(R.color.grey_4, null))
-                        Log.d(TAG, "Фильм ${viewModel.filmId} отсутствует в коллекции \"Хочу посмотреть\"")
+                        binding.wantedToWatch.setColorFilter(
+                            resources.getColor(
+                                R.color.grey_4,
+                                null
+                            )
+                        )
+                        Log.d(
+                            TAG,
+                            "Фильм ${viewModel.filmId} отсутствует в коллекции \"Хочу посмотреть\""
+                        )
                     }
                 }
             }
@@ -409,7 +383,7 @@ class FilmFragment : Fragment() {
                                     binding.buttonAllGallery.isGone = true
                                     binding.galleryRecycler.isGone = true
                                 } else {
-                                    galleryAdapter.setData(viewModel.imageWithTypeList)
+                                    galleryAdapter.setData(viewModel.imageTableList!!)
 
                                     if (viewModel.gallerySize > 20) {
                                         binding.galleryListSize.text =
@@ -424,7 +398,9 @@ class FilmFragment : Fragment() {
                                     binding.buttonAllSimilars.isGone = true
                                     binding.similarsRecycler.isGone = true
                                 } else {
-                                    similarsAdapter.setData(viewModel.similarFilmList)
+                                    viewModel.similarsFlow.onEach {
+                                        similarsAdapter.setAdapterData(it)
+                                    }.launchIn(viewLifecycleOwner.lifecycleScope)
 
                                     if (viewModel.similarsQuantity > 20) {
                                         binding.similarsListSize.text =
@@ -447,30 +423,10 @@ class FilmFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        Log.d(TAG, "onDestroyView")
     }
 
-//    override fun onDetach() {
-//        super.onDetach()
-//        requireActivity().viewModelStore.clear()
-//        Log.d("FilmVM", "Film Fragment. onDetach.")
-//    }
-
-//    override fun onDestroy() {
-//        super.onDestroy()
-//        if (activity != null) {
-//            Log.d("FilmVM", "FilmFragment. Activity != null. ${activity.toString()}")
-//            val vmStore = activity!!.viewModelStore
-//            Log.d("FilmVM", "FilmFragment. vmStore = $vmStore")
-//            activity!!.viewModelStore.clear()
-//            val vmStoreCleared = activity!!.viewModelStore
-//            Log.d("FilmVM", "FilmFragment. vmStoreCleared = $vmStoreCleared")
-//        }
-//        Log.d("FilmVM", "Film Fragment. onDestroy.")
-//    }
-
     private fun onStaffItemClick(
-        item: StaffInfo
+        item: StaffTable
     ) {
         val bundle =
             Bundle().apply {
@@ -485,8 +441,8 @@ class FilmFragment : Fragment() {
         )
     }
 
-    private fun onSimilarsItemClick(
-        item: SimilarFilm
+    private fun onItemClick(
+        item: FilmItemData
     ) {
         val bundle =
             Bundle().apply {
@@ -497,6 +453,20 @@ class FilmFragment : Fragment() {
             }
         findNavController().navigate(
             R.id.action_FilmFragment_to_FilmFragment,
+            bundle
+        )
+    }
+
+    private fun showListPageSimilars() {
+        val bundle =
+            Bundle().apply {
+                putInt(
+                    "filmId",
+                    viewModel.filmId
+                )
+            }
+        findNavController().navigate(
+            R.id.action_FilmFragment_to_ListPageSimilarsFragment,
             bundle
         )
     }

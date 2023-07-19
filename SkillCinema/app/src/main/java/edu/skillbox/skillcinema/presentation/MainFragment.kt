@@ -1,6 +1,7 @@
 package edu.skillbox.skillcinema.presentation
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -53,33 +54,46 @@ class MainFragment : Fragment() {
 //    private val filmPremieresAdapter =
 //        FilmPremieresAdapter(limited = true) { filmPremiere -> onPremiereItemClick(filmPremiere) }
 
-    private val filmPremieresAdapter =
-        FilmAdapter(limited = true) { filmItemData -> onItemClick(filmItemData) }
+    private val filmPremieresAdapter = FilmAdapter(limited = true,
+        onClick = { filmItemData -> onItemClick(filmItemData) },
+        showAll = { findNavController().navigate(R.id.action_MainFragment_to_ListPagePremieresFragment) }
+    )
+//        FilmAdapter(limited = true) { filmItemData -> onItemClick(filmItemData) }
 
 //    private val filmTop100PopularAdapter =
 //        FilmsTopPagedListAdapter { filmItemData -> onItemClick(filmItemData) }
 
-    private val filmTop100PopularExtendedAdapter =
-        FilmAdapter(limited = true) { filmItemData -> onItemClick(filmItemData) }
+    private val filmTop100PopularExtendedAdapter = FilmAdapter(limited = true,
+        onClick = { filmItemData -> onItemClick(filmItemData) },
+        showAll = { findNavController().navigate(R.id.action_MainFragment_to_ListPagePopularFragment) }
+    )
+//        FilmAdapter(limited = true) { filmItemData -> onItemClick(filmItemData) }
 
-//        FilmsFilteredPagedListAdapter { filmFiltered -> onFilmFilteredItemClick(filmFiltered) }
-    private val filmsFiltered1Adapter =
-        FilmAdapter(limited = true) { filmItemData -> onItemClick(filmItemData) }
+    //        FilmsFilteredPagedListAdapter { filmFiltered -> onFilmFilteredItemClick(filmFiltered) }
+    private val filmsFiltered1Adapter = FilmAdapter(limited = true,
+        onClick = { filmItemData -> onItemClick(filmItemData) },
+        showAll = { findNavController().navigate(R.id.action_MainFragment_to_ListPageFiltered1Fragment) }
+    )
+//        FilmAdapter(limited = true) { filmItemData -> onItemClick(filmItemData) }
 
-//    private val filmTop250Adapter =
+    //    private val filmTop250Adapter =
 //        FilmsTopPagedListAdapter { filmItemData -> onItemClick(filmItemData) }
-    private val filmTop250ExtendedAdapter =
-        FilmAdapter(limited = true) { filmItemData -> onItemClick(filmItemData) }
+    private val filmTop250ExtendedAdapter = FilmAdapter(limited = true,
+        onClick = { filmItemData -> onItemClick(filmItemData) },
+        showAll = { findNavController().navigate(R.id.action_MainFragment_to_ListPageTop250Fragment) }
+    )
 
-//    private val filmsFiltered2Adapter =
-//        FilmsFilteredPagedListAdapter { filmFiltered -> onFilmFilteredItemClick(filmFiltered) }
-    private val filmsFiltered2Adapter =
-        FilmAdapter(limited = true) { filmItemData -> onItemClick(filmItemData) }
+    private val filmsFiltered2Adapter = FilmAdapter(limited = true,
+        onClick = { filmItemData -> onItemClick(filmItemData) },
+        showAll = { findNavController().navigate(R.id.action_MainFragment_to_ListPageFiltered2Fragment) }
+    )
 
     //    private val seriesAdapter =
 //        FilmsFilteredPagedListAdapter { filmFiltered -> onSerialItemClick(filmFiltered) }
-    private val serialsAdapter =
-        FilmAdapter(limited = true) { filmItemData -> onItemClick(filmItemData) }
+    private val serialsAdapter = FilmAdapter(limited = true,
+        onClick = { filmItemData -> onSerialItemClick(filmItemData) },
+        showAll = { findNavController().navigate(R.id.action_MainFragment_to_ListPageSerialsFragment) }
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -113,7 +127,8 @@ class MainFragment : Fragment() {
 
         if (viewModel.top100Popular != null && viewModel.top250 != null &&
             viewModel.serials != null && viewModel.filmsFiltered1 != null &&
-            viewModel.filmsFiltered2 != null) {
+            viewModel.filmsFiltered2 != null
+        ) {
             viewModel.loadExtendedFilmData()
         }
 
@@ -173,7 +188,7 @@ class MainFragment : Fragment() {
 
         binding.buttonAllSeries.setOnClickListener {
             findNavController().navigate(
-                R.id.action_MainFragment_to_ListPageSeriesFragment
+                R.id.action_MainFragment_to_ListPageSerialsFragment
             )
         }
 
@@ -195,7 +210,7 @@ class MainFragment : Fragment() {
 
                             binding.buttonAllPremieres.isVisible = viewModel.premieresQuantity > 20
                             viewModel.premieresExtendedFlow.onEach {
-                                filmPremieresAdapter.setData(it)
+                                filmPremieresAdapter.setAdapterData(it)
                             }.launchIn(viewLifecycleOwner.lifecycleScope)
 
                             binding.buttonAllPopular.isVisible =
@@ -208,31 +223,31 @@ class MainFragment : Fragment() {
 //                                viewLifecycleOwner.lifecycleScope
 //                            )
                             viewModel.top100PopularExtendedFlow.onEach {
-                                filmTop100PopularExtendedAdapter.setData(it)
+                                filmTop100PopularExtendedAdapter.setAdapterData(it)
                             }.launchIn(viewLifecycleOwner.lifecycleScope)
 
                             binding.buttonAllFilmsFiltered1.isVisible =
                                 viewModel.filmsFiltered1PagesQuantity > 1
                             viewModel.filmsFiltered1ExtendedFlow.onEach {
-                                filmsFiltered1Adapter.setData(it)
+                                filmsFiltered1Adapter.setAdapterData(it)
                             }.launchIn(viewLifecycleOwner.lifecycleScope)
 
                             binding.buttonAllTop250.isVisible =
                                 viewModel.top250PagesQuantity > 1
                             viewModel.top250ExtendedFlow.onEach {
-                                filmTop250ExtendedAdapter.setData(it)
+                                filmTop250ExtendedAdapter.setAdapterData(it)
                             }.launchIn(viewLifecycleOwner.lifecycleScope)
 
                             binding.buttonAllFilmsFiltered2.isVisible =
                                 viewModel.filmsFiltered2PagesQuantity > 1
                             viewModel.filmsFiltered2ExtendedFlow.onEach {
-                                filmsFiltered2Adapter.setData(it)
+                                filmsFiltered2Adapter.setAdapterData(it)
                             }.launchIn(viewLifecycleOwner.lifecycleScope)
 
                             binding.buttonAllSeries.isVisible =
                                 viewModel.serialsPagesQuantity > 1
                             viewModel.serialsExtendedFlow.onEach {
-                                serialsAdapter.setData(it)
+                                serialsAdapter.setAdapterData(it)
                             }.launchIn(viewLifecycleOwner.lifecycleScope)
                         }
                         ViewModelState.Error -> {
@@ -250,6 +265,7 @@ class MainFragment : Fragment() {
     private fun onItemClick(
         item: FilmItemData
     ) {
+        Log.d(TAG, "onItemClick(${item.filmId})")
         val bundle =
             Bundle().apply {
                 putInt(
@@ -259,6 +275,28 @@ class MainFragment : Fragment() {
             }
         findNavController().navigate(
             R.id.action_MainFragment_to_FilmFragment,
+            bundle
+        )
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    private fun onSerialItemClick(
+        item: FilmItemData
+    ) {
+        Log.d(TAG, "onSerialItemClick(${item.filmId})")
+        val bundle =
+            Bundle().apply {
+                putInt(
+                    "filmId",
+                    item.filmId
+                )
+            }
+        findNavController().navigate(
+            R.id.action_MainFragment_to_SerialFragment,
             bundle
         )
     }
@@ -293,23 +331,6 @@ class MainFragment : Fragment() {
 //            }
 //        findNavController().navigate(
 //            R.id.action_MainFragment_to_FilmFragment,
-//            bundle
-//        )
-//    }
-
-//    private fun onSerialItemClick(
-//        item: FilmFiltered
-//    ) {
-//        Log.d("FilmVM", "MainFragment. FilmID called = ${item.kinopoiskId}")
-//        val bundle =
-//            Bundle().apply {
-//                putInt(
-//                    "filmId",
-//                    item.kinopoiskId
-//                )
-//            }
-//        findNavController().navigate(
-//            R.id.action_MainFragment_to_SerialFragment,
 //            bundle
 //        )
 //    }

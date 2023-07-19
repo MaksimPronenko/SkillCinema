@@ -79,10 +79,6 @@ class ListPageSerialsFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-//        binding.mainButton.setOnClickListener {
-//            findNavController().navigate(R.id.action_ListPageSeriesFragment_to_MainFragment)
-//        }
-
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
                 viewModel.state
@@ -99,6 +95,8 @@ class ListPageSerialsFragment : Fragment() {
                             }
                             ViewModelState.Error -> {
                                 binding.progress.isGone = true
+                                binding.listPageRecycler.isGone = true
+                                findNavController().navigate(R.id.action_ListPageSerialsFragment_to_ErrorBottomFragment)
                             }
                         }
                     }
@@ -116,8 +114,13 @@ class ListPageSerialsFragment : Fragment() {
                 )
             }
         findNavController().navigate(
-            R.id.action_ListPageSeriesFragment_to_FilmFragment,
+            R.id.action_ListPageSerialsFragment_to_SerialFragment,
             bundle
         )
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

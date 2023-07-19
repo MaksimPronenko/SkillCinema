@@ -17,4 +17,4 @@ data class PersonTable(
     val posterUrl: String,
     @ColumnInfo(name = "profession")
     val profession: String?
-) : InterestedItem()
+) : InterestedViewItem()

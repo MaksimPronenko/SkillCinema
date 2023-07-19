@@ -10,9 +10,6 @@ import edu.skillbox.skillcinema.App
 import edu.skillbox.skillcinema.data.*
 import javax.inject.Singleton
 
-//import dagger.hilt.InstallIn
-//import dagger.hilt.components.SingletonComponent
-
 @Module
 @InstallIn(SingletonComponent::class)
 class DataModule {
@@ -30,18 +27,9 @@ class DataModule {
     }
 
     @Provides
+    @Singleton
     fun provideRepository(dao: FilmDao): Repository {
         return Repository(dao)
-    }
-
-    @Provides
-    fun provideFilmsTop100PopularPagingSource(repository: Repository): FilmsTop100PopularPagingSource {
-        return FilmsTop100PopularPagingSource(repository)
-    }
-
-    @Provides
-    fun provideFilmsTop250PagingSource(repository: Repository): FilmsTop250PagingSource {
-        return FilmsTop250PagingSource(repository)
     }
 
     @Provides
@@ -49,27 +37,32 @@ class DataModule {
         return SerialsPagingSource(repository)
     }
 
+    @Provides
+    @Singleton
+    fun provideSearchPagingSource(application: App, repository: Repository): SearchPagingSource {
+        return SearchPagingSource(application, repository)
+    }
+}
+
+//    @Provides
+//    fun provideFilmsTop100PopularPagingSource(repository: Repository): FilmsTop100PopularPagingSource {
+//        return FilmsTop100PopularPagingSource(repository)
+//    }
+//    @Provides
+//    fun provideFilmsTop250PagingSource(repository: Repository): FilmsTop250PagingSource {
+//        return FilmsTop250PagingSource(repository)
+//    }
 //    @Provides
 //    fun provideFilmsFilteredPagingSource(repository: Repository): FilmsFilteredPagingSource {
 //        return FilmsFilteredPagingSource(repository)
 //    }
-
 //    @Provides
 //    @Singleton
 //    fun provideFilmsFiltered1PagingSource(application: App, dao: FilmDao): FilmsFiltered1PagingSource {
 //        return FilmsFiltered1PagingSource(application, dao)
 //    }
-
 //    @Provides
 //    @Singleton
 //    fun provideFilmsFiltered2PagingSource(application: App, dao: FilmDao): FilmsFiltered2PagingSource {
 //        return FilmsFiltered2PagingSource(application, dao)
 //    }
-
-    @Provides
-    @Singleton
-    fun provideSearchPagingSource(application: App, dao: FilmDao): SearchPagingSource {
-        return SearchPagingSource(application, dao)
-    }
-
-}

@@ -30,7 +30,7 @@ class App @Inject constructor() : Application() {
         19 to "Семейные фильмы",
 //        22 to "Документальные фильмы",
 //        23 to "Короткометражки",
-        33 to "Детские фильмы"
+//        33 to "Детские фильмы"
     )
     private val availableCountries = mapOf(
         1 to "США",

@@ -4,7 +4,6 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import edu.skillbox.skillcinema.models.FilmItemData
 
-//class FilmsFiltered1PagingSource @Inject constructor(val genre:Int, val country:Int) : PagingSource<Int, FilmFiltered>() {
 class FilmsFilteredPagingSource(
     val repository: Repository,
     private val genreKey: Int,
@@ -20,7 +19,7 @@ class FilmsFilteredPagingSource(
                 genreKey,
                 countryKey,
                 page
-            )
+            ).first
         }.fold(
             onSuccess = {
                 LoadResult.Page(

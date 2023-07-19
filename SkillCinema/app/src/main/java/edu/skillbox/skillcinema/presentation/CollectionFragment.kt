@@ -15,9 +15,9 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
-import edu.skillbox.skillcinema.data.ViewedAdapter
+import edu.skillbox.skillcinema.data.CollectionFilmsAdapter
 import edu.skillbox.skillcinema.databinding.FragmentCollectionBinding
-import edu.skillbox.skillcinema.models.FilmDbViewed
+import edu.skillbox.skillcinema.models.FilmItemData
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
@@ -32,8 +32,9 @@ class CollectionFragment : Fragment() {
     private var _binding: FragmentCollectionBinding? = null
     private val binding get() = _binding!!
 
-    private val viewedAdapter =
-        ViewedAdapter(limited = true) { filmDbViewed -> onViewedItemClick(filmDbViewed) }
+    private lateinit var collectionName: String
+
+    private lateinit var collectionFilmsAdapter: CollectionFilmsAdapter
 
     @Inject
     lateinit var collectionViewModelFactory: CollectionViewModelFactory
@@ -43,8 +44,14 @@ class CollectionFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val collectionName = arguments?.getString(ARG_COLLECTION_NAME) ?: ""
+        collectionName = arguments?.getString(ARG_COLLECTION_NAME) ?: ""
         viewModel.loadData(collectionName)
+        collectionFilmsAdapter = CollectionFilmsAdapter(limited = false,
+            viewedOrCollection = collectionName.isBlank(),
+            context = requireContext(),
+            onClick = { filmItemData -> onItemClick(filmItemData) },
+            clear = { viewModel.clear(collectionName) }
+        )
     }
 
     override fun onCreateView(
@@ -60,7 +67,10 @@ class CollectionFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.listPageRecycler.adapter = viewedAdapter
+        binding.listPageRecycler.adapter = collectionFilmsAdapter
+
+        Log.d(TAG, "Запускаем viewModel.loadData() из onViewCreated")
+        viewModel.loadData(collectionName = collectionName)
 
         val dividerItemDecorationVertical = DividerItemDecoration(context, RecyclerView.VERTICAL)
         val dividerItemDecorationHorizontal =
@@ -77,10 +87,6 @@ class CollectionFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-//        binding.mainButton.setOnClickListener {
-//            findNavController().navigate(R.id.action_CollectionFragment_to_MainFragment)
-//        }
-
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
                 viewModel.state
@@ -94,11 +100,11 @@ class CollectionFragment : Fragment() {
                                 if (viewModel.collection.isNotBlank())
                                     binding.listName.text = viewModel.collection
                                 viewModel.filmsListFlow.onEach {
-                                    viewedAdapter.setData(it)
+                                    collectionFilmsAdapter.setAdapterData(it)
                                     Log.d(TAG, "viewedAdapter.setData. Размер= ${it.size}")
                                     Log.d(
                                         TAG,
-                                        "viewedAdapter.itemCount = ${viewedAdapter.itemCount}"
+                                        "viewedAdapter.itemCount = ${collectionFilmsAdapter.itemCount}"
                                     )
                                 }.launchIn(viewLifecycleOwner.lifecycleScope)
                             }
@@ -107,15 +113,16 @@ class CollectionFragment : Fragment() {
             }
     }
 
-    private fun onViewedItemClick(
-        item: FilmDbViewed
+    private fun onItemClick(
+        item: FilmItemData
     ) {
-        val bundle = Bundle().apply {
-            putInt(
-                "filmId",
-                item.filmDb.filmTable.filmId
-            )
-        }
+        val bundle =
+            Bundle().apply {
+                putInt(
+                    "filmId",
+                    item.filmId
+                )
+            }
         findNavController().navigate(
             R.id.action_CollectionFragment_to_FilmFragment,
             bundle

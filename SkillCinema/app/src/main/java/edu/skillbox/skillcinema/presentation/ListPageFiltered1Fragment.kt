@@ -134,6 +134,8 @@ class ListPageFiltered1Fragment : Fragment() {
                             }
                             ViewModelState.Error -> {
                                 binding.progress.isGone = true
+                                binding.listPageRecycler.isGone = true
+                                findNavController().navigate(R.id.action_ListPageFiltered1Fragment_to_ErrorBottomFragment)
                             }
                         }
                     }
@@ -154,5 +156,10 @@ class ListPageFiltered1Fragment : Fragment() {
             R.id.action_ListPageFiltered1Fragment_to_FilmFragment,
             bundle
         )
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

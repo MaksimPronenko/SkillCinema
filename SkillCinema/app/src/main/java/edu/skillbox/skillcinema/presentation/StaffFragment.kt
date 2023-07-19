@@ -13,9 +13,9 @@ import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
-import edu.skillbox.skillcinema.data.BestFilmsAdapter
+import edu.skillbox.skillcinema.data.FilmAdapter
 import edu.skillbox.skillcinema.databinding.FragmentStaffBinding
-import edu.skillbox.skillcinema.models.FilmOfStaff
+import edu.skillbox.skillcinema.models.FilmItemData
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
@@ -34,8 +34,11 @@ class StaffFragment : Fragment() {
     private var _binding: FragmentStaffBinding? = null
     private val binding get() = _binding!!
 
-    private val bestFilmsAdapter =
-        BestFilmsAdapter(limited = true) { bestFilm -> onBestFilmItemClick(bestFilm) }
+    private val bestFilmsAdapter = FilmAdapter(limited = true,
+        onClick = { filmItemData -> onItemClick(filmItemData) },
+        showAll = { showAllBestFilms() }
+    )
+//        BestFilmsAdapter(limited = true) { bestFilm -> onBestFilmItemClick(bestFilm) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,26 +67,15 @@ class StaffFragment : Fragment() {
 
         binding.bestFilmsRecycler.adapter = bestFilmsAdapter
 
+        Log.d(TAG, "Запускаем viewModel.loadBestFilmsExtended() из onViewCreated")
+        viewModel.loadBestFilmsExtended()
+
         binding.backButton.setOnClickListener {
             findNavController().popBackStack()
         }
 
-//        binding.mainButton.setOnClickListener {
-//            findNavController().navigate(R.id.action_StaffFragment_to_MainFragment)
-//        }
-
         binding.buttonAllFilms.setOnClickListener {
-            val bundle =
-                Bundle().apply {
-                    putInt(
-                        "staffId",
-                        viewModel.staffId
-                    )
-                }
-            findNavController().navigate(
-                R.id.action_StaffFragment_to_AllFilmsOfStaffFragment,
-                bundle
-            )
+            showAllBestFilms()
         }
 
         binding.buttonToTheList.setOnClickListener {
@@ -149,9 +141,12 @@ class StaffFragment : Fragment() {
 //                                        )
 //                                    }
 //                                }.launchIn(viewLifecycleOwner.lifecycleScope)
-                                viewModel.personFilmsFlow.onEach {
-                                    Log.d(TAG, "Во Flow во фрагменте принят список размера: ${it.size}")
-                                    bestFilmsAdapter.setData(it)
+                                viewModel.bestFilmsFlow.onEach {
+                                    Log.d(
+                                        TAG,
+                                        "Во Flow во фрагменте принят список размера: ${it.size}"
+                                    )
+                                    bestFilmsAdapter.setAdapterData(it)
                                 }.launchIn(viewLifecycleOwner.lifecycleScope)
                             }
                             ViewModelState.Error -> {
@@ -172,8 +167,8 @@ class StaffFragment : Fragment() {
             }
     }
 
-    private fun onBestFilmItemClick(
-        item: FilmOfStaff
+    private fun onItemClick(
+        item: FilmItemData
     ) {
         val bundle =
             Bundle().apply {
@@ -184,6 +179,20 @@ class StaffFragment : Fragment() {
             }
         findNavController().navigate(
             R.id.action_StaffFragment_to_FilmFragment,
+            bundle
+        )
+    }
+
+    private fun showAllBestFilms() {
+        val bundle =
+            Bundle().apply {
+                putInt(
+                    "staffId",
+                    viewModel.staffId
+                )
+            }
+        findNavController().navigate(
+            R.id.action_StaffFragment_to_AllFilmsOfStaffFragment,
             bundle
         )
     }

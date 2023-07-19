@@ -4,7 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.skillbox.skillcinema.data.Repository
-import edu.skillbox.skillcinema.models.*
+import edu.skillbox.skillcinema.models.StaffTable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,10 +25,8 @@ class AllStaffViewModel(
     var filmName: String = ""
     var staffType: Boolean = false
 
-    var allStaffTableList: List<StaffTable> = emptyList()
-    private var allStaffList: List<StaffInfo> = emptyList()
-    var actorsList: List<StaffInfo> = emptyList()
-    var staffList: List<StaffInfo> = emptyList()
+    var actorsList: List<StaffTable> = emptyList()
+    var staffList: List<StaffTable> = emptyList()
 
     fun loadStaff() {
         Log.d(TAG, "loadAllStaff($filmId)")
@@ -36,18 +34,16 @@ class AllStaffViewModel(
             _state.value = ViewModelState.Loading
             var error = false
 
-            val jobGetAllStaff = viewModelScope.launch(Dispatchers.IO) {
-                val queryResult = repository.getAllStaffFromDb(filmId)
-                if (queryResult != null) allStaffTableList = queryResult
-                else error = true
+            val allStaffTableListLoadResult: Pair<List<StaffTable>?, Boolean> = repository.getStaffTableList(filmId)
+            val allStaffTableList: List<StaffTable>? = allStaffTableListLoadResult.first
+            if (allStaffTableListLoadResult.second || allStaffTableList == null) {
+                Log.d(TAG, "Ошибка загрузки")
+                error = true
+            } else {
+                val actorsAndStaff = repository.divideStaffByType(allStaffTableList)
+                actorsList = actorsAndStaff.actorsList
+                staffList = actorsAndStaff.staffList
             }
-            jobGetAllStaff.join()
-
-            allStaffList =
-                repository.convertStaffTableListToStaffInfoList(allStaffTableList)
-            val actorsAndStaff = repository.divideStaffByType(allStaffList)
-            actorsList = actorsAndStaff.actorsList
-            staffList = actorsAndStaff.staffList
 
             if (error) {
                 _state.value = ViewModelState.Error

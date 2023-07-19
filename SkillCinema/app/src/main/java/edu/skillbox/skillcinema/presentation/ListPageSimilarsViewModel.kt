@@ -4,13 +4,14 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import edu.skillbox.skillcinema.data.Repository
-import edu.skillbox.skillcinema.models.SimilarFilm
+import edu.skillbox.skillcinema.models.FilmItemData
+import edu.skillbox.skillcinema.models.SimilarFilmTable
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-private const val TAG = "ListPageSimilars"
+private const val TAG = "ListPageSimilars.VM"
 
 class ListPageSimilarsViewModel(
     private val repository: Repository
@@ -23,26 +24,57 @@ class ListPageSimilarsViewModel(
 
     var filmId: Int = 0
 
+    var similarFilmTableList: List<SimilarFilmTable>? = null
     var similarsQuantity = 0
-    private val _similars = MutableStateFlow<List<SimilarFilm>>(emptyList())
-    val similars = _similars.asStateFlow()
+    var similars: MutableList<FilmItemData> = mutableListOf()
+    private val _similarsFlow = MutableStateFlow<List<FilmItemData>>(emptyList())
+    val similarsFlow = _similarsFlow.asStateFlow()
 
     fun loadSimilars(filmId: Int) {
+        Log.d(TAG, "loadSimilars($filmId)")
         viewModelScope.launch(Dispatchers.IO) {
             _state.value = ViewModelState.Loading
-            val jobLoading = viewModelScope.launch(Dispatchers.IO) {
-                kotlin.runCatching {
-                    repository.getSimilars(filmId)
-                }.fold(
-                    onSuccess = {
-                        _similars.value = it.items
-                        similarsQuantity = it.total
-                    },
-                    onFailure = { Log.d("Похожие фильмы", it.message ?: "Ошибка загрузки") }
-                )
+            var error = false
+
+            val jobGetData = viewModelScope.launch(Dispatchers.IO) {
+                // Загрузка похожих фильмов из БД или из API с записью в БД
+                val similarsLoadResult: Pair<List<SimilarFilmTable>?, Boolean> = repository.getSimilarFilmTableList(filmId)
+                similarFilmTableList = similarsLoadResult.first
+                if (similarsLoadResult.second) {
+                    error = true
+                    Log.d(TAG, "Ошибка загрузки List<SimilarFilmTable>")
+                }
+                similarsQuantity = similarFilmTableList?.size ?: 0
             }
-            jobLoading.join()
-            _state.value = ViewModelState.Loaded
+            jobGetData.join()
+
+            if (error) {
+                _state.value = ViewModelState.Error
+                Log.d(TAG, "Состояние ошибки VM")
+            } else {
+                _state.value = ViewModelState.Loaded
+                Log.d(TAG, "Состояние уcпешного завершения загрузки VM")
+
+//                loadSimilarFilmsData()
+            }
+        }
+    }
+
+    fun loadSimilarFilmsData() {
+        viewModelScope.launch(Dispatchers.IO) {
+            similars = mutableListOf()
+            Log.d(
+                TAG,
+                "loadSimilarFilmsData(), similarFilmTableList: ${similarFilmTableList?.size ?: 0}"
+            )
+            similarFilmTableList?.forEach { similarFilmTable ->
+                val filmDbViewed = repository.getFilmDbViewed(similarFilmTable.similarFilmId).first
+                if (filmDbViewed != null) {
+                    val filmItemData: FilmItemData = filmDbViewed.convertToFilmItemData()
+                    similars.add(filmItemData)
+                    _similarsFlow.value = similars.toList()
+                }
+            }
         }
     }
 }

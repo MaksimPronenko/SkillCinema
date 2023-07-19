@@ -15,9 +15,9 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
-import edu.skillbox.skillcinema.data.AllStaffFilmsAdapter
+import edu.skillbox.skillcinema.data.FilmAdapter
 import edu.skillbox.skillcinema.databinding.FragmentAllFilmsOfStaffBinding
-import edu.skillbox.skillcinema.models.FilmOfStaff
+import edu.skillbox.skillcinema.models.FilmItemData
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
@@ -32,8 +32,11 @@ class AllFilmsOfStaffFragment : Fragment() {
     private var _binding: FragmentAllFilmsOfStaffBinding? = null
     private val binding get() = _binding!!
 
-    private val filmsAdapter =
-        AllStaffFilmsAdapter { film -> onFilmItemClick(film) }
+    private val filmsAdapter = FilmAdapter(limited = false,
+        onClick = { filmItemData -> onItemClick(filmItemData) },
+        showAll = {}
+    )
+//        AllStaffFilmsAdapter { film -> onItemClick(film) }
 
     @Inject
     lateinit var allFilmsOfStaffViewModelFactory: AllFilmsOfStaffViewModelFactory
@@ -65,6 +68,9 @@ class AllFilmsOfStaffFragment : Fragment() {
 
         binding.listPageRecycler.adapter = filmsAdapter
 
+        Log.d(TAG, "Запускаем viewModel.loadFilmsExtended() из onViewCreated")
+        viewModel.loadFilmsExtended()
+
         val dividerItemDecorationVertical = DividerItemDecoration(context, RecyclerView.VERTICAL)
         val dividerItemDecorationHorizontal =
             DividerItemDecoration(context, RecyclerView.HORIZONTAL)
@@ -80,10 +86,6 @@ class AllFilmsOfStaffFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-//        binding.mainButton.setOnClickListener {
-//            findNavController().navigate(R.id.action_AllFilmsOfStaffFragment_to_MainFragment)
-//        }
-
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
                 viewModel.state
@@ -97,12 +99,10 @@ class AllFilmsOfStaffFragment : Fragment() {
                                 binding.staffName.text = viewModel.name
 
                                 viewModel.filmsFlow.onEach {
-                                    filmsAdapter.setData(it)
+                                    filmsAdapter.setAdapterData(it)
                                     Log.d(TAG, "filmsAdapter.setData. Размер= ${it.size}")
                                     Log.d(TAG, "filmsAdapter.itemCount = ${filmsAdapter.itemCount}")
                                 }.launchIn(viewLifecycleOwner.lifecycleScope)
-
-                                viewModel.loadAllFilmsDetailed()
                             }
                             ViewModelState.Error -> {
                                 binding.progress.isGone = true
@@ -112,8 +112,24 @@ class AllFilmsOfStaffFragment : Fragment() {
                     }
             }
     }
-    private fun onFilmItemClick(
-        item: FilmOfStaff
+
+    //    private fun onFilmItemClick(
+//        item: FilmOfStaff
+//    ) {
+//        val bundle =
+//            Bundle().apply {
+//                putInt(
+//                    "filmId",
+//                    item.filmId
+//                )
+//            }
+//        findNavController().navigate(
+//            R.id.action_AllFilmsOfStaffFragment_to_FilmFragment,
+//            bundle
+//        )
+//    }
+    private fun onItemClick(
+        item: FilmItemData
     ) {
         val bundle =
             Bundle().apply {

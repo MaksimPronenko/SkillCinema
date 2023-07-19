@@ -77,7 +77,7 @@
             android:id="@+id/action_MainFragment_to_ListPageFiltered2Fragment"
             app:destination="@id/ListPageFiltered2Fragment" />
         <action
-            android:id="@+id/action_MainFragment_to_ListPageSeriesFragment"
+            android:id="@+id/action_MainFragment_to_ListPageSerialsFragment"
             app:destination="@id/ListPageSerialsFragment" />
         <action
             android:id="@+id/action_MainFragment_to_FilmFragment"
@@ -97,6 +97,9 @@
         <action
             android:id="@+id/action_ListPagePremieresFragment_to_FilmFragment"
             app:destination="@id/FilmFragment" />
+        <action
+            android:id="@+id/action_ListPagePremieresFragment_to_ErrorBottomFragment"
+            app:destination="@id/ErrorBottomDialogFragment" />
     </fragment>
 
     <fragment
@@ -106,6 +109,9 @@
         <action
             android:id="@+id/action_ListPagePopularFragment_to_FilmFragment"
             app:destination="@id/FilmFragment" />
+        <action
+            android:id="@+id/action_ListPagePopularFragment_to_ErrorBottomFragment"
+            app:destination="@id/ErrorBottomDialogFragment" />
     </fragment>
 
     <fragment
@@ -121,6 +127,9 @@
         <action
             android:id="@+id/action_ListPageFiltered1Fragment_to_FilmFragment"
             app:destination="@id/FilmFragment" />
+        <action
+            android:id="@+id/action_ListPageFiltered1Fragment_to_ErrorBottomFragment"
+            app:destination="@id/ErrorBottomDialogFragment" />
     </fragment>
 
     <fragment
@@ -130,6 +139,9 @@
         <action
             android:id="@+id/action_ListPageTop250Fragment_to_FilmFragment"
             app:destination="@id/FilmFragment" />
+        <action
+            android:id="@+id/action_ListPageTop250Fragment_to_ErrorBottomFragment"
+            app:destination="@id/ErrorBottomDialogFragment" />
     </fragment>
 
     <fragment
@@ -145,6 +157,9 @@
         <action
             android:id="@+id/action_ListPageFiltered2Fragment_to_FilmFragment"
             app:destination="@id/FilmFragment" />
+        <action
+            android:id="@+id/action_ListPageFiltered2Fragment_to_ErrorBottomFragment"
+            app:destination="@id/ErrorBottomDialogFragment" />
     </fragment>
 
     <fragment
@@ -152,8 +167,11 @@
         android:name="edu.skillbox.skillcinema.presentation.ListPageSerialsFragment"
         tools:layout="@layout/fragment_list_page_serials">
         <action
-            android:id="@+id/action_ListPageSeriesFragment_to_FilmFragment"
-            app:destination="@id/FilmFragment" />
+            android:id="@+id/action_ListPageSerialsFragment_to_SerialFragment"
+            app:destination="@id/SerialFragment" />
+        <action
+            android:id="@+id/action_ListPageSerialsFragment_to_ErrorBottomFragment"
+            app:destination="@id/ErrorBottomDialogFragment" />
     </fragment>
 
     <fragment
@@ -331,6 +349,9 @@
         <action
             android:id="@+id/action_ListPageGalleryFragment_to_ImagePagerFragment"
             app:destination="@id/ImagePagerFragment" />
+        <action
+            android:id="@+id/action_ListPageGalleryFragment_to_ErrorBottomFragment"
+            app:destination="@id/ErrorBottomDialogFragment" />
     </fragment>
 
     <fragment

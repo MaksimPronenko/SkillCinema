@@ -37,25 +37,26 @@ class ListPagePremieresViewModel(
             var error = false
             _state.value = ViewModelState.Loading
             Log.d(TAG, "Cостояние = ${_state.value}")
-                kotlin.runCatching {
-                    repository.getPremieres()
-                }.fold(
-                    onSuccess = {
-                        premieres = it
-                        premieresQuantity = it.size
-                        _state.value = ViewModelState.Loaded
-                        Log.d(TAG, "Cостояние = ${_state.value}")
-                        loadExtendedFilmData()
-                    },
-                    onFailure = {
-                        _state.value = ViewModelState.Error
-                        Log.d(TAG, "Cостояние = ${_state.value}")
-                    }
-                )
+
+            val premieresLoadResult = repository.getPremieresList()
+            premieres = premieresLoadResult.first
+            if (premieresLoadResult.second) error = true
+            premieresQuantity = premieres.size
+
+            if (error) {
+                _state.value = ViewModelState.Error
+                Log.d(TAG, "Состояние ошибки VM")
+            } else {
+                _state.value = ViewModelState.Loaded
+                Log.d(TAG, "Состояние уcпешного завершения загрузки VM")
+                Log.d(TAG, "Запускаем loadExtendedFilmData() из loadPremieres()")
+                loadExtendedFilmData()
+            }
         }
     }
 
     fun loadExtendedFilmData() {
+        Log.d(TAG, "loadExtendedFilmData()")
         viewModelScope.launch(Dispatchers.IO) {
             premieresExtended = mutableListOf()
             premieres.forEach { filmPremiere ->

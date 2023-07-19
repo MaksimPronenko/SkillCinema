@@ -11,7 +11,7 @@ class SerialsPagingSource (val repository: Repository): PagingSource<Int, FilmIt
     override suspend fun load(params: LoadParams<Int>): LoadResult<Int, FilmItemData> {
         val page = params.key ?: FIRST_PAGE
         return kotlin.runCatching {
-            repository.getSerialsExtended(page)
+            repository.getSerialsExtended(page).first
         }.fold(
             onSuccess = {
                 LoadResult.Page(

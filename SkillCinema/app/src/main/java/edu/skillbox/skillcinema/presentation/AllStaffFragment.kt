@@ -16,10 +16,10 @@ import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
 import edu.skillbox.skillcinema.data.AllStaffAdapter
 import edu.skillbox.skillcinema.databinding.FragmentAllStaffBinding
-import edu.skillbox.skillcinema.models.StaffInfo
+import edu.skillbox.skillcinema.models.StaffTable
 import javax.inject.Inject
 
-private const val TAG = "AllStaff.Fragment"
+//private const val TAG = "AllStaff.Fragment"
 
 private const val ARG_FILM_ID = "filmId"
 private const val ARG_FILM_NAME = "filmName"
@@ -82,10 +82,6 @@ class AllStaffFragment : Fragment() {
             findNavController().popBackStack()
         }
 
-//        binding.mainButton.setOnClickListener {
-//            findNavController().navigate(R.id.action_AllFilmsOfStaffFragment_to_MainFragment)
-//        }
-
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
                 viewModel.state
@@ -116,7 +112,7 @@ class AllStaffFragment : Fragment() {
     }
 
     private fun onStaffItemClick(
-        item: StaffInfo
+        item: StaffTable
     ) {
         val bundle =
             Bundle().apply {

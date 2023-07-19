@@ -21,7 +21,7 @@ import edu.skillbox.skillcinema.models.*
         CollectionExisting::class,
         ViewedTable::class,
         InterestedTable::class
-    ], version = 18
+    ], version = 20
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun filmDao(): FilmDao

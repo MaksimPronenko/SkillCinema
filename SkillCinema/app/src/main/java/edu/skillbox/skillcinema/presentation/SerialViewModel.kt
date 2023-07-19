@@ -6,13 +6,14 @@ import androidx.lifecycle.viewModelScope
 import edu.skillbox.skillcinema.data.Repository
 import edu.skillbox.skillcinema.models.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 
-private const val TAG = "SerialVM"
+private const val TAG = "Serial.VM"
 
 class SerialViewModel(
     private val repository: Repository
@@ -54,17 +55,19 @@ class SerialViewModel(
     var seasonsInformation: String = ""
     var serialInformation: String = ""
 
-    var allStaffList: List<StaffInfo> = emptyList()
-    var actorsList: List<StaffInfo> = emptyList()
+    var actorsList: List<StaffTable> = emptyList()
     var actorsQuantity = 0
-    var staffList: List<StaffInfo> = emptyList()
+    var staffList: List<StaffTable> = emptyList()
     var staffQuantity = 0
 
+    var imageTableList: List<ImageTable>? = null
     var gallerySize = 0
-    var imageWithTypeList: List<ImageWithType> = emptyList()
 
-    var similarFilmList: List<SimilarFilm> = emptyList()
+    var similarFilmTableList: List<SimilarFilmTable>? = null
     var similarsQuantity = 0
+    var similars: MutableList<FilmItemData> = mutableListOf()
+    private val _similarsFlow = MutableStateFlow<List<FilmItemData>>(emptyList())
+    val similarsFlow = _similarsFlow.asStateFlow()
 
     var favorite = false
     private val _favoriteChannel = Channel<Boolean>()
@@ -78,260 +81,140 @@ class SerialViewModel(
     private val _viewedChannel = Channel<Boolean>()
     val viewedChannel = _viewedChannel.receiveAsFlow()
 
+    var jobLoadSimilarFilmsData: Job? = null
+
     fun loadSerialData(filmId: Int) {
-        Log.d(TAG, "loadSerialData($filmId)")
+        Log.d(TAG, "Запущена loadSerialData($filmId)")
         viewModelScope.launch(Dispatchers.IO) {
             _state.value = ViewModelState.Loading
+            var filmDbViewedResult: Pair<FilmDbViewed?, Boolean>
+            var filmDbViewed: FilmDbViewed?
+            var filmDb: FilmDb?
             var error = false
 
-            val jobFilmData = viewModelScope.launch(Dispatchers.IO) {
-                var filmDataFoundInDb = false
-                val jobCheckFilmDataInDb = viewModelScope.launch(Dispatchers.IO) {
-                    filmDataFoundInDb = repository.isFilmDataExists(filmId)
+            val jobGetMainSerialData = viewModelScope.launch(Dispatchers.IO) {
+                filmDbViewedResult = repository.getFilmDbViewed(filmId)
+                filmDbViewed = filmDbViewedResult.first
+                if (filmDbViewedResult.second) {
+                    Log.d(TAG, "Ошибка загрузки filmDbViewedResult.second == true")
+                    error = true
                 }
-                jobCheckFilmDataInDb.join()
-                Log.d(TAG, "Данные фильма в БД: $filmDataFoundInDb")
+                filmDb = filmDbViewed?.filmDb
 
-                if (filmDataFoundInDb) {
-                    var filmInfoDb: FilmInfoDb? = null
-                    val jobGetFilmInfoDb = viewModelScope.launch {
-                        filmInfoDb = repository.getFilmInfoDb(filmId)
-                    }
-                    jobGetFilmInfoDb.join()
-                    Log.d(TAG, "Загружена из БД FilmInfoDb: $filmInfoDb")
+                viewed = filmDbViewed?.viewed ?: false
+                _viewedChannel.send(element = viewed)
+                Log.d(TAG, "Просмотрен: $viewed")
 
-                    if (filmInfoDb == null) error = true
-                    else {
-                        name = filmInfoDb!!.filmTable.name
-                        poster = filmInfoDb!!.filmTable.poster ?: ""
-                        posterSmall = filmInfoDb!!.filmTable.posterSmall ?: ""
-                        rating = filmInfoDb!!.filmTable.rating
-                        year = filmInfoDb!!.filmTable.year
+                favorite = repository.isFilmExistsInCollection(filmId, "Любимое")
+                _favoriteChannel.send(element = favorite)
+                Log.d(TAG, "Коллекция \"Любимое\": $favorite")
 
-                        length = filmInfoDb!!.filmTable.length
-                        filmLength = repository.convertLength(length)
+                wantedToWatch = repository.isFilmExistsInCollection(filmId, "Хочу посмотреть")
+                _wantedToWatchChannel.send(element = wantedToWatch)
+                Log.d(TAG, "Коллекция \"Хочу посмотреть\": $wantedToWatch")
 
-                        ratingAgeLimits = filmInfoDb!!.filmTable.ratingAgeLimits
-                        ageLimit = repository.convertAgeLimit(ratingAgeLimits)
+                if (filmDb != null) {
+                    name = filmDb!!.filmTable.name
+                    poster = filmDb!!.filmTable.poster
+                    posterSmall = filmDb!!.filmTable.posterSmall
+                    rating = filmDb!!.filmTable.rating
+                    year = filmDb!!.filmTable.year
 
-                        shortDescription = filmInfoDb!!.filmTable.shortDescription
-                        description = filmInfoDb!!.filmTable.description
+                    length = filmDb!!.filmTable.length
+                    filmLength = repository.convertLength(length)
 
-                        countryList =
-                            repository.convertClassListToStringList(filmInfoDb!!.countries)
-                        countries = repository.convertStringListToString(countryList)
+                    ratingAgeLimits = filmDb!!.filmTable.ratingAgeLimits
+                    ageLimit = repository.convertAgeLimit(ratingAgeLimits)
 
-                        genreList = repository.convertClassListToStringList(filmInfoDb!!.genres)
-                        genres = repository.convertStringListToString(genreList)
+                    shortDescription = filmDb!!.filmTable.shortDescription
+                    description = filmDb!!.filmTable.description
 
-                        allStaffList =
-                            repository.convertStaffTableListToStaffInfoList(filmInfoDb!!.staffList)
-                        val actorsAndStaff = repository.divideStaffByType(allStaffList)
-                        actorsList = actorsAndStaff.actorsList
-                        actorsQuantity = actorsList.size
-                        staffList = actorsAndStaff.staffList
-                        staffQuantity = staffList.size
+                    countryList = repository.convertClassListToStringList(filmDb!!.countries)
+                    countries = repository.convertStringListToString(countryList)
 
-                        imageWithTypeList =
-                            repository.convertImageTableListToImageWithTypeList(filmInfoDb!!.images)
-                        gallerySize = imageWithTypeList.size
-
-                        similarFilmList =
-                            repository.convertSimilarFilmTableListToSimilarFilmList(filmInfoDb!!.similarFilms)
-                        similarsQuantity = similarFilmList.size
-                    }
+                    genreList = repository.convertClassListToStringList(filmDb!!.genres)
+                    genres = repository.convertStringListToString(genreList)
                 } else {
-                    val jobGetFilmDataFromApi = viewModelScope.launch {
-                        kotlin.runCatching {
-                            repository.getFilmInfo(filmId)
-                        }.fold(
-                            onSuccess = {
-                                name = it?.nameRu ?: it?.nameEn ?: it?.nameOriginal ?: ""
-                                poster = it?.posterUrl ?: ""
-                                posterSmall = it?.posterUrlPreview ?: ""
-                                rating = it?.ratingKinopoisk
-                                year = it?.year
-
-                                length = it?.filmLength
-                                filmLength = repository.convertLength(length)
-
-                                ratingAgeLimits = it?.ratingAgeLimits
-                                ageLimit = repository.convertAgeLimit(ratingAgeLimits)
-
-                                shortDescription = it?.shortDescription
-                                description = it?.description
-
-                                if (it != null) {
-                                    countryList = repository.convertClassListToStringList(it.countries)
-                                }
-                                countries = repository.convertStringListToString(countryList)
-
-                                if (it != null) {
-                                    genreList = repository.convertClassListToStringList(it.genres)
-                                }
-                                genres = repository.convertStringListToString(genreList)
-                                Log.d(TAG, "Загружена из Api FilmInfo: $it")
-                            },
-                            onFailure = {
-                                Log.d(
-                                    TAG,
-                                    "Информация о фильме из Api. Ошибка загрузки. ${it.message ?: ""}"
-                                )
-                                error = true
-                            }
-                        )
-
-                        kotlin.runCatching {
-                            repository.getAllStaffList(filmId)
-                        }.fold(
-                            onSuccess = {
-                                allStaffList = it
-                                val actorsAndStaff = repository.divideStaffByType(allStaffList)
-                                actorsList = actorsAndStaff.actorsList
-                                actorsQuantity = actorsList.size
-                                staffList = actorsAndStaff.staffList
-                                staffQuantity = staffList.size
-                                Log.d(TAG, "Загружен из Api List<StaffInfo>: $it")
-                            },
-                            onFailure = {
-                                Log.d(TAG, "Персонал. Ошибка загрузки. ${it.message ?: ""}")
-                                error = true
-                            }
-                        )
-
-                        kotlin.runCatching {
-                            repository.getAllGallery(filmId)
-                        }.fold(
-                            onSuccess = {
-                                imageWithTypeList = it
-                                gallerySize = it.size
-                                Log.d(TAG, "Загружен из Api List<ImageWithType>: $it")
-                            },
-                            onFailure = {
-                                Log.d(TAG, "Галерея. Ошибка загрузки. ${it.message ?: ""}")
-                                error = true
-                            }
-                        )
-
-                        kotlin.runCatching {
-                            repository.getSimilars(filmId)
-                        }.fold(
-                            onSuccess = {
-                                similarFilmList = it.items
-                                similarsQuantity = it.total
-                                Log.d(TAG, "Загружен из Api SimilarFilmList: $it")
-                            },
-                            onFailure = {
-                                Log.d(TAG, "Похожие фильмы. Ошибка загрузки. ${it.message ?: ""}")
-                                error = true
-                            }
-                        )
-                    }
-                    jobGetFilmDataFromApi.join()
-
-                    // Запись данных фильма в базу данных после загрузки из Api
-                    val jobAddFilmDataToDb = viewModelScope.launch {
-                        repository.addFilmTable(
-                            FilmTable(
-                                filmId = filmId,
-                                name = name,
-                                poster = poster,
-                                posterSmall = posterSmall,
-                                rating = rating,
-                                year = year,
-                                length = length,
-                                description = description,
-                                shortDescription = shortDescription,
-                                ratingAgeLimits = ratingAgeLimits
-                            )
-                        )
-                        repository.addCountryTable(filmId, countryList)
-                        repository.addGenreTable(filmId, genreList)
-                        repository.addStaffTable(filmId, allStaffList)
-                        repository.addImageTable(filmId, imageWithTypeList)
-                        repository.addSimilarFilmTable(filmId, similarFilmList)
-                    }
-                    jobAddFilmDataToDb.join()
-                    Log.d(TAG, "Данные фильма записаны в базу данных")
+                    Log.d(TAG, "Ошибка загрузки filmDb == null")
+                    error = true
                 }
+
+                // Загрузка данных актёров и персонала фильма из БД или из API с записью в БД
+                val allStaffTableListLoadResult: Pair<List<StaffTable>?, Boolean> = repository.getStaffTableList(filmId)
+                val allStaffTableList: List<StaffTable>? = allStaffTableListLoadResult.first
+                if (allStaffTableListLoadResult.second) {
+                    Log.d(TAG, "Ошибка загрузки List<StaffTable>")
+                }
+                if (allStaffTableList != null) {
+                    val actorsAndStaff = repository.divideStaffByType(allStaffTableList)
+                    actorsList = actorsAndStaff.actorsList
+                    actorsQuantity = actorsList.size
+                    staffList = actorsAndStaff.staffList
+                    staffQuantity = staffList.size
+                }
+
+                // Загрузка галереи фильма из БД или из API с записью в БД
+                val allGalleryLoadResult: Pair<List<ImageTable>?, Boolean> = repository.getAllGallery(filmId)
+                imageTableList = allGalleryLoadResult.first
+                if (allGalleryLoadResult.second) {
+                    Log.d(TAG, "Ошибка загрузки List<ImageTable>")
+                }
+                gallerySize = imageTableList?.size ?: 0
+
+                // Загрузка похожих фильмов из БД или из API с записью в БД
+                val similarsLoadResult: Pair<List<SimilarFilmTable>?, Boolean> = repository.getSimilarFilmTableList(filmId)
+                similarFilmTableList = similarsLoadResult.first
+                if (similarsLoadResult.second) {
+                    Log.d(TAG, "Ошибка загрузки List<SimilarFilmTable>")
+                }
+                similarsQuantity = similarFilmTableList?.size ?: 0
+
+                // Загрузка данных сериала из БД или из API с записью в БД
+                val serialInfoDbResult: Pair<SerialInfoDb?, Boolean> = repository.getSerialInfoDb(filmId)
+                val serialInfoDb: SerialInfoDb? = serialInfoDbResult.first
+                if (serialInfoDbResult.second) {
+                    Log.d(TAG, "Ошибка загрузки SerialInfoDb")
+                    error = true
+                }
+                serialInfoDb?.let { serialInfoDbToVMData(it) }
             }
-
-            val jobSerialData = viewModelScope.launch(Dispatchers.IO) {
-                var serialDataFoundInDb = false
-                var serialInfoDb: SerialInfoDb? = null
-                val jobCheckSerialDataInDb = viewModelScope.launch(Dispatchers.IO) {
-                    serialDataFoundInDb = repository.isSerialDataExists(filmId)
-                }
-                jobCheckSerialDataInDb.join()
-                Log.d(TAG, "Данные сериала в БД: $serialDataFoundInDb")
-
-                if (serialDataFoundInDb) {
-                    val jobGetSerialInfoDb = viewModelScope.launch {
-                        serialInfoDb = repository.getSerialInfoDb(filmId)
-                    }
-                    jobGetSerialInfoDb.join()
-                    Log.d(TAG, "Загружена из БД SerialInfoDb: $serialInfoDb")
-
-                    if (serialInfoDb == null) error = true
-                    else {
-                        serialInfoDbToVMData(serialInfoDb!!)
-                    }
-                } else {
-                    val jobGetSerialDataFromApi = viewModelScope.launch {
-                        kotlin.runCatching {
-                            repository.getFromApiSerialInfoDb(filmId)
-                        }.fold(
-                            onSuccess = {
-                                serialInfoDb = it
-                                serialInfoDbToVMData(serialInfoDb!!)
-                                Log.d(TAG, "Данные сериала загружены из Api: $serialInfoDb")
-                            },
-                            onFailure = {
-                                Log.d(
-                                    TAG,
-                                    "Данные сериала из Api. Ошибка загрузки. ${it.message ?: ""}"
-                                )
-                                error = true
-                            }
-                        )
-                    }
-                    jobGetSerialDataFromApi.join()
-
-                    // Запись данных сериала в базу данных после загрузки из Api
-                    val jobAddSerialDataToDb = viewModelScope.launch {
-                        serialInfoDb?.let { repository.addSerialInfoDb(it) }
-                    }
-                    jobAddSerialDataToDb.join()
-                    Log.d(TAG, "Данные сериала записаны в базу данных")
-                }
-            }
-            jobFilmData.join()
-            jobSerialData.join()
-
-            favorite = repository.isFilmExistsInCollection(filmId, "Любимое")
-            _favoriteChannel.send(element = favorite)
-            wantedToWatch = repository.isFilmExistsInCollection(filmId, "Хочу посмотреть")
-            _wantedToWatchChannel.send(element = wantedToWatch)
-            viewed = repository.isFilmExistsInViewed(filmId)
-            _viewedChannel.send(element = viewed)
-            Log.d(TAG, "Коллекция \"Любимое\": $favorite")
-            Log.d(TAG, "Коллекция \"Хочу посмотреть\": $wantedToWatch")
-            Log.d(TAG, "Просмотрен: $viewed")
+            jobGetMainSerialData.join()
 
             if (error) {
                 _state.value = ViewModelState.Error
                 Log.d(TAG, "Состояние ошибки VM")
             } else {
                 _state.value = ViewModelState.Loaded
-                Log.d(TAG, "Состояние умпешного завершения загрузки VM")
+                Log.d(TAG, "Состояние уcпешного завершения загрузки VM")
 
-                // Запись в список "Вам было инетересно"
+                Log.d(TAG, "Запускаем loadSimilarFilmsData() из loadSerialData()")
+                loadSimilarFilmsData()
+
+                // Запись в список "Вам было интересно"
                 repository.addInterested(
                     InterestedTable(
                         id = filmId,
-                        type = 1
+                        type = 0
                     )
                 )
+            }
+        }
+    }
+
+    fun loadSimilarFilmsData() {
+        if (jobLoadSimilarFilmsData?.isActive != true) {
+            jobLoadSimilarFilmsData = viewModelScope.launch(Dispatchers.IO) {
+                similars = mutableListOf()
+                Log.d(TAG, "loadSimilarFilmsData(). Внутри Job.")
+                similarFilmTableList?.forEach { similarFilmTable ->
+                    val filmDbViewed =
+                        repository.getFilmDbViewed(similarFilmTable.similarFilmId).first
+                    if (filmDbViewed != null) {
+                        val filmItemData: FilmItemData = filmDbViewed.convertToFilmItemData()
+                        similars.add(filmItemData)
+                        _similarsFlow.value = similars.toList()
+                    }
+                }
             }
         }
     }

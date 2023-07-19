@@ -3,39 +3,25 @@ package edu.skillbox.skillcinema.data
 import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import edu.skillbox.skillcinema.databinding.FilmOfStaffItemBinding
-import edu.skillbox.skillcinema.models.FilmOfStaff
+import edu.skillbox.skillcinema.models.FilmItemData
 
 private const val TAG = "Filmography.Adapter"
 
 class StaffFilmsAdapter(
-    private val onClick: (FilmOfStaff) -> Unit
+    private val onClick: (FilmItemData) -> Unit
 ) : RecyclerView.Adapter<StaffFilmViewHolder>() {
-//    private var data: List<FilmOfStaff> = emptyList()
-//    @SuppressLint("NotifyDataSetChanged")
-//    fun setData(data: List<FilmOfStaff>) {
-//        this.data = data
-//        notifyDataSetChanged()
-//    }
 
-    private var data: List<FilmOfStaff> = emptyList()
-//    private var mutableData: MutableList<FilmOfStaff> = emptyList<FilmOfStaff>().toMutableList()
+    private var data: List<FilmItemData> = emptyList()
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setData(receivedData: List<FilmOfStaff>) {
+    fun setData(receivedData: List<FilmItemData>) {
         data = receivedData
         notifyDataSetChanged()
     }
-
-//    fun addItem(item: FilmOfStaff) {
-//        mutableData.add(item)
-//        data = mutableData.toList()
-//        val index = data.size - 1
-//        notifyItemInserted(index)
-//    }
 
     override fun getItemCount(): Int = data.size
 
@@ -50,25 +36,24 @@ class StaffFilmsAdapter(
     }
 
     override fun onBindViewHolder(holder: StaffFilmViewHolder, position: Int) {
-        val filmOfStaff = data.getOrNull(position)
-        with(holder.binding) {
-            if (filmOfStaff != null) {
-                filmName.text = filmOfStaff.name
-                filmInfo.text = if (filmOfStaff.year == null) filmOfStaff.genres
-                else "${filmOfStaff.year}, ${filmOfStaff.genres}"
+        val item = data.getOrNull(position)
+        if (item != null) {
+            with(holder.binding) {
+                filmName.text = item.name
+                filmInfo.text = if (item.year == null) item.genres
+                else "${item.year}, ${item.genres}"
+                viewed.isVisible = item.viewed
                 Glide
                     .with(poster.context)
-                    .load(filmOfStaff.poster)
+                    .load(item.poster)
                     .into(poster)
-                if (filmOfStaff.rating != null) {
-                    ratingFrame.isGone = false
-                    rating.text = filmOfStaff.rating.toString()
-                } else ratingFrame.isGone = true
+                if (item.rating != null) {
+                    ratingFrame.isVisible = true
+                    rating.text = item.rating
+                } else ratingFrame.isVisible = false
             }
-        }
-        holder.binding.root.setOnClickListener {
-            filmOfStaff?.let {
-                onClick(it)
+            holder.binding.root.setOnClickListener {
+                onClick(item)
             }
         }
     }

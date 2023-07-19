@@ -10,6 +10,7 @@
     <string name="top_250">Топ-250</string>
     <string name="series">Сериалы</string>
     <string name="button_all">Все</string>
+    <string name="show_all">Показать все</string>
     <string name="seasons_and_episodes_title">Сезоны и серии</string>
     <string name="actors_recycler_title">В фильме снимались</string>
     <string name="staff_recycler_title">Над фильмом работали</string>
@@ -47,8 +48,8 @@
     <string name="chip_producer_ussr">Директор фильма</string>
     <string name="chip_producer">Продюсер</string>
     <string name="chip_design">Художник</string>
-    <string name="chip_director">Режисёр</string>
-    <string name="chip_voice_director">Режисёр озвучки</string>
+    <string name="chip_director">Режиссёр</string>
+    <string name="chip_voice_director">Режиссёр озвучки</string>
     <string name="chip_translator">Переводчик</string>
     <string name="chip_unknown">Неизвестно</string>
     <string name="chip_season_title">Сезон</string>
@@ -115,7 +116,9 @@
     <string name="he_is_any">любой</string>
 
     <string name="viewed">Просмотрено</string>
+    <string name="clear_history">Очистить историю</string>
     <string name="collections">Коллекции</string>
+    <string name="clear_collection">Очистить коллекцию</string>
     <string name="create_collection">Создать свою коллекцию</string>
     <string name="interested">Вам было интересно</string>
 

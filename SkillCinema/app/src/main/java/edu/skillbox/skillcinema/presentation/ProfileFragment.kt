@@ -12,8 +12,6 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.Navigation
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
@@ -21,11 +19,11 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
 import edu.skillbox.skillcinema.data.CollectionAdapter
+import edu.skillbox.skillcinema.data.CollectionFilmsAdapter
 import edu.skillbox.skillcinema.data.InterestedAdapter
-import edu.skillbox.skillcinema.data.ViewedAdapter
 import edu.skillbox.skillcinema.databinding.FragmentProfileBinding
 import edu.skillbox.skillcinema.models.CollectionInfo
-import edu.skillbox.skillcinema.models.FilmDbViewed
+import edu.skillbox.skillcinema.models.FilmItemData
 import edu.skillbox.skillcinema.models.PersonTable
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -43,17 +41,29 @@ class ProfileFragment : Fragment() {
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
 
-    private val viewedAdapter =
-        ViewedAdapter(limited = true) { filmDbViewed -> onViewedItemClick(filmDbViewed) }
+    private lateinit var viewedAdapter: CollectionFilmsAdapter
+
     private val collectionAdapter = CollectionAdapter(
         onOpenCollection = { collection -> onOpenCollection(collection) },
         onDeleteCollection = { collection -> onDeleteCollection(collection) }
     )
     private val interestedAdapter = InterestedAdapter(
-        onFilmClick = { filmDbViewed -> onFilmClick(filmDbViewed) },
-        onSerialClick = { filmDbViewed -> onSerialClick(filmDbViewed) },
-        onPersonClick = { personTable -> onPersonClick(personTable) }
+        limited = true,
+        onFilmClick = { filmItemData -> onFilmClick(filmItemData) },
+        onSerialClick = { filmItemData -> onSerialClick(filmItemData) },
+        onPersonClick = { personTable -> onPersonClick(personTable) },
+        clear = { viewModel.clearAllInterested() }
     )
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        viewedAdapter = CollectionFilmsAdapter(limited = true,
+            viewedOrCollection = true,
+            context = requireContext(),
+            onClick = { filmItemData -> onViewedItemClick(filmItemData) },
+            clear = { viewModel.removeAllViewedFilms() }
+        )
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -73,6 +83,9 @@ class ProfileFragment : Fragment() {
         binding.viewedRecycler.adapter = viewedAdapter
         binding.collectionsRecycler.adapter = collectionAdapter
         binding.interestedRecycler.adapter = interestedAdapter
+
+        Log.d(TAG, "Запускаем viewModel.loadProfileData() из onViewCreated")
+        viewModel.loadProfileData()
 
         val dividerItemDecorationVertical = DividerItemDecoration(context, RecyclerView.VERTICAL)
         val dividerItemDecorationHorizontal =
@@ -112,11 +125,11 @@ class ProfileFragment : Fragment() {
             )
         }
 
-//        binding.buttonAllInterested.setOnClickListener {
-//            findNavController().navigate(
-//                R.id.action_ProfileFragment_to_AllInterestedFragment
-//            )
-//        }
+        binding.buttonAllInterested.setOnClickListener {
+            findNavController().navigate(
+                R.id.action_ProfileFragment_to_AllInterestedFragment
+            )
+        }
 
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
@@ -141,7 +154,7 @@ class ProfileFragment : Fragment() {
 
                                 binding.viewedListSize.text = viewModel.viewedQuantity.toString()
                                 viewModel.viewedFlow.onEach {
-                                    viewedAdapter.setData(it)
+                                    viewedAdapter.setAdapterData(it)
                                     Log.d(TAG, "viewedAdapter.setData. Размер= ${it.size}")
                                     Log.d(
                                         TAG,
@@ -152,7 +165,7 @@ class ProfileFragment : Fragment() {
                                 binding.interestedListSize.text =
                                     viewModel.interestedQuantity.toString()
                                 viewModel.interestedFlow.onEach {
-                                    interestedAdapter.setData(it)
+                                    interestedAdapter.setAdapterData(it)
                                     Log.d(TAG, "interestedAdapter.setData. Размер= ${it.size}")
                                     Log.d(
                                         TAG,
@@ -160,11 +173,6 @@ class ProfileFragment : Fragment() {
                                     )
                                 }.launchIn(viewLifecycleOwner.lifecycleScope)
                             }
-//                            ViewModelState.Error -> {
-//                                binding.scrollView.isGone = true
-//                                binding.progress.isGone = true
-//                                findNavController().navigate(R.id.action_FilmFragment_to_ErrorBottomFragment)
-//                            }
                         }
                     }
             }
@@ -176,13 +184,13 @@ class ProfileFragment : Fragment() {
     }
 
     private fun onViewedItemClick(
-        item: FilmDbViewed
+        item: FilmItemData
     ) {
         val bundle =
             Bundle().apply {
                 putInt(
                     "filmId",
-                    item.filmDb.filmTable.filmId
+                    item.filmId
                 )
             }
         findNavController().navigate(
@@ -214,21 +222,15 @@ class ProfileFragment : Fragment() {
     }
 
     private fun onFilmClick(
-        item: FilmDbViewed
+        item: FilmItemData
     ) {
         val bundle =
             Bundle().apply {
                 putInt(
                     "filmId",
-                    item.filmDb.filmTable.filmId
+                    item.filmId
                 )
             }
-
-//        activity?.findNavController(R.id.ProfileFragment)?.navigate(
-//            R.id.action_ProfileFragment_to_FilmFragment,
-//            bundle
-//        )
-
         findNavController().navigate(
             R.id.action_ProfileFragment_to_FilmFragment,
             bundle
@@ -236,13 +238,13 @@ class ProfileFragment : Fragment() {
     }
 
     private fun onSerialClick(
-        item: FilmDbViewed
+        item: FilmItemData
     ) {
         val bundle =
             Bundle().apply {
                 putInt(
                     "filmId",
-                    item.filmDb.filmTable.filmId
+                    item.filmId
                 )
             }
         findNavController().navigate(

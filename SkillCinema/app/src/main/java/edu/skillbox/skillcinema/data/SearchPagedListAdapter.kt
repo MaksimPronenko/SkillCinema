@@ -2,15 +2,15 @@ package edu.skillbox.skillcinema.data
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.paging.PagingDataAdapter
 import com.bumptech.glide.Glide
 import edu.skillbox.skillcinema.databinding.FilmOfStaffItemBinding
-import edu.skillbox.skillcinema.models.FilmFiltered
+import edu.skillbox.skillcinema.models.FilmItemData
 
 class SearchPagedListAdapter(
-    private val onClick: (FilmFiltered) -> Unit
-) : PagingDataAdapter<FilmFiltered, StaffFilmViewHolder>(FilmsFilteredDiffUtilCallback()) {
+    private val onClick: (FilmItemData) -> Unit
+) : PagingDataAdapter<FilmItemData, StaffFilmViewHolder>(FilmsFilteredDiffUtilCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StaffFilmViewHolder {
         return StaffFilmViewHolder(
@@ -26,22 +26,19 @@ class SearchPagedListAdapter(
         val item = getItem(position)
         with(holder.binding) {
             if (item != null) {
-                filmName.text = if (!item.nameRu.isNullOrEmpty()) item.nameRu
-                else if (!item.nameEn.isNullOrEmpty()) item.nameEn
-                else if (!item.nameOriginal.isNullOrEmpty()) item.nameOriginal
-                else ""
-                val genresToString = item.genres.joinToString(", ") { it.genre }
+                filmName.text = item.name
+                val genresToString = item.genres
                 filmInfo.text = if (item.year == null) genresToString
                 else "${item.year}, $genresToString"
-                val image: String = item.posterUrlPreview.ifEmpty { item.posterUrl }
+                viewed.isVisible = item.viewed
                 Glide
                     .with(poster.context)
-                    .load(image)
+                    .load(item.poster)
                     .into(poster)
-                if (item.ratingKinopoisk != null) {
-                    ratingFrame.isGone = false
-                    rating.text = item.ratingKinopoisk.toString()
-                } else ratingFrame.isGone = true
+                if (item.rating != null) {
+                    ratingFrame.isVisible = true
+                    rating.text = item.rating
+                } else ratingFrame.isVisible = false
             } else {
                 filmName.text = "Ошибка загрузки"
             }

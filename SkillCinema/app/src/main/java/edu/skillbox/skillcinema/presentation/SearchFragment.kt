@@ -21,7 +21,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
 import edu.skillbox.skillcinema.data.SearchPagedListAdapter
 import edu.skillbox.skillcinema.databinding.FragmentSearchBinding
-import edu.skillbox.skillcinema.models.FilmFiltered
+import edu.skillbox.skillcinema.models.FilmItemData
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
@@ -35,7 +35,7 @@ class SearchFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val filmsAdapter =
-        SearchPagedListAdapter { filmFiltered -> onFilmItemClick(filmFiltered) }
+        SearchPagedListAdapter { filmItemData -> onItemClick(filmItemData) }
 
     @Inject
     lateinit var searchViewModelFactory: SearchViewModelFactory
@@ -87,11 +87,17 @@ class SearchFragment : Fragment() {
             }
 
             override fun afterTextChanged(s: Editable) {
+                Log.d(TAG, "Вызов search() в afterTextChanged")
                 viewModel.search(s.toString())
             }
         })
 
-        viewModel.search()
+        if (viewModel.jobSearch?.isActive != true) {
+            Log.d(TAG, "Вызов search() по onViewCreated")
+            viewModel.search()
+        } else {
+            Log.d(TAG, "Предотвращён повторный вызов search() по onViewCreated")
+        }
 
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
@@ -111,6 +117,7 @@ class SearchFragment : Fragment() {
                                 binding.listPageRecycler.isVisible = true
 
                                 viewModel.filmsFlow.onEach {
+                                    Log.d(TAG, "Получен $it")
                                     filmsAdapter.submitData(it)
                                 }.launchIn(viewLifecycleOwner.lifecycleScope)
                             }
@@ -132,14 +139,14 @@ class SearchFragment : Fragment() {
             }
     }
 
-    private fun onFilmItemClick(
-        item: FilmFiltered
+    private fun onItemClick(
+        item: FilmItemData
     ) {
         val bundle =
             Bundle().apply {
                 putInt(
                     "filmId",
-                    item.kinopoiskId
+                    item.filmId
                 )
             }
         findNavController().navigate(

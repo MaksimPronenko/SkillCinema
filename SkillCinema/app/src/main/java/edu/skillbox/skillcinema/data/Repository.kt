@@ -11,8 +11,232 @@ import kotlin.math.ceil
 private const val TAG = "Repository"
 
 class Repository @Inject constructor(private val dao: FilmDao) {
+    // Набор ключей API. Каждый на 500 запросов.
+    private val apiKeysList = listOf(
+        "ce6f81de-e746-4a8b-8a79-4a7fe451b75d",
+        "a8429c6b-2971-443a-9a72-59932af2324f",
+        "ca8d9204-5d12-4fcd-bdfc-194f72a55394",
+        "3a8ba0d1-8a76-4d8b-90e6-b3d00ed195c5"
+    )
+    private var currentApiKeyNumber = 0 // Номер текущего ключа.
+    var currentApiKey = apiKeysList[0] // Активный ключ.
 
-    suspend fun getPremieres(): List<FilmPremiere> {
+    // Переключение ключей API.
+    private fun changeApiKey() {
+        currentApiKeyNumber = if (currentApiKeyNumber == 3) 0 else currentApiKeyNumber + 1
+        currentApiKey = apiKeysList[currentApiKeyNumber]
+        Log.d(TAG, "changeApiKey(): currentApiKey = $currentApiKey")
+    }
+
+    // Получение из API данных фильма FilmInfo по filmId, с переключением ключей API.
+    private suspend fun getFilmInfo(filmId: Int): Pair<FilmInfo?, Boolean> {
+        for (i in 0..3) {
+            Log.d(TAG, "getFilmInfo($filmId). apiKey = $currentApiKey")
+            kotlin.runCatching {
+                retrofit.getFilmInfo(apiKey = currentApiKey, filmId = filmId)
+            }.fold(
+                onSuccess = {
+                    Log.d(TAG, "getFilmInfo($filmId). Успешная загрузка на итерации $i")
+                    return Pair(first = it, second = false)
+                },
+                onFailure = {
+                    Log.d(TAG, "getFilmInfo($filmId). Ошибка загрузки из Api. ${it.message ?: ""}")
+                    changeApiKey()
+                }
+            )
+        }
+        return Pair(first = null, second = true)
+    }
+
+    // Получение из API данных фильма FilmDb по filmId.
+    // FilmDb - класс для взаимодействия с БД.
+    private suspend fun getFromApiFilmDb(filmId: Int): Pair<FilmDb?, Boolean> {
+        val apiLoadResult = getFilmInfo(filmId)
+        val filmInfo: FilmInfo? = apiLoadResult.first
+        val error: Boolean = apiLoadResult.second
+
+        val countries: MutableList<CountryTable> =
+            emptyList<CountryTable>().toMutableList()
+        val genres: MutableList<GenreTable> =
+            emptyList<GenreTable>().toMutableList()
+
+        filmInfo?.countries?.forEach { countryClass ->
+            countries.add(
+                CountryTable(
+                    filmId = filmId,
+                    country = countryClass.country
+                )
+            )
+        }
+        filmInfo?.genres?.forEach { genreClass ->
+            genres.add(
+                GenreTable(
+                    filmId = filmId,
+                    genre = genreClass.genre
+                )
+            )
+        }
+
+        return if (filmInfo != null) Pair(
+            first = FilmDb(
+                filmTable = FilmTable(
+                    filmId = filmId,
+                    name = filmInfo.nameRu ?: filmInfo.nameEn ?: filmInfo.nameOriginal ?: "",
+                    poster = filmInfo.posterUrl,
+                    posterSmall = filmInfo.posterUrlPreview,
+                    rating = filmInfo.ratingKinopoisk,
+                    year = filmInfo.year,
+                    length = filmInfo.filmLength,
+                    description = filmInfo.description,
+                    shortDescription = filmInfo.shortDescription,
+                    ratingAgeLimits = filmInfo.ratingAgeLimits
+                ),
+                countries = countries.toList(),
+                genres = genres.toList()
+            ),
+            second = error
+        ) else Pair(
+            first = null,
+            second = error
+        )
+    }
+
+    // Получение данных фильма FilmDbViewed по filmId.
+    // Эта функция запрашивает из БД, если нет, то берёт из API, и записывает в БД.
+    suspend fun getFilmDbViewed(filmId: Int): Pair<FilmDbViewed?, Boolean> {
+        var filmDb: FilmDb? = dao.getFilmDb(filmId)
+        val apiLoadFilmDbResult: Pair<FilmDb?, Boolean>
+        val viewed: Boolean = dao.isFilmExistsInViewed(filmId)
+        var error = false
+
+        if (filmDb == null) {
+            apiLoadFilmDbResult = getFromApiFilmDb(filmId)
+            filmDb = apiLoadFilmDbResult.first
+            error = apiLoadFilmDbResult.second
+            if (filmDb != null) {
+                Log.d(TAG, "Фильм $filmId загружен из API")
+                addFilmDb(filmDb)
+                Log.d(TAG, "Фильм $filmId записан в БД")
+            }
+        } else Log.d(TAG, "Фильм $filmId загружен из БД")
+
+        return if (filmDb != null) Pair(
+            first = FilmDbViewed(filmDb = filmDb, viewed = viewed),
+            second = error
+        ) else Pair(
+            first = null,
+            second = error
+        )
+    }
+
+    // Получение из API данных человека PersonInfo по personId, с переключением ключей API.
+    private suspend fun getPersonInfo(personId: Int): Pair<PersonInfo?, Boolean> {
+        for (i in 0..3) {
+            Log.d(TAG, "getPersonInfo($personId). apiKey = $currentApiKey")
+            kotlin.runCatching {
+                retrofit.getPersonInfo(apiKey = currentApiKey, personId = personId)
+            }.fold(
+                onSuccess = {
+                    Log.d(TAG, "getPersonInfo($personId). Успешная загрузка на итерации $i")
+                    return Pair(first = it, second = false)
+                },
+                onFailure = {
+                    Log.d(
+                        TAG,
+                        "getPersonInfo($personId). Ошибка загрузки из Api. ${it.message ?: ""}"
+                    )
+                    changeApiKey()
+                }
+            )
+        }
+        return Pair(first = null, second = true)
+    }
+
+    // Получение из API данных человека PersonInfoDb по personId.
+    // PersonInfoDb - класс для взаимодействия с БД.
+    private suspend fun getFromApiPersonInfoDb(personId: Int): Pair<PersonInfoDb?, Boolean> {
+        val apiLoadResult = getPersonInfo(personId)
+        val personInfo: PersonInfo? = apiLoadResult.first
+        val error: Boolean = apiLoadResult.second
+
+        val filmsOfPerson: MutableList<FilmOfPersonTable> = mutableListOf()
+        return if (personInfo != null) {
+            personInfo.films.forEach { film ->
+                filmsOfPerson.add(
+                    FilmOfPersonTable(
+                        personId = personId,
+                        filmId = film.filmId,
+                        name = film.nameRu ?: film.nameEn ?: "",
+                        rating = film.rating?.toFloatOrNull(),
+                        professionKey = film.professionKey
+                    )
+                )
+            }
+            val sortedFilmsOfPerson =
+                filmsOfPerson.sortedByDescending { filmOfPersonTable -> filmOfPersonTable.rating }
+            Pair(
+                first = PersonInfoDb(
+                    personTable = PersonTable(
+                        personId = personId,
+                        name = personInfo.nameRu ?: personInfo.nameEn,
+                        sex = personInfo.sex,
+                        posterUrl = personInfo.posterUrl,
+                        profession = personInfo.profession
+                    ),
+                    filmsOfPerson = sortedFilmsOfPerson
+                ),
+                second = error
+            )
+        } else Pair(
+            first = null,
+            second = error
+        )
+    }
+
+    // Получение данных человека PersonInfoDb по personId.
+    // Эта функция запрашивает из БД, если нет, то берёт из API, и записывает в БД.
+    suspend fun getPersonInfoDb(personId: Int): Pair<PersonInfoDb?, Boolean> {
+        var personInfoDb: PersonInfoDb? = dao.getPersonInfoDb(personId)
+        val apiLoadPersonInfoDbResult: Pair<PersonInfoDb?, Boolean>
+        var error = false
+
+        if (personInfoDb == null) {
+            apiLoadPersonInfoDbResult = getFromApiPersonInfoDb(personId)
+            personInfoDb = apiLoadPersonInfoDbResult.first
+            error = apiLoadPersonInfoDbResult.second
+            if (personInfoDb != null) {
+                Log.d(TAG, "Данные человека $personId загружены из API")
+                addPersonInfoDb(personInfoDb)
+                Log.d(TAG, "Данные человека $personId записаны в БД")
+            }
+        } else Log.d(TAG, "Данные человека $personId загружены из БД")
+
+        return Pair(first = personInfoDb, second = error)
+    }
+
+    private suspend fun getPremieres(year: Int, month: String): Pair<FilmList?, Boolean> {
+        for (i in 0..3) {
+            Log.d(TAG, "getPremieres($year, $month). apiKey = $currentApiKey")
+            kotlin.runCatching {
+                retrofit.getPremieres(apiKey = currentApiKey, year = year, month = month)
+            }.fold(
+                onSuccess = {
+                    Log.d(TAG, "getPremieres($year, $month). Успешная загрузка на итерации $i")
+                    return Pair(first = it, second = false)
+                },
+                onFailure = {
+                    Log.d(
+                        TAG,
+                        "getPremieres($year, $month). Ошибка загрузки из Api. ${it.message ?: ""}"
+                    )
+                    changeApiKey()
+                }
+            )
+        }
+        return Pair(first = null, second = true)
+    }
+
+    suspend fun getPremieresList(): Pair<List<FilmPremiere>, Boolean> {
 
         val calendar: Calendar = Calendar.getInstance()
         val currentDate: Date = calendar.time // Текущая дата
@@ -25,15 +249,25 @@ class Repository @Inject constructor(private val dao: FilmDao) {
         val datePlus15DaysYear = calendar.get(Calendar.YEAR) // Получили месяц новый
         val datePlus15DaysMonth = calendar.get(Calendar.MONTH) // Получили месяц новый
 
-        val premieresThisMonth =
-            retrofit.getPremieres(currentYear, monthToString(currentMonth))?.items ?: emptyList()
+        val premieresThisMonthLoadResult: Pair<FilmList?, Boolean> =
+            getPremieres(currentYear, monthToString(currentMonth))
+        val premieresThisMonth = premieresThisMonthLoadResult.first?.items ?: emptyList()
 
+        var premieresNextMonthLoadResult: Pair<FilmList?, Boolean>? = null
         var premieresNextMonth: List<FilmPremiere> = emptyList()
-        if (datePlus15DaysMonth != currentMonth) premieresNextMonth =
-            retrofit.getPremieres(
-                datePlus15DaysYear,
-                monthToString(datePlus15DaysMonth)
-            )?.items ?: emptyList()
+        if (datePlus15DaysMonth != currentMonth) {
+            premieresNextMonthLoadResult =
+                getPremieres(
+                    datePlus15DaysYear,
+                    monthToString(datePlus15DaysMonth)
+                )
+            premieresNextMonth = premieresNextMonthLoadResult.first?.items ?: emptyList()
+        }
+
+        // Определяем, была ли ошибка загрузки из API. Нулевой список сам по себе ошибкой
+        // не считаю, т.к. может премьер и не быть за какой-то период.
+        val error =
+            (premieresThisMonthLoadResult.second) || (premieresNextMonthLoadResult?.second ?: false)
 
         val premieres2Months = premieresThisMonth + premieresNextMonth
 
@@ -47,14 +281,10 @@ class Repository @Inject constructor(private val dao: FilmDao) {
             // т.к. текущее время больше 00:00:00 в дате фильма.
             calendar.add(Calendar.DAY_OF_MONTH, 1)
             val premiereDate: Date = calendar.time
-
-//            calendar.time = dateFormat.parse("2023-02-23") as Date
-//            val startDate:Date = calendar.time
-
             if (premiereDate in currentDate..datePlus15Days) premieresNext2Weeks.add(it)
         }
 
-        return premieresNext2Weeks.toList().shuffled()
+        return Pair(first = premieresNext2Weeks.toList().shuffled(), second = error)
     }
 
     private fun monthToString(month: Int): String {
@@ -83,6 +313,7 @@ class Repository @Inject constructor(private val dao: FilmDao) {
             FilmItemData(
                 filmId = filmId,
                 name = name,
+                year = filmPremiere.year.toString(),
                 genres = genres,
                 poster = filmPremiere.posterUrlPreview,
                 rating = null,
@@ -91,26 +322,40 @@ class Repository @Inject constructor(private val dao: FilmDao) {
         else null
     }
 
-    suspend fun getTop100Popular(page: Int): PagedFilmTopList? {
-        return retrofit.getTop100Popular(page)
+    // Получение из API списка Top, с переключением ключей API
+    suspend fun getTopList(type: String, page: Int): Pair<PagedFilmTopList?, Boolean> {
+        for (i in 0..3) {
+            Log.d(TAG, "getTopList($type). apiKey = $currentApiKey")
+            kotlin.runCatching {
+                retrofit.getTopList(apiKey = currentApiKey, type = type, page = page)
+            }.fold(
+                onSuccess = {
+                    Log.d(TAG, "getTopList($type). Успешная загрузка на итерации $i")
+                    return Pair(first = it, second = false)
+                },
+                onFailure = {
+                    Log.d(TAG, "getTopList($type). Ошибка загрузки из Api. ${it.message ?: ""}")
+                    changeApiKey()
+                }
+            )
+        }
+        return Pair(first = null, second = true)
     }
 
-    suspend fun getTop100PopularExtended(page: Int): List<FilmItemData>? {
-        val pagedFilmTopList: PagedFilmTopList? = retrofit.getTop100Popular(page)
-        return if (pagedFilmTopList != null) extendTop(pagedFilmTopList)
-        else null
+    // Используется только в PagingSource
+    suspend fun getTopListExtended(type: String, page: Int): Pair<List<FilmItemData>?, Boolean> {
+        Log.d(TAG, "Вызвана getTopListExtended($type)")
+        val loadResult: Pair<PagedFilmTopList?, Boolean> = getTopList(type = type, page = page)
+        val pagedFilmTopList: PagedFilmTopList? = loadResult.first
+        val error: Boolean = loadResult.second
+        return if (pagedFilmTopList == null) {
+            Pair(first = null, second = error)
+        } else {
+            Pair(first = extendTop(pagedFilmTopList), second = error)
+        }
     }
 
-    suspend fun getTop250(page: Int): PagedFilmTopList? {
-        return retrofit.getTop250(page)
-    }
-
-    suspend fun getTop250Extended(page: Int): List<FilmItemData>? {
-        val pagedFilmTopList: PagedFilmTopList? = retrofit.getTop250(page)
-        return if (pagedFilmTopList != null) extendTop(pagedFilmTopList)
-        else null
-    }
-
+    // Используется в getTopListExtended()
     private suspend fun extendTop(topList: PagedFilmTopList): List<FilmItemData> {
         val topExtended: MutableList<FilmItemData> = mutableListOf()
         topList.films.forEach { filmTop ->
@@ -126,6 +371,7 @@ class Repository @Inject constructor(private val dao: FilmDao) {
                     FilmItemData(
                         filmId = filmId,
                         name = name,
+                        year = filmTop.year,
                         genres = genres,
                         poster = filmTop.posterUrlPreview,
                         rating = rating,
@@ -137,17 +383,23 @@ class Repository @Inject constructor(private val dao: FilmDao) {
         return topExtended.toList()
     }
 
+    // Используется в MainViewModel() по отношению к загруженным ранее из API спискам Top100Popular
+    // и Top250 для преобразования данных каждого фильма отдельно в тип FilmItemData (с обращением
+    // в БД для получения Viewed) с постепенной подгрузкой увеличивающегося списка в Recycler.
+    // Это происходит при каждом возврате на окно, без повторной подгрузки базового списка из API.
     suspend fun extendTopFilmData(filmTop: FilmTop): FilmItemData? {
         val filmId = filmTop.filmId
         val name = filmTop.nameRu ?: filmTop.nameEn
         val genres = filmTop.genres.joinToString(", ") { it.genre }
-        val rating: String? = if (filmTop.rating == null || filmTop.rating.contains("%", true)) null
-        else filmTop.rating
+        val rating: String? =
+            if (filmTop.rating == null || filmTop.rating.contains("%", true)) null
+            else filmTop.rating
         val viewed: Boolean = dao.isFilmExistsInViewed(filmId)
         return if (name != null)
             FilmItemData(
                 filmId = filmId,
                 name = name,
+                year = filmTop.year,
                 genres = genres,
                 poster = filmTop.posterUrlPreview,
                 rating = rating,
@@ -156,49 +408,142 @@ class Repository @Inject constructor(private val dao: FilmDao) {
         else null
     }
 
-    suspend fun getSerials(page: Int): PagedFilmFilteredList? {
-        return retrofit.getSerials(page)
-    }
-
-    suspend fun getSerialsExtended(page: Int): List<FilmItemData>? {
-        val pagedFilmFilteredList: PagedFilmFilteredList? = retrofit.getSerials(page)
-        return if (pagedFilmFilteredList != null) extendFilmFiltered(pagedFilmFilteredList)
-        else null
-    }
-
-    suspend fun getFilmsFiltered(genre: Int, country: Int, page: Int): PagedFilmFilteredList? {
-        val apiResult: PagedFilmFilteredList? = retrofit.getFilmFiltered(genre, country, page)
-        if (apiResult == null) return null
-        else {
-            var newTotal: Int = apiResult.total
-            var newTotalPages = apiResult.totalPages
-            val filmsFilteredRatingAbove6: MutableList<FilmFiltered> = mutableListOf()
-            apiResult.items.forEach {
-                if (it.ratingKinopoisk != null) filmsFilteredRatingAbove6.add(it)
-                else {
-                    newTotal -= 1
-                    newTotalPages = ceil(newTotal / 20.0).toInt()
+    // Получение из API списка сериалов, с переключением ключей API.
+    suspend fun getSerials(page: Int): Pair<PagedFilmFilteredList?, Boolean> {
+        for (i in 0..3) {
+            Log.d(TAG, "getSerials($page). apiKey = $currentApiKey")
+            kotlin.runCatching {
+                retrofit.getSerials(apiKey = currentApiKey, page = page)
+            }.fold(
+                onSuccess = {
+                    Log.d(TAG, "getSerials($page). Успешная загрузка на итерации $i")
+                    return Pair(first = it, second = false)
+                },
+                onFailure = {
+                    Log.d(TAG, "getSerials($page). Ошибка загрузки из Api. ${it.message ?: ""}")
+                    changeApiKey()
                 }
-            }
-            return PagedFilmFilteredList(
-                total = newTotal,
-                totalPages = newTotalPages,
-                items = filmsFilteredRatingAbove6
             )
+        }
+        return Pair(first = null, second = true)
+    }
+
+    // Используется только в PagingSource
+    suspend fun getSerialsExtended(page: Int): Pair<List<FilmItemData>?, Boolean> {
+        Log.d(TAG, "Вызвана getSerialsExtended($page)")
+        val loadResult: Pair<PagedFilmFilteredList?, Boolean> = getSerials(page = page)
+        val pagedFilmFilteredList: PagedFilmFilteredList? = loadResult.first
+        val error: Boolean = loadResult.second
+        return if (pagedFilmFilteredList == null) {
+            Pair(first = null, second = error)
+        } else {
+            Pair(first = extendFilmsFiltered(pagedFilmFilteredList), second = error)
         }
     }
 
-    suspend fun getFilmsFilteredExtended(genre: Int, country: Int, page: Int): List<FilmItemData>? {
-        val pagedFilmFilteredList: PagedFilmFilteredList? = retrofit.getFilmFiltered(genre, country, page)
-        return if (pagedFilmFilteredList != null) extendFilmFiltered(pagedFilmFilteredList)
-        else null
+    // Получение из API списка фильмов по жанрам и странам, с переключением ключей API.
+    private suspend fun getFilmsFiltered(
+        genre: Int,
+        country: Int,
+        page: Int
+    ): Pair<PagedFilmFilteredList?, Boolean> {
+        Log.d(TAG, "Вызвана getFilmsFiltered($genre, $country, $page)")
+        for (i in 0..3) {
+            Log.d(TAG, "getFilmsFiltered(). apiKey = $currentApiKey")
+            kotlin.runCatching {
+                retrofit.getFilmFiltered(
+                    apiKey = currentApiKey,
+                    genres = genre,
+                    countries = country,
+                    page = page
+                )
+            }.fold(
+                onSuccess = {
+                    Log.d(
+                        TAG,
+                        "getFilmsFiltered($genre, $country, $page). Успешная загрузка на итерации $i"
+                    )
+                    return Pair(first = it, second = false)
+                },
+                onFailure = {
+                    Log.d(
+                        TAG,
+                        "getFilmsFiltered($genre, $country, $page). Ошибка загрузки из Api. ${it.message ?: ""}"
+                    )
+                    changeApiKey()
+                }
+            )
+        }
+        return Pair(first = null, second = true)
     }
 
-    private suspend fun extendFilmFiltered(filmsList: PagedFilmFilteredList): List<FilmItemData> {
+    // Для получения фильмов с рейтингом выше 6, производится отсев фильмов рейтингом null, затем
+    // пересчитывается количество оставшихся фильмов и количество страниц.
+    suspend fun getFilmsFilteredClearedFromNullRating(
+        genre: Int,
+        country: Int,
+        page: Int
+    ): Pair<PagedFilmFilteredList?, Boolean> {
+        Log.d(TAG, "Вызвана getFilmsFilteredClearedFromNullRating($genre, $country, $page)")
+        val apiResult: Pair<PagedFilmFilteredList?, Boolean> = getFilmsFiltered(
+            genre = genre,
+            country = country,
+            page = page
+        )
+        val pagedFilmFilteredList: PagedFilmFilteredList? = apiResult.first
+        val error = apiResult.second
+
+        if (error) return Pair(first = null, second = true)
+        if (pagedFilmFilteredList == null) return Pair(first = null, second = false)
+        var newTotal: Int = pagedFilmFilteredList.total
+        var newTotalPages = pagedFilmFilteredList.totalPages
+        val filmsFilteredRatingAbove6: MutableList<FilmFiltered> = mutableListOf()
+        pagedFilmFilteredList.items.forEach {
+            if (it.ratingKinopoisk != null) filmsFilteredRatingAbove6.add(it)
+            else {
+                newTotal -= 1
+                newTotalPages = ceil(newTotal / 20.0).toInt()
+            }
+        }
+        return Pair(
+            first = PagedFilmFilteredList(
+                total = newTotal,
+                totalPages = newTotalPages,
+                items = filmsFilteredRatingAbove6
+            ),
+            second = false
+        )
+    }
+
+    // Используется только в PagingSource
+    suspend fun getFilmsFilteredExtended(
+        genre: Int,
+        country: Int,
+        page: Int
+    ): Pair<List<FilmItemData>?, Boolean> {
+        Log.d(TAG, "Вызвана getFilmsFilteredExtended(genre=$genre, country=$country, $page)")
+        val loadResult: Pair<PagedFilmFilteredList?, Boolean> =
+            getFilmsFilteredClearedFromNullRating(genre = genre, country = country, page = page)
+        val pagedFilmFilteredList: PagedFilmFilteredList? = loadResult.first
+        val error: Boolean = loadResult.second
+        return if (pagedFilmFilteredList == null) {
+            Pair(first = null, second = error)
+        } else {
+            Pair(first = extendFilmsFiltered(pagedFilmFilteredList), second = error)
+        }
+    }
+
+    // Используется в MainViewModel() по отношению к загруженным ранее из API спискам FilmFiltered
+    // для преобразования данных каждого фильма отдельно в тип FilmItemData (с обращением
+    // в БД для получения Viewed) с постепенной подгрузкой увеличивающегося списка в Recycler.
+    // Это происходит при каждом возврате на окно, без повторной подгрузки базового списка из API.
+    private suspend fun extendFilmsFiltered(filmsList: PagedFilmFilteredList): List<FilmItemData> {
         val filmsDataExtended: MutableList<FilmItemData> = mutableListOf()
         filmsList.items.forEach { filmFiltered ->
             val filmId = filmFiltered.kinopoiskId
             val name = filmFiltered.nameRu ?: filmFiltered.nameEn ?: filmFiltered.nameOriginal
+            val year = if (filmFiltered.year == null) null
+            else filmFiltered.year.toString()
             val genres = filmFiltered.genres.joinToString(", ") { it.genre }
             val rating: String? = if (filmFiltered.ratingKinopoisk == null) null
             else filmFiltered.ratingKinopoisk.toString()
@@ -208,6 +553,7 @@ class Repository @Inject constructor(private val dao: FilmDao) {
                     FilmItemData(
                         filmId = filmId,
                         name = name,
+                        year = year,
                         genres = genres,
                         poster = filmFiltered.posterUrlPreview,
                         rating = rating,
@@ -222,6 +568,8 @@ class Repository @Inject constructor(private val dao: FilmDao) {
     suspend fun extendFilteredFilmData(filmFiltered: FilmFiltered): FilmItemData? {
         val filmId = filmFiltered.kinopoiskId
         val name = filmFiltered.nameRu ?: filmFiltered.nameEn ?: filmFiltered.nameOriginal
+        val year = if (filmFiltered.year == null) null
+        else filmFiltered.year.toString()
         val genres = filmFiltered.genres.joinToString(", ") { it.genre }
         val rating: String? = if (filmFiltered.ratingKinopoisk == null) null
         else filmFiltered.ratingKinopoisk.toString()
@@ -230,6 +578,7 @@ class Repository @Inject constructor(private val dao: FilmDao) {
             FilmItemData(
                 filmId = filmId,
                 name = name,
+                year = year,
                 genres = genres,
                 poster = filmFiltered.posterUrlPreview,
                 rating = rating,
@@ -238,6 +587,7 @@ class Repository @Inject constructor(private val dao: FilmDao) {
         else null
     }
 
+    // Получение из API результатов поиска, с переключением ключей API.
     suspend fun searchFilms(
         country: Int?,
         genre: Int?,
@@ -249,124 +599,180 @@ class Repository @Inject constructor(private val dao: FilmDao) {
         yearTo: Int?,
         keyword: String?,
         page: Int
-    ): PagedFilmFilteredList {
-        Log.d(TAG, "Сработала searchFilms()")
-        val result = retrofit.searchFilms(
-            country,
-            genre,
-            order,
-            type,
-            ratingFrom,
-            ratingTo,
-            yearFrom,
-            yearTo,
-            keyword,
-            page
+    ): Pair<PagedFilmFilteredList?, Boolean> {
+        for (i in 0..3) {
+            Log.d(TAG, "searchFilms($keyword). apiKey = $currentApiKey")
+            kotlin.runCatching {
+                retrofit.searchFilms(
+                    apiKey = currentApiKey,
+                    countries = country,
+                    genres = genre,
+                    order = order,
+                    type = type,
+                    ratingFrom = ratingFrom,
+                    ratingTo = ratingTo,
+                    yearFrom = yearFrom,
+                    yearTo = yearTo,
+                    keyword = keyword,
+                    page = page
+                )
+            }.fold(
+                onSuccess = {
+                    Log.d(TAG, "searchFilms($keyword). Успешная загрузка на итерации $i")
+                    return Pair(first = it, second = false)
+                },
+                onFailure = {
+                    Log.d(TAG, "searchFilms($keyword). Ошибка загрузки из Api. ${it.message ?: ""}")
+                    changeApiKey()
+                }
+            )
+        }
+        Log.d(TAG, "Все 4 ключа API не дали результата. Возвращаем null")
+        return Pair(first = null, second = true)
+    }
+
+    // На основе результатов searchFilms() формируем список фильмов List<FilmItemData>,
+    // в котором к каждому фильму прибавляется значение Viewed (из БД), и данные фильма
+    // преобразуются для отображения в стандартном ViewHolder.
+    suspend fun searchFilmsExtended(
+        country: Int?,
+        genre: Int?,
+        order: String,
+        type: String,
+        ratingFrom: Int,
+        ratingTo: Int,
+        yearFrom: Int?,
+        yearTo: Int?,
+        keyword: String?,
+        page: Int
+    ): Pair<List<FilmItemData>?, Boolean> {
+        Log.d(TAG, "Вызвана searchFilmsExtended($keyword)")
+        val loadResult: Pair<PagedFilmFilteredList?, Boolean> = searchFilms(
+            country = country,
+            genre = genre,
+            order = order,
+            type = type,
+            ratingFrom = ratingFrom,
+            ratingTo = ratingTo,
+            yearFrom = yearFrom,
+            yearTo = yearTo,
+            keyword = keyword,
+            page = page
         )
-        Log.d(TAG, "$result")
-        return result
+        val pagedFilmFilteredList: PagedFilmFilteredList? = loadResult.first
+        val error: Boolean = loadResult.second
+        return if (pagedFilmFilteredList == null) {
+            Pair(first = null, second = error)
+        } else {
+            Pair(first = extendFilmsFiltered(pagedFilmFilteredList), second = error)
+        }
     }
 
-    suspend fun getFilmInfo(filmId: Int): FilmInfo? {
-        return retrofit.getFilmInfo(filmId)
+    // Получение из API данных фильма FilmInfo по filmId, с переключением ключей API.
+    private suspend fun getStaff(filmId: Int): Pair<List<StaffInfo>?, Boolean> {
+        for (i in 0..3) {
+            Log.d(TAG, "getStaff($filmId). apiKey = $currentApiKey")
+            kotlin.runCatching {
+                retrofit.getStaff(apiKey = currentApiKey, filmId = filmId)
+            }.fold(
+                onSuccess = {
+                    Log.d(TAG, "getStaff($filmId). Успешная загрузка на итерации $i")
+                    return Pair(first = it, second = false)
+                },
+                onFailure = {
+                    Log.d(TAG, "getStaff($filmId). Ошибка загрузки из Api. ${it.message ?: ""}")
+                    changeApiKey()
+                }
+            )
+        }
+        return Pair(first = null, second = true)
     }
 
-    suspend fun getFromApiFilmInfoDb(filmId: Int): FilmInfoDb {
-        val filmInfo = retrofit.getFilmInfo(filmId)
-        val staffInfo = retrofit.getStaff(filmId)
-        val gallery = getAllGallery(filmId)
-        val similars = retrofit.getSimilars(filmId).items
+    // Получение из API данных персонала List<StaffTable> по filmId.
+    // StaffTable - класс для взаимодействия с БД.
+    private suspend fun getFromApiStaffTableList(filmId: Int): Pair<List<StaffTable>?, Boolean> {
+        val apiLoadResult = getStaff(filmId)
+        val staffInfoList: List<StaffInfo>? = apiLoadResult.first
+        val error: Boolean = apiLoadResult.second
 
-        val countries: MutableList<CountryTable> =
-            emptyList<CountryTable>().toMutableList()
-        val genres: MutableList<GenreTable> =
-            emptyList<GenreTable>().toMutableList()
-        val staffList: MutableList<StaffTable> =
-            emptyList<StaffTable>().toMutableList()
-        val images: MutableList<ImageTable> =
-            emptyList<ImageTable>().toMutableList()
-        val similarFilms: MutableList<SimilarFilmTable> =
-            emptyList<SimilarFilmTable>().toMutableList()
+        if (error) return Pair(first = null, second = true)
+        if (staffInfoList == null) return Pair(first = null, second = false)
 
-        filmInfo?.countries?.forEach { countryClass ->
-            countries.add(
-                CountryTable(
-                    filmId = filmId,
-                    country = countryClass.country
-                )
-            )
-        }
-        filmInfo?.genres?.forEach { genreClass ->
-            genres.add(
-                GenreTable(
-                    filmId = filmId,
-                    genre = genreClass.genre
-                )
-            )
-        }
-        staffInfo.forEach { staff ->
-            staffList.add(
+        val staffTableList: MutableList<StaffTable> = mutableListOf()
+        staffInfoList.forEach { staffInfo ->
+            staffTableList.add(
                 StaffTable(
                     filmId = filmId,
-                    staffId = staff.staffId,
-                    name = staff.nameRu ?: staff.nameEn ?: "",
-                    description = staff.description,
-                    posterUrl = staff.posterUrl,
-                    professionText = staff.professionText,
-                    professionKey = staff.professionKey
+                    staffId = staffInfo.staffId,
+                    name = staffInfo.nameRu ?: staffInfo.nameEn ?: "",
+                    description = staffInfo.description,
+                    posterUrl = staffInfo.posterUrl,
+                    professionText = staffInfo.professionText,
+                    professionKey = staffInfo.professionKey
                 )
             )
         }
-        gallery.forEach { image ->
-            images.add(
-                ImageTable(
-                    filmId = filmId,
-                    image = image.imageUrl,
-                    preview = image.previewUrl,
-                    type = image.type
-                )
-            )
-        }
-        similars.forEach { similarFilm ->
-            similarFilms.add(
-                SimilarFilmTable(
-                    filmId = filmId,
-                    similarFilmId = similarFilm.filmId,
-                    name = similarFilm.nameRu ?: similarFilm.nameEn ?: similarFilm.nameOriginal
-                    ?: "",
-                    posterUrlPreview = similarFilm.posterUrlPreview
-                )
-            )
-        }
-
-        return FilmInfoDb(
-            filmTable = FilmTable(
-                filmId = filmId,
-                name = filmInfo?.nameRu ?: filmInfo?.nameEn ?: filmInfo?.nameOriginal ?: "",
-                poster = filmInfo?.posterUrl ?: "",
-                posterSmall = filmInfo?.posterUrlPreview ?: "",
-                rating = filmInfo?.ratingKinopoisk,
-                year = filmInfo?.year,
-                length = filmInfo?.filmLength,
-                description = filmInfo?.description,
-                shortDescription = filmInfo?.shortDescription,
-                ratingAgeLimits = filmInfo?.ratingAgeLimits
-            ),
-            countries = countries.toList(),
-            genres = genres.toList(),
-            collections = emptyList(),
-            staffList = staffList.toList(),
-            images = images.toList(),
-            similarFilms = similarFilms.toList()
-        )
+        return Pair(first = staffTableList.toList(), second = false)
     }
 
-    suspend fun getSerialInfo(filmId: Int): SerialInfo {
-        return retrofit.getSerialInfo(filmId)
+    // Получение данных данных персонала List<StaffTable> по filmId.
+    // Эта функция запрашивает из БД, если нет, то берёт из API, и записывает в БД.
+    suspend fun getStaffTableList(filmId: Int): Pair<List<StaffTable>?, Boolean> {
+        var staffTableList: List<StaffTable>? = dao.getStaffTableList(filmId)
+        val apiLoadStaffTableListResult: Pair<List<StaffTable>?, Boolean>
+        val error: Boolean
+
+        if (staffTableList.isNullOrEmpty()) {
+            apiLoadStaffTableListResult = getFromApiStaffTableList(filmId)
+            staffTableList = apiLoadStaffTableListResult.first
+            error = apiLoadStaffTableListResult.second
+            if (!staffTableList.isNullOrEmpty()) {
+                Log.d(TAG, "Данные персонала фильма $filmId загружены из API")
+                addStaffTableList(staffTableList)
+                Log.d(TAG, "Данные персонала фильма $filmId записаны в БД")
+            }
+        } else {
+            Log.d(TAG, "Данные персонала фильма $filmId загружены из БД")
+            Log.d(TAG, staffTableList.toString())
+            error = false
+        }
+
+        return Pair(first = staffTableList, second = error)
     }
 
-    suspend fun getFromApiSerialInfoDb(filmId: Int): SerialInfoDb {
-        val serialInfo = retrofit.getSerialInfo(filmId)
+    // Получение из API данных фильма SerialInfo по filmId, с переключением ключей API.
+    private suspend fun getSerialInfo(filmId: Int): Pair<SerialInfo?, Boolean> {
+        for (i in 0..3) {
+            Log.d(TAG, "getSerialInfo($filmId). apiKey = $currentApiKey")
+            kotlin.runCatching {
+                retrofit.getSerialInfo(apiKey = currentApiKey, filmId = filmId)
+            }.fold(
+                onSuccess = {
+                    Log.d(TAG, "getSerialInfo($filmId). Успешная загрузка на итерации $i")
+                    return Pair(first = it, second = false)
+                },
+                onFailure = {
+                    Log.d(
+                        TAG,
+                        "getSerialInfo($filmId). Ошибка загрузки из Api. ${it.message ?: ""}"
+                    )
+                    changeApiKey()
+                }
+            )
+        }
+        return Pair(first = null, second = true)
+    }
+
+    // Получение из API данных сериала SerialInfoDb по filmId.
+    // SerialInfoDb - класс для взаимодействия с БД.
+    private suspend fun getFromApiSerialInfoDb(filmId: Int): Pair<SerialInfoDb?, Boolean> {
+        val apiLoadResult = getSerialInfo(filmId)
+        val serialInfo: SerialInfo? = apiLoadResult.first
+        val error: Boolean = apiLoadResult.second
+
+        if (error) return Pair(first = null, second = true)
+        if (serialInfo == null) return Pair(first = null, second = false)
+
         val seasonsWithEpisodes: MutableList<SeasonsWithEpisodes> =
             emptyList<SeasonsWithEpisodes>().toMutableList()
         serialInfo.items.forEach { season ->
@@ -397,22 +803,45 @@ class Repository @Inject constructor(private val dao: FilmDao) {
                 )
             )
         }
-        return SerialInfoDb(
-            serialTable = SerialTable(
-                filmId = filmId,
-                totalSeasons = serialInfo.total
+        return Pair(
+            first = SerialInfoDb(
+                serialTable = SerialTable(
+                    filmId = filmId,
+                    totalSeasons = serialInfo.total
+                ),
+                seasonsWithEpisodes = seasonsWithEpisodes.toList()
             ),
-            seasonsWithEpisodes = seasonsWithEpisodes.toList()
+            second = false
         )
     }
 
-    suspend fun getAllStaffList(filmId: Int): List<StaffInfo> {
-        return retrofit.getStaff(filmId)
+    // Получение данных сериала SerialInfoDb по filmId.
+    // Эта функция запрашивает из БД, если нет, то берёт из API, и записывает в БД.
+    suspend fun getSerialInfoDb(filmId: Int): Pair<SerialInfoDb?, Boolean> {
+        var serialInfoDb: SerialInfoDb? = dao.getSerialInfoDb(filmId)
+        val apiLoadSerialInfoDbResult: Pair<SerialInfoDb?, Boolean>
+        val error: Boolean
+
+        if (serialInfoDb == null) {
+            apiLoadSerialInfoDbResult = getFromApiSerialInfoDb(filmId)
+            serialInfoDb = apiLoadSerialInfoDbResult.first
+            error = apiLoadSerialInfoDbResult.second
+            if (serialInfoDb != null) {
+                Log.d(TAG, "Данные сериала $filmId загружены из API")
+                addSerialInfoDb(serialInfoDb)
+                Log.d(TAG, "Данные сериала $filmId записаны в БД")
+            }
+        } else {
+            Log.d(TAG, "Данные сериала $filmId загружены из БД")
+            error = false
+        }
+
+        return Pair(first = serialInfoDb, second = error)
     }
 
-    fun divideStaffByType(allStaffList: List<StaffInfo>): ActorsAndStaff {
-        val actorsList: MutableList<StaffInfo> = emptyList<StaffInfo>().toMutableList()
-        val staffList: MutableList<StaffInfo> = emptyList<StaffInfo>().toMutableList()
+    fun divideStaffByType(allStaffList: List<StaffTable>): ActorsAndStaff {
+        val actorsList: MutableList<StaffTable> = mutableListOf()
+        val staffList: MutableList<StaffTable> = mutableListOf()
         allStaffList.forEach {
             if (it.professionKey == "ACTOR") actorsList.add(it)
             else staffList.add(it)
@@ -420,10 +849,40 @@ class Repository @Inject constructor(private val dao: FilmDao) {
         return ActorsAndStaff(actorsList.toList(), staffList.toList())
     }
 
-    suspend fun getAllGallery(
-        filmId: Int
-    ): List<ImageWithType> {
-        val summaryList: MutableList<ImageWithType> = emptyList<ImageWithType>().toMutableList()
+    // Получение из API данных фильма SerialInfo по filmId, с переключением ключей API.
+    private suspend fun getImages(
+        filmId: Int,
+        type: String,
+        page: Int
+    ): Pair<PagedImages?, Boolean> {
+        for (i in 0..3) {
+            Log.d(TAG, "getImages($filmId). apiKey = $currentApiKey")
+            kotlin.runCatching {
+                retrofit.getImages(
+                    apiKey = currentApiKey,
+                    filmId = filmId,
+                    type = type,
+                    page = page
+                )
+            }.fold(
+                onSuccess = {
+                    Log.d(TAG, "getImages($filmId). Успешная загрузка на итерации $i")
+                    return Pair(first = it, second = false)
+                },
+                onFailure = {
+                    Log.d(TAG, "getImages($filmId). Ошибка загрузки из Api. ${it.message ?: ""}")
+                    changeApiKey()
+                }
+            )
+        }
+        return Pair(first = null, second = true)
+    }
+
+    // Получение из API списка изображений по filmId.
+    // ImageTable - класс для взаимодействия с БД.
+    private suspend fun getFromApiAllGallery(filmId: Int): Pair<List<ImageTable>?, Boolean> {
+        val summaryList: MutableList<ImageTable> = mutableListOf()
+        var error = true
         listOf(
             "STILL",
             "SHOOTING",
@@ -437,28 +896,61 @@ class Repository @Inject constructor(private val dao: FilmDao) {
         ).forEach { type ->
             var page = 1
             do {
-                val pagedImages = retrofit.getImages(filmId = filmId, type = type, page = page)
-                pagedImages.items.forEach { image ->
-                    summaryList.add(
-                        ImageWithType(
-                            type = type,
-                            imageUrl = image.imageUrl,
-                            previewUrl = image.previewUrl
+                val pagedImages = getImages(filmId = filmId, type = type, page = page)
+                if (pagedImages.first != null && !pagedImages.second) {
+                    pagedImages.first!!.items.forEach { image ->
+                        summaryList.add(
+                            ImageTable(
+                                filmId = filmId,
+                                image = image.imageUrl,
+                                preview = image.previewUrl,
+                                type = type
+                            )
                         )
-                    )
+                    }
+                    error = false // Если хоть одно изображение получено, ошибки загрузки нет.
                 }
-            } while (page < 20 && pagedImages.totalPages > page++)
+            } while (page < 20 && (pagedImages.first?.totalPages ?: 0) > page++)
         }
-        return summaryList.toList()
+        return if (error) Pair(first = null, second = true)
+        else Pair(first = summaryList.toList(), second = false)
     }
 
-    suspend fun getImages(
+    // Получение списка изображений по filmId.
+    // Эта функция запрашивает из БД, если нет, то берёт из API, и записывает в БД.
+    suspend fun getAllGallery(filmId: Int): Pair<List<ImageTable>?, Boolean> {
+        var imageTableList: List<ImageTable>? = dao.getImageTableList(filmId)
+        val apiLoadAllGalleryResult: Pair<List<ImageTable>?, Boolean>
+        val error: Boolean
+
+        if (imageTableList.isNullOrEmpty()) {
+            apiLoadAllGalleryResult = getFromApiAllGallery(filmId)
+            imageTableList = apiLoadAllGalleryResult.first
+            error = apiLoadAllGalleryResult.second
+            if (!imageTableList.isNullOrEmpty()) {
+                Log.d(TAG, "Список изображений $filmId загружен из API")
+                addImageTableList(imageTableList)
+                Log.d(TAG, "Список изображений $filmId записан в БД")
+            }
+        } else {
+            Log.d(TAG, "Список изображений $filmId загружен из БД")
+            Log.d(TAG, imageTableList.toString())
+            error = false
+        }
+
+        return Pair(first = imageTableList, second = error)
+    }
+
+    // Получение списка изображений, включая изображение, с которого был переход на список.
+    // Тип изображений в итоговом списке соответствует типу того, с которого был переход.
+    suspend fun getImagesWithCurrentImage(
         filmId: Int,
         currentImage: String,
         imagesType: Int
-    ): List<String> {
+    ): Pair<List<String>?, Boolean> {
         Log.d("Pager", "Repository. chosenImage = $currentImage")
         val resultImageList: MutableList<String> = mutableListOf(currentImage)
+        var error = true
         val types: List<String> = when (imagesType) {
             0 -> listOf(
                 "STILL",
@@ -482,138 +974,115 @@ class Repository @Inject constructor(private val dao: FilmDao) {
             else -> listOf("SCREENSHOT")
         }
         types.forEach { type ->
-            var page = 1
-            do {
-                val pagedImages = retrofit.getImages(filmId = filmId, type = type, page = page)
-                pagedImages.items.forEach { image ->
-                    resultImageList.add(image.imageUrl)
-                }
-            } while (pagedImages.totalPages > page++)
+            var imagesList: List<String>? = dao.getImagesOfType(filmId = filmId, type = type)
+            if (imagesList == null) {
+                var page = 1
+                val imagesListFromApi: MutableList<String> = mutableListOf()
+                do {
+                    val apiLoadImagesOfTypeResult: Pair<PagedImages?, Boolean> =
+                        getImages(filmId = filmId, type = type, page = page)
+                    val pagedImages: PagedImages? = apiLoadImagesOfTypeResult.first
+                    val imageTableList: MutableList<ImageTable> = mutableListOf()
+                    if (!apiLoadImagesOfTypeResult.second && pagedImages != null && pagedImages.items.isNotEmpty()) {
+                        Log.d(TAG, "Изображения $filmId типа $type загружены из API (page $page)")
+                        pagedImages.items.forEach { image ->
+                            imageTableList.add(
+                                ImageTable(
+                                    filmId = filmId,
+                                    image = image.imageUrl,
+                                    preview = image.previewUrl,
+                                    type = type
+                                )
+                            )
+                        }
+                        addImageTableList(imageTableList)
+                        Log.d(TAG, "Изображения $filmId типа $type записаны в БД (page $page)")
+                    }
+                    imagesListFromApi.addAll(imageTableList.map { imageTable -> imageTable.image })
+                } while ((pagedImages?.totalPages ?: 0) > page++)
+                imagesList = imagesListFromApi.toList()
+            } else {
+                Log.d(TAG, "Изображения $filmId типа $type загружены из БД")
+            }
+            if (imagesList.isNotEmpty()) {
+                resultImageList.addAll(imagesList)
+                error = false // Если хоть одно изображение получено, ошибки загрузки нет.
+            }
         }
         val resultImageSet: Set<String> = resultImageList.toSet().minus("")
-        return resultImageSet.toList()
+
+        return if (error) Pair(first = null, second = true)
+        else Pair(first = resultImageSet.toList(), second = false)
     }
 
-    suspend fun getSimilars(filmId: Int): SimilarFilmList {
-        return retrofit.getSimilars(filmId)
-    }
-
-    suspend fun getPersonInfo(personId: Int): PersonInfo {
-        return retrofit.getPersonInfo(personId)
-    }
-
-    suspend fun getFromApiPersonInfoDb(personId: Int): PersonInfoDb {
-        val personInfo = retrofit.getPersonInfo(personId)
-        val filmsOfPerson: MutableList<FilmOfPersonTable> =
-            emptyList<FilmOfPersonTable>().toMutableList()
-//        val sortedFilmsOfPerson: MutableList<FilmOfPersonTable> =
-//            emptyList<FilmOfPersonTable>().toMutableList()
-        personInfo.films.forEach { film ->
-            filmsOfPerson.add(
-                FilmOfPersonTable(
-                    personId = personId,
-                    filmId = film.filmId,
-                    name = film.nameRu ?: film.nameEn ?: "",
-                    rating = film.rating?.toFloatOrNull(),
-                    professionKey = film.professionKey
-                )
-            )
-        }
-        val sortedFilmsOfPerson =
-            filmsOfPerson.sortedByDescending { filmOfPersonTable -> filmOfPersonTable.rating }
-//        filmsOfPerson.sortedByDescending { filmOfPersonTable -> filmOfPersonTable.rating }
-//            .forEach { film ->
-//                sortedFilmsOfPerson.add(film)
-//            }
-        return PersonInfoDb(
-            personTable = PersonTable(
-                personId = personId,
-                name = personInfo.nameRu ?: personInfo.nameEn,
-                sex = personInfo.sex,
-                posterUrl = personInfo.posterUrl,
-                profession = personInfo.profession
-            ),
-            filmsOfPerson = sortedFilmsOfPerson
-        )
-    }
-
-//    suspend fun getPersonFilms(filmIDs: List<Int>): List<FilmInfo> {
-//        val resultFilmList: MutableList<FilmInfo> = emptyList<FilmInfo>().toMutableList()
-//        filmIDs.forEach { filmId -> resultFilmList.add(retrofit.getFilmInfo(filmId)) }
-//        Log.d("StaffFilmIDs", resultFilmList.size.toString())
-//        return resultFilmList.toList()
-//    }
-
-//    suspend fun getPersonFilmsDetailed(films: List<FilmOfPersonTable>): List<FilmOfStaff> {
-//        val filmsDetailedList: MutableList<FilmOfStaff> = emptyList<FilmOfStaff>().toMutableList()
-//        films.forEach { film ->
-//            var filmInfoDb = getFilmInfoDb(film.filmId)
-//            if (filmInfoDb == null) {
-//                Log.d(TAG, "Фильм ${film.filmId} не обнаружен в БД")
-//                kotlin.runCatching {
-//                    getFromApiFilmInfoDb(film.filmId)
-//                }.fold(
-//                    onSuccess = {
-//                        filmInfoDb = it
-//                        Log.d(TAG, "Фильм ${film.filmId} загружен из Api")
-//                        addFilmInfoDb(it)
-//                        Log.d(TAG, "Фильм ${film.filmId} записан в БД")
-//                    },
-//                    onFailure = {
-//                        Log.d(TAG, "Фильм не загрузился ни из БД, ни из Api. ${it.message ?: ""}")
-//                    }
-//                )
-//            } else Log.d(TAG, "Фильм ${film.filmId} загружен из БД")
-//            if (filmInfoDb != null) {
-//                filmsDetailedList.add(
-//                    FilmOfStaff(
-//                        filmId = filmInfoDb!!.filmTable.filmId,
-//                        name = filmInfoDb!!.filmTable.name,
-//                        poster = filmInfoDb!!.filmTable.posterSmall,
-//                        rating = filmInfoDb!!.filmTable.rating,
-//                        year = filmInfoDb!!.filmTable.year,
-//                        genres = convertStringListToString(
-//                            convertClassListToStringList(filmInfoDb!!.genres)
-//                        ),
-//                        profession = film.professionKey
-//                    )
-//                )
-//            }
-//        }
-//        return filmsDetailedList.toList()
-//    }
-
-    suspend fun getPersonFilmDetailed(film: FilmOfPersonTable): FilmOfStaff? {
-        var filmInfoDb = getFilmInfoDb(film.filmId)
-        if (filmInfoDb == null) {
-            Log.d(TAG, "Фильм ${film.filmId} не обнаружен в БД")
+    // Получение из API похожих фильмов SimilarFilmList по filmId, с переключением ключей API.
+    private suspend fun getSimilars(filmId: Int): Pair<SimilarFilmList?, Boolean> {
+        for (i in 0..3) {
+            Log.d(TAG, "getSimilars($filmId). apiKey = $currentApiKey")
             kotlin.runCatching {
-                getFromApiFilmInfoDb(film.filmId)
+                retrofit.getSimilars(apiKey = currentApiKey, filmId = filmId)
             }.fold(
                 onSuccess = {
-                    filmInfoDb = it
-                    Log.d(TAG, "Фильм ${film.filmId} загружен из Api")
-                    addFilmInfoDb(it)
-                    Log.d(TAG, "Фильм ${film.filmId} записан в БД")
+                    Log.d(TAG, "getSimilars($filmId). Успешная загрузка на итерации $i")
+                    return Pair(first = it, second = false)
                 },
                 onFailure = {
-                    Log.d(TAG, "Фильм не загрузился ни из БД, ни из Api. ${it.message ?: ""}")
+                    Log.d(TAG, "getSimilars($filmId). Ошибка загрузки из Api. ${it.message ?: ""}")
+                    changeApiKey()
                 }
             )
-        } else Log.d(TAG, "Фильм ${film.filmId} загружен из БД")
-        return if (filmInfoDb != null) {
-            FilmOfStaff(
-                filmId = filmInfoDb!!.filmTable.filmId,
-                name = filmInfoDb!!.filmTable.name,
-                poster = filmInfoDb!!.filmTable.posterSmall,
-                rating = filmInfoDb!!.filmTable.rating,
-                year = filmInfoDb!!.filmTable.year,
-                genres = convertStringListToString(
-                    convertClassListToStringList(filmInfoDb!!.genres)
-                ),
-                profession = film.professionKey
-            )
-        } else null
+        }
+        return Pair(first = null, second = true)
+    }
+
+    // Получение из API похожих фильмов List<SimilarFilmTable> по filmId.
+    // SimilarFilmTable - класс для взаимодействия с БД.
+    private suspend fun getFromApiSimilarFilmTableList(filmId: Int): Pair<List<SimilarFilmTable>?, Boolean> {
+        val apiLoadResult = getSimilars(filmId)
+        val similarFilmList: SimilarFilmList? = apiLoadResult.first
+        val error: Boolean = apiLoadResult.second
+        if (similarFilmList == null || error) {
+            return Pair(first = null, second = error)
+        } else {
+            val similarFilmTableList: MutableList<SimilarFilmTable> = mutableListOf()
+            similarFilmList.items.forEach { similarFilm ->
+                val name = similarFilm.nameRu ?: similarFilm.nameEn ?: similarFilm.nameOriginal
+                if (name != null) {
+                    similarFilmTableList.add(
+                        SimilarFilmTable(
+                            filmId = filmId,
+                            similarFilmId = similarFilm.filmId,
+                            name = name,
+                            posterUrlPreview = similarFilm.posterUrlPreview
+                        )
+                    )
+                }
+            }
+            return Pair(first = similarFilmTableList.toList(), second = false)
+        }
+    }
+
+    // Получение похожих фильмов List<SimilarFilmTable> по filmId.
+    // Эта функция запрашивает из БД, если нет, то берёт из API, и записывает в БД.
+    suspend fun getSimilarFilmTableList(filmId: Int): Pair<List<SimilarFilmTable>?, Boolean> {
+        var similarFilmTableList: List<SimilarFilmTable>? = dao.getSimilarFilmTableList(filmId)
+        val error: Boolean
+
+        if (similarFilmTableList.isNullOrEmpty()) {
+            val apiLoadSimilarsResult: Pair<List<SimilarFilmTable>?, Boolean> = getFromApiSimilarFilmTableList(filmId)
+            similarFilmTableList = apiLoadSimilarsResult.first
+            error = apiLoadSimilarsResult.second
+            if (!similarFilmTableList.isNullOrEmpty()) {
+                Log.d(TAG, "Похожие фильмы $filmId загружены из API")
+                addSimilarFilmTable(similarFilmTableList)
+                Log.d(TAG, "Похожие фильмы $filmId записаны в БД")
+            }
+        } else {
+            Log.d(TAG, "Похожие фильмы $filmId загружены из БД")
+            error = false
+        }
+        Log.d(TAG, similarFilmTableList.toString())
+        return Pair(first = similarFilmTableList, second = error)
     }
 
     fun convertClassListToStringList(anyList: List<Any>): List<String> {
@@ -661,25 +1130,6 @@ class Repository @Inject constructor(private val dao: FilmDao) {
         }
     }
 
-//    fun genresListToString(genres: List<Genre>): String {
-//        var resultString = ""
-//        genres.forEachIndexed { index, genre ->
-//            if (index == 0) resultString = genre.genre
-//            else resultString += ", " + genre.genre
-//        }
-//        return resultString
-//    }
-
-//    fun filmsQuantityToText(quantity: Int, baseWord: String): String {
-//        val remOfDivBy10 = quantity % 10
-//        val remOfDivBy100 = quantity % 100
-//        return "$quantity $baseWord" + when (remOfDivBy10) {
-//            1 -> if (remOfDivBy100 == 11) "ов" else ""
-//            in 2..4 -> if (remOfDivBy100 == 12) "ов" else "а"
-//            else -> "ов"
-//        }
-//    }
-
 // Функции с запросами Dao
 
     // Запрос на добавление новой записи любимого фильма
@@ -713,79 +1163,28 @@ class Repository @Inject constructor(private val dao: FilmDao) {
     }
 
     // Запрос на добавление персонала фильма
-    suspend fun addStaffTable(filmId: Int, staffInfoList: List<StaffInfo>) {
-        staffInfoList.forEach { staffInfo ->
-            dao.addStaffTable(
-                StaffTable(
-                    filmId = filmId,
-                    staffId = staffInfo.staffId,
-                    name = staffInfo.nameRu ?: staffInfo.nameEn ?: "",
-                    description = staffInfo.description,
-                    posterUrl = staffInfo.posterUrl,
-                    professionText = staffInfo.professionText,
-                    professionKey = staffInfo.professionKey
-                )
-            )
-        }
+    suspend fun addStaffTableList(staffTableList: List<StaffTable>) {
+        staffTableList.forEach { staffTable -> dao.addStaffTable(staffTable) }
     }
 
     // Запрос на добавление галереи фильма
-    suspend fun addImageTable(filmId: Int, imageWithTypeList: List<ImageWithType>) {
-        imageWithTypeList.forEach { imageWithType ->
-            dao.addImageTable(
-                ImageTable(
-                    filmId = filmId,
-                    image = imageWithType.imageUrl,
-                    preview = imageWithType.previewUrl,
-                    type = imageWithType.type
-                )
-            )
-        }
+    suspend fun addImageTableList(imageTableList: List<ImageTable>) {
+        imageTableList.forEach { imageWithType -> dao.addImageTable(imageWithType) }
     }
 
     // Запрос на добавление похожих фильмов
-    suspend fun addSimilarFilmTable(filmId: Int, similarFilmList: List<SimilarFilm>) {
-        similarFilmList.forEach { similarFilm ->
-            dao.addSimilarFilmTable(
-                SimilarFilmTable(
-                    filmId = filmId,
-                    similarFilmId = similarFilm.filmId,
-                    name = similarFilm.nameRu ?: similarFilm.nameEn ?: similarFilm.nameOriginal
-                    ?: "",
-                    posterUrlPreview = similarFilm.posterUrlPreview
-                )
-            )
-        }
+    suspend fun addSimilarFilmTable(similarFilmTableList: List<SimilarFilmTable>) {
+        similarFilmTableList.forEach { similarFilmTable -> dao.addSimilarFilmTable(similarFilmTable) }
     }
 
     // Запрос на добавление в БД данных фильма FilmDb
-    suspend fun addFilmDb(filmDb: FilmDb) {
+    private suspend fun addFilmDb(filmDb: FilmDb) {
         dao.addFilmTable(filmDb.filmTable)
         filmDb.countries.forEach { countryTable ->
             dao.addCountryTable(countryTable)
         }
         filmDb.genres.forEach { genreTable ->
             dao.addGenreTable(genreTable)
-        }
-    }
-
-    // Запрос на добавление в БД данных фильма FilmInfoDb
-    suspend fun addFilmInfoDb(filmInfoDb: FilmInfoDb) {
-        dao.addFilmTable(filmInfoDb.filmTable)
-        filmInfoDb.countries.forEach { countryTable ->
-            dao.addCountryTable(countryTable)
-        }
-        filmInfoDb.genres.forEach { genreTable ->
-            dao.addGenreTable(genreTable)
-        }
-        filmInfoDb.staffList.forEach { staffTable ->
-            dao.addStaffTable(staffTable)
-        }
-        filmInfoDb.images.forEach { imageTable ->
-            dao.addImageTable(imageTable)
-        }
-        filmInfoDb.similarFilms.forEach { similarFilmTable ->
-            dao.addSimilarFilmTable(similarFilmTable)
         }
     }
 
@@ -808,95 +1207,25 @@ class Repository @Inject constructor(private val dao: FilmDao) {
         }
     }
 
-    // Запрос на проверку наличия записи данных фильма в БД
-    suspend fun isFilmDataExists(searchedFilmId: Int): Boolean {
-        return dao.isFilmDataExists(
-            searchedFilmId
-        )
-    }
-
     // Запрос на получение данных фильма FilmDb по filmId
-    suspend fun getFilmDbViewed(filmId: Int): FilmDbViewed? {
-        var filmDb: FilmDb? = dao.getFilmDbFromDao(filmId)
-        val viewed: Boolean = dao.isFilmExistsInViewed(filmId)
-        var filmInfo: FilmInfo?
-        val countries: MutableList<CountryTable> =
-            emptyList<CountryTable>().toMutableList()
-        val genres: MutableList<GenreTable> =
-            emptyList<GenreTable>().toMutableList()
-        if (filmDb == null) {
-            kotlin.runCatching {
-                getFilmInfo(filmId)
-            }.fold(
-                onSuccess = {
-                    filmInfo = it
-
-                    filmInfo?.countries?.forEach { countryClass ->
-                        countries.add(
-                            CountryTable(
-                                filmId = filmId,
-                                country = countryClass.country
-                            )
-                        )
-                    }
-                    filmInfo?.genres?.forEach { genreClass ->
-                        genres.add(
-                            GenreTable(
-                                filmId = filmId,
-                                genre = genreClass.genre
-                            )
-                        )
-                    }
-                    if (filmInfo != null) {
-                        filmDb = FilmDb(
-                            filmTable = FilmTable(
-                                filmId = filmInfo!!.kinopoiskId,
-                                name = filmInfo!!.nameRu ?: filmInfo!!.nameEn
-                                ?: filmInfo!!.nameOriginal ?: "",
-                                poster = filmInfo!!.posterUrl,
-                                posterSmall = filmInfo!!.posterUrlPreview,
-                                rating = filmInfo!!.ratingKinopoisk,
-                                year = filmInfo!!.year,
-                                length = filmInfo!!.filmLength,
-                                description = filmInfo!!.description,
-                                shortDescription = filmInfo!!.shortDescription,
-                                ratingAgeLimits = filmInfo!!.ratingAgeLimits
-                            ),
-                            countries = countries.toList(),
-                            genres = genres.toList()
-                        )
-                        addFilmDb(filmDb!!)
-                        Log.d(TAG, "Фильм $filmId записан в БД")
-                    }
-                },
-                onFailure = {
-                    Log.d(TAG, "Фильм не загрузился ни из БД, ни из Api")
-                }
-            )
-        } else Log.d(TAG, "Фильм $filmId загружен из БД")
-        return filmDb?.let { FilmDbViewed(filmDb = it, viewed = viewed) }
-    }
-
-    // Запрос на получение данных фильма по filmId
-    suspend fun getFilmInfoDb(filmId: Int): FilmInfoDb? {
-        return dao.getFilmInfoDb(
+    suspend fun getFilmDb(filmId: Int): FilmDb? {
+        return dao.getFilmDb(
             filmId
         )
     }
 
-    suspend fun getAllStaffFromDb(filmId: Int): List<StaffTable>? {
-        return dao.getAllStaffFromDb(filmId)
+    // Запрос на получение данных персонала фильма по filmId
+    suspend fun getFromDaoStaffTableList(filmId: Int): List<StaffTable>? {
+        return dao.getStaffTableList(filmId)
     }
 
-    // Запрос на проверку наличия записи данных сериала в БД
-    suspend fun isSerialDataExists(searchedFilmId: Int): Boolean {
-        return dao.isSerialDataExists(
-            searchedFilmId
-        )
+    // Запрос на получение галереи фильма по filmId
+    suspend fun getFromDaoImageTableList(filmId: Int): List<ImageTable>? {
+        return dao.getImageTableList(filmId)
     }
 
     // Запрос на получение данных сериала по filmId
-    suspend fun getSerialInfoDb(filmId: Int): SerialInfoDb {
+    suspend fun getFromDaoSerialInfoDb(filmId: Int): SerialInfoDb? {
         return dao.getSerialInfoDb(
             filmId
         )
@@ -915,52 +1244,22 @@ class Repository @Inject constructor(private val dao: FilmDao) {
     }
 
     // Запрос на получение данных персонала по personId, и сортировка по убыванию рейтинга
-    suspend fun getPersonInfoDb(personId: Int): PersonInfoDb {
+    suspend fun getFromDaoPersonInfoDb(personId: Int): PersonInfoDb? {
         val personInfoDb = dao.getPersonInfoDb(personId)
         val sortedFilmsOfPerson: MutableList<FilmOfPersonTable> =
             emptyList<FilmOfPersonTable>().toMutableList()
-        personInfoDb.filmsOfPerson.sortedByDescending { filmOfPersonTable -> filmOfPersonTable.rating }
-            .forEach { film ->
-                sortedFilmsOfPerson.add(film)
-            }
-        return PersonInfoDb(
-            personTable = personInfoDb.personTable,
-            filmsOfPerson = sortedFilmsOfPerson.toList()
-        )
+        return if (personInfoDb == null) null
+        else {
+            personInfoDb.filmsOfPerson.sortedByDescending { filmOfPersonTable -> filmOfPersonTable.rating }
+                .forEach { film ->
+                    sortedFilmsOfPerson.add(film)
+                }
+            PersonInfoDb(
+                personTable = personInfoDb.personTable,
+                filmsOfPerson = sortedFilmsOfPerson.toList()
+            )
+        }
     }
-
-// Запросы для проверки
-
-    // Запрос на получение данных фильма
-//    suspend fun getAllFilmInfoDb(): List<FilmInfoDb> {
-//        return dao.getAllFilmInfoDb()
-//    }
-
-    // Запрос для отображение всех строк таблицы
-//    suspend fun getAllFilmTable(): List<FilmTable> {
-//        return dao.getAllFilmTable()
-//    }
-
-// Запрос на очистку таблицы
-//    suspend fun clearTable() {
-//        dao.clearTable()
-//    }
-//    private val repositoryScope = CoroutineScope(Dispatchers.Default)
-//    fun getAllFavorite(): StateFlow<List<Favorite>> {
-//        Log.d("BD", "Репозиторий. Пытаемся запросить все любымые фильмы")
-//        return dao.getAllFavorite()
-//            .stateIn(
-//                scope = repositoryScope,
-//                started = SharingStarted.WhileSubscribed(5000L),
-//                initialValue = emptyList()
-//            )
-//    }
-//    val allFavorite = dao.getAllFavorite()
-//        .stateIn(
-//            scope = repositoryScope,
-//            started = SharingStarted.WhileSubscribed(5000L),
-//            initialValue = emptyList()
-//        )
 
     // Запрос на проверку наличия фильма в указанной коллекции
     suspend fun isFilmExistsInCollection(filmId: Int, collectionName: String): Boolean {
@@ -978,7 +1277,7 @@ class Repository @Inject constructor(private val dao: FilmDao) {
     }
 
     // Запрос на получение списка id фильмов коллекции
-    suspend fun getCollectionFilmsIds(collectionName: String): List<Int> {
+    suspend fun getCollectionFilmsIds(collectionName: String): List<Int>? {
         return dao.getCollectionFilmsIds(collectionName)
     }
 
@@ -1024,15 +1323,20 @@ class Repository @Inject constructor(private val dao: FilmDao) {
         return collectionFilmList.toList()
     }
 
-    // Запрос на добавление пустой колекции без фильмов
+    // Запрос на добавление пустой коллекции без фильмов
     suspend fun addCollection(collection: CollectionExisting) {
         dao.addCollection(collection)
     }
 
-    // Запрос на удаление колекции и фильмов в ней
+    // Запрос на удаление коллекции и фильмов в ней
     suspend fun deleteCollection(collectionName: String) {
         dao.removeCollectionFilms(collectionName)
         dao.removeCollection(collectionName)
+    }
+
+    // Запрос на удаление всех фильмов из коллекции
+    suspend fun removeCollectionFilms(collectionName: String) {
+        dao.removeCollectionFilms(collectionName)
     }
 
     // Запрос на добавление фильма в просмотренные
@@ -1051,7 +1355,7 @@ class Repository @Inject constructor(private val dao: FilmDao) {
     }
 
     // Запрос на получение списка id просмотренных фильмов
-    suspend fun getViewedFilmsIds(): List<Int> {
+    suspend fun getViewedFilmsIds(): List<Int>? {
         return dao.getViewedFilmsIds()
     }
 
@@ -1066,8 +1370,16 @@ class Repository @Inject constructor(private val dao: FilmDao) {
     }
 
     // Запрос на добавление фильма, сериала или человека в список "Вам было интересно"
+    // с учётом ограничения длины истории в 400 элементов.
     suspend fun addInterested(interested: InterestedTable) {
-        dao.addInterested(interested)
+        if (dao.isObjectExistsInInterested(id = interested.id, type = interested.type)) {
+            dao.removeInterestedTable(id = interested.id, type = interested.type)
+            dao.addInterested(InterestedTable(id = interested.id, type = interested.type))
+        } else {
+            val interestedQuantity = dao.getInterestedQuantity()
+            if (interestedQuantity >= 400) dao.removeOldestInterested()
+            dao.addInterested(interested)
+        }
     }
 
     // Запрос на получение количества элементов в списке "Вам было интересно"
@@ -1076,64 +1388,13 @@ class Repository @Inject constructor(private val dao: FilmDao) {
     }
 
     // Запрос на получение списка id просмотренных фильмов
-    suspend fun getInterestedList(): List<InterestedTable> {
+    suspend fun getInterestedList(): List<InterestedTable>? {
         return dao.getInterestedList()
     }
 
     // Запрос на удаление всех элементов в списке "Вам было интересно"
     suspend fun removeAllInterested() {
         dao.removeAllInterested()
-    }
-
-    fun convertStaffTableListToStaffInfoList(staffTableList: List<StaffTable>): List<StaffInfo> {
-        val staffInfoList: MutableList<StaffInfo> =
-            emptyList<StaffInfo>().toMutableList()
-        staffTableList.forEach {
-            staffInfoList.add(
-                StaffInfo(
-                    staffId = it.staffId,
-                    nameRu = it.name,
-                    nameEn = null,
-                    description = it.description,
-                    posterUrl = it.posterUrl,
-                    professionText = it.professionText,
-                    professionKey = it.professionKey
-                )
-            )
-        }
-        return staffInfoList.toList()
-    }
-
-    fun convertImageTableListToImageWithTypeList(imageTableList: List<ImageTable>): List<ImageWithType> {
-        val imageWithTypeList: MutableList<ImageWithType> =
-            emptyList<ImageWithType>().toMutableList()
-        imageTableList.forEach {
-            imageWithTypeList.add(
-                ImageWithType(
-                    type = it.type,
-                    imageUrl = it.image,
-                    previewUrl = it.preview
-                )
-            )
-        }
-        return imageWithTypeList.toList()
-    }
-
-    fun convertSimilarFilmTableListToSimilarFilmList(similarFilmTableList: List<SimilarFilmTable>): List<SimilarFilm> {
-        val similarFilmList: MutableList<SimilarFilm> =
-            emptyList<SimilarFilm>().toMutableList()
-        similarFilmTableList.forEach {
-            similarFilmList.add(
-                SimilarFilm(
-                    filmId = it.similarFilmId,
-                    nameRu = it.name,
-                    nameEn = null,
-                    nameOriginal = null,
-                    posterUrlPreview = it.posterUrlPreview
-                )
-            )
-        }
-        return similarFilmList.toList()
     }
 
     fun convertLength(lengthInt: Int?): String? {
@@ -1154,18 +1415,4 @@ class Repository @Inject constructor(private val dao: FilmDao) {
 
     fun convertAgeLimit(ratingAgeLimits: String?): String? =
         if (ratingAgeLimits != null) ratingAgeLimits.removePrefix("age") + "+" else null
-
-//    fun convertImageWithTypeListToImageTableList(imageWithTypeList: List<ImageWithType>): List<ImageTable> {
-//        val imageTableList: MutableList<ImageTable> = emptyList<ImageTable>().toMutableList()
-//        imageWithTypeList.forEach {
-//            imageTableList.add(
-//                ImageTable(
-//                    type = it.type,
-//                    image = it.imageUrl,
-//                    preview = it.previewUrl
-//                )
-//            )
-//        }
-//        return imageWithTypeList.toList()
-//    }
 }

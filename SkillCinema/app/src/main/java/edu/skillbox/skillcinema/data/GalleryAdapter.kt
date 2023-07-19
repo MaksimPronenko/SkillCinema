@@ -6,15 +6,15 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import edu.skillbox.skillcinema.databinding.GalleryItemBinding
-import edu.skillbox.skillcinema.models.ImageWithType
+import edu.skillbox.skillcinema.models.ImageTable
 
 class GalleryAdapter(
     private val onClick: (String) -> Unit
 ) : RecyclerView.Adapter<GalleryViewHolder>() {
-    private var data: List<ImageWithType> = emptyList()
+    private var data: List<ImageTable> = emptyList()
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setData(data: List<ImageWithType>) {
+    fun setData(data: List<ImageTable>) {
         this.data = data
         notifyDataSetChanged()
     }
@@ -36,19 +36,15 @@ class GalleryAdapter(
 
     override fun onBindViewHolder(holder: GalleryViewHolder, position: Int) {
         val item = data.getOrNull(position)
-        with(holder.binding) {
-            item?.let {
+        if (item != null) {
+            with(holder.binding) {
                 Glide
                     .with(image.context)
-                    .load(it.previewUrl)
+                    .load(item.preview)
                     .into(image)
             }
-        }
-        holder.binding.root.setOnClickListener {
-            item?.let {
-                val currentImage: String? = it.imageUrl ?: it.previewUrl
-                if (currentImage != null)
-                    onClick(currentImage)
+            holder.binding.root.setOnClickListener {
+                onClick(item.image)
             }
         }
     }
