@@ -2,6 +2,24 @@ package edu.skillbox.skillcinema.data
 
 import androidx.room.*
 import edu.skillbox.skillcinema.models.*
+import edu.skillbox.skillcinema.models.collection.CollectionExisting
+import edu.skillbox.skillcinema.models.collection.CollectionTable
+import edu.skillbox.skillcinema.models.collection.InterestedTable
+import edu.skillbox.skillcinema.models.collection.ViewedTable
+import edu.skillbox.skillcinema.models.filmAndSerial.country.CountryTable
+import edu.skillbox.skillcinema.models.filmAndSerial.film.FilmDb
+import edu.skillbox.skillcinema.models.filmAndSerial.film.FilmTable
+import edu.skillbox.skillcinema.models.filmAndSerial.genre.GenreTable
+import edu.skillbox.skillcinema.models.filmAndSerial.image.ImageTable
+import edu.skillbox.skillcinema.models.person.filmOfPerson.FilmOfPersonTable
+import edu.skillbox.skillcinema.models.person.PersonInfoDb
+import edu.skillbox.skillcinema.models.person.PersonTable
+import edu.skillbox.skillcinema.models.filmAndSerial.serial.EpisodeTable
+import edu.skillbox.skillcinema.models.filmAndSerial.serial.SeasonTable
+import edu.skillbox.skillcinema.models.filmAndSerial.serial.SerialInfoDb
+import edu.skillbox.skillcinema.models.filmAndSerial.serial.SerialTable
+import edu.skillbox.skillcinema.models.filmAndSerial.similar.SimilarFilmTable
+import edu.skillbox.skillcinema.models.filmAndSerial.staff.StaffTable
 
 @Dao
 interface FilmDao {
@@ -71,9 +89,9 @@ interface FilmDao {
     suspend fun getFilmDb(filmId: Int): FilmDb?
 
     // Запрос на получение данных фильма FilmInfoDb по filmId
-    @Transaction
-    @Query("SELECT * FROM film_table WHERE film_id LIKE :filmId")
-    suspend fun getFilmInfoDb(filmId: Int): FilmInfoDb?
+//    @Transaction
+//    @Query("SELECT * FROM film_table WHERE film_id LIKE :filmId")
+//    suspend fun getFilmInfoDb(filmId: Int): FilmInfoDb?
 
     // Запрос на получение данных сериала по filmId
     @Transaction

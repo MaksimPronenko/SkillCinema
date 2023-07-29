@@ -28,41 +28,36 @@ class DataModule {
 
     @Provides
     @Singleton
-    fun provideRepository(dao: FilmDao): Repository {
-        return Repository(dao)
+    fun provideRepositoryFilmAndSerial(dao: FilmDao): RepositoryFilmAndSerial {
+        return RepositoryFilmAndSerial(dao)
     }
 
     @Provides
-    fun provideSeriesPagingSource(repository: Repository): SerialsPagingSource {
+    @Singleton
+    fun provideRepositoryMainLists(dao: FilmDao): RepositoryMainLists {
+        return RepositoryMainLists(dao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideRepositoryPerson(dao: FilmDao): RepositoryPerson {
+        return RepositoryPerson(dao)
+    }
+
+    @Provides
+    @Singleton
+    fun provideRepositoryCollections(dao: FilmDao): RepositoryCollections {
+        return RepositoryCollections(dao)
+    }
+
+    @Provides
+    fun provideSeriesPagingSource(repository: RepositoryMainLists): SerialsPagingSource {
         return SerialsPagingSource(repository)
     }
 
     @Provides
     @Singleton
-    fun provideSearchPagingSource(application: App, repository: Repository): SearchPagingSource {
+    fun provideSearchPagingSource(application: App, repository: RepositoryMainLists): SearchPagingSource {
         return SearchPagingSource(application, repository)
     }
 }
-
-//    @Provides
-//    fun provideFilmsTop100PopularPagingSource(repository: Repository): FilmsTop100PopularPagingSource {
-//        return FilmsTop100PopularPagingSource(repository)
-//    }
-//    @Provides
-//    fun provideFilmsTop250PagingSource(repository: Repository): FilmsTop250PagingSource {
-//        return FilmsTop250PagingSource(repository)
-//    }
-//    @Provides
-//    fun provideFilmsFilteredPagingSource(repository: Repository): FilmsFilteredPagingSource {
-//        return FilmsFilteredPagingSource(repository)
-//    }
-//    @Provides
-//    @Singleton
-//    fun provideFilmsFiltered1PagingSource(application: App, dao: FilmDao): FilmsFiltered1PagingSource {
-//        return FilmsFiltered1PagingSource(application, dao)
-//    }
-//    @Provides
-//    @Singleton
-//    fun provideFilmsFiltered2PagingSource(application: App, dao: FilmDao): FilmsFiltered2PagingSource {
-//        return FilmsFiltered2PagingSource(application, dao)
-//    }

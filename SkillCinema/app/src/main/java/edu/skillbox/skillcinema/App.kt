@@ -3,8 +3,11 @@ package edu.skillbox.skillcinema
 import android.app.Application
 import android.util.Log
 import androidx.room.Room
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.hilt.android.HiltAndroidApp
 import edu.skillbox.skillcinema.data.AppDatabase
+import edu.skillbox.skillcinema.utils.FilmOrder
+import edu.skillbox.skillcinema.utils.FilmType
 import java.util.*
 import javax.inject.Inject
 
@@ -64,8 +67,8 @@ class App @Inject constructor() : Application() {
     // Настройки поиска
     var country: Int? = null
     var genre: Int? = null
-    var order: String = "NUM_VOTE"  // RATING, NUM_VOTE, YEAR
-    var type: String = "FILM"       // FILM, TV_SHOW, TV_SERIES, MINI_SERIES, ALL
+    var order: String = FilmOrder.NUM_VOTE.name  // RATING, NUM_VOTE, YEAR
+    var type: String = FilmType.FILM.name       // FILM, TV_SHOW, TV_SERIES, MINI_SERIES, ALL
     var ratingFrom: Int = 1
     var ratingTo: Int = 10
     var yearFrom: Int? = null
@@ -93,5 +96,6 @@ class App @Inject constructor() : Application() {
         Log.d("AppMain", "Сработал App OnCreate\n" +
                 "\tg1 = $genre1key, c1 = $country1key, g2 = $genre2key, c2 = $country2key")
 
+        FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(true)
     }
 }

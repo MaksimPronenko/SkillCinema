@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".presentation.AllInterestedFragment">
+    tools:context=".presentation.allInterested.AllInterestedFragment">
 
     <ProgressBar
         android:id="@+id/progress"

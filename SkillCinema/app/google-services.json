@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "365093612257",
+    "project_id": "skillcinema-b706b",
+    "storage_bucket": "skillcinema-b706b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:365093612257:android:7fb492516ba380cca565a0",
+        "android_client_info": {
+          "package_name": "edu.skillbox.skillcinema"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "365093612257-snh4jgpkmd6t9nt4f1q6cfc6dhepajgc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAPzrgdsFckANH3iu6Ttyyukp7Bnw15NGk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "365093612257-snh4jgpkmd6t9nt4f1q6cfc6dhepajgc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

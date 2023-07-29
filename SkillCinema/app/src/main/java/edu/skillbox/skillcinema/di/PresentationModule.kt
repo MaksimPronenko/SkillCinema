@@ -7,6 +7,54 @@ import dagger.hilt.components.SingletonComponent
 import edu.skillbox.skillcinema.App
 import edu.skillbox.skillcinema.data.*
 import edu.skillbox.skillcinema.presentation.*
+import edu.skillbox.skillcinema.presentation.allFilmsOfStaff.AllFilmsOfStaffViewModel
+import edu.skillbox.skillcinema.presentation.allFilmsOfStaff.AllFilmsOfStaffViewModelFactory
+import edu.skillbox.skillcinema.presentation.allInterested.AllInterestedViewModel
+import edu.skillbox.skillcinema.presentation.allInterested.AllInterestedViewModelFactory
+import edu.skillbox.skillcinema.presentation.allStaff.AllStaffViewModel
+import edu.skillbox.skillcinema.presentation.allStaff.AllStaffViewModelFactory
+import edu.skillbox.skillcinema.presentation.bottomDialogFragment.BottomDialogViewModel
+import edu.skillbox.skillcinema.presentation.bottomDialogFragment.BottomDialogViewModelFactory
+import edu.skillbox.skillcinema.presentation.collection.CollectionViewModel
+import edu.skillbox.skillcinema.presentation.collection.CollectionViewModelFactory
+import edu.skillbox.skillcinema.presentation.collectionName.CollectionNameDialogViewModel
+import edu.skillbox.skillcinema.presentation.collectionName.CollectionNameDialogViewModelFactory
+import edu.skillbox.skillcinema.presentation.film.FilmViewModel
+import edu.skillbox.skillcinema.presentation.film.FilmViewModelFactory
+import edu.skillbox.skillcinema.presentation.imagePager.ImagePagerViewModel
+import edu.skillbox.skillcinema.presentation.imagePager.ImagePagerViewModelFactory
+import edu.skillbox.skillcinema.presentation.listPageFilmography.ListPageFilmographyViewModel
+import edu.skillbox.skillcinema.presentation.listPageFilmography.ListPageFilmographyViewModelFactory
+import edu.skillbox.skillcinema.presentation.listPageFiltered1.ListPageFiltered1ViewModel
+import edu.skillbox.skillcinema.presentation.listPageFiltered1.ListPageFiltered1ViewModelFactory
+import edu.skillbox.skillcinema.presentation.listPageFiltered2.ListPageFiltered2ViewModel
+import edu.skillbox.skillcinema.presentation.listPageFiltered2.ListPageFiltered2ViewModelFactory
+import edu.skillbox.skillcinema.presentation.listPageGallery.ListPageGalleryViewModel
+import edu.skillbox.skillcinema.presentation.listPageGallery.ListPageGalleryViewModelFactory
+import edu.skillbox.skillcinema.presentation.listPagePopular.ListPagePopularViewModel
+import edu.skillbox.skillcinema.presentation.listPagePopular.ListPagePopularViewModelFactory
+import edu.skillbox.skillcinema.presentation.listPagePremieres.ListPagePremieresViewModel
+import edu.skillbox.skillcinema.presentation.listPagePremieres.ListPagePremieresViewModelFactory
+import edu.skillbox.skillcinema.presentation.listPageSerials.ListPageSerialsViewModel
+import edu.skillbox.skillcinema.presentation.listPageSerials.ListPageSerialsViewModelFactory
+import edu.skillbox.skillcinema.presentation.listPageSimilars.ListPageSimilarsViewModel
+import edu.skillbox.skillcinema.presentation.listPageSimilars.ListPageSimilarsViewModelFactory
+import edu.skillbox.skillcinema.presentation.listPageTop250.ListPageTop250ViewModel
+import edu.skillbox.skillcinema.presentation.listPageTop250.ListPageTop250ViewModelFactory
+import edu.skillbox.skillcinema.presentation.main.MainViewModel
+import edu.skillbox.skillcinema.presentation.main.MainViewModelFactory
+import edu.skillbox.skillcinema.presentation.profile.ProfileViewModel
+import edu.skillbox.skillcinema.presentation.profile.ProfileViewModelFactory
+import edu.skillbox.skillcinema.presentation.search.*
+import edu.skillbox.skillcinema.presentation.serial.SerialViewModel
+import edu.skillbox.skillcinema.presentation.serial.SerialViewModelFactory
+import edu.skillbox.skillcinema.presentation.serialContent.SerialContentViewModel
+import edu.skillbox.skillcinema.presentation.serialContent.SerialContentViewModelFactory
+import edu.skillbox.skillcinema.presentation.staff.StaffViewModel
+import edu.skillbox.skillcinema.presentation.staff.StaffViewModelFactory
+import edu.skillbox.skillcinema.presentation.welcome.WelcomeViewModel
+import edu.skillbox.skillcinema.presentation.welcome.WelcomeViewModelFactory
+import edu.skillbox.skillcinema.utils.Converters
 import javax.inject.Singleton
 
 @Module
@@ -28,21 +76,11 @@ class PresentationModule {
     @Provides
     @Singleton
     fun provideMainViewModel(
-        repository: Repository,
-//        filmsTop100PopularPagingSource: FilmsTop100PopularPagingSource,
-//        filmsTop250PagingSource: FilmsTop250PagingSource,
-//        seriesPagingSource: SerialsPagingSource,
-//        filmsFiltered1PagingSource: FilmsFiltered1PagingSource,
-//        filmsFiltered2PagingSource: FilmsFiltered2PagingSource,
+        repositoryMainLists: RepositoryMainLists,
         application: App
     ): MainViewModel {
         return MainViewModel(
-            repository,
-//            filmsTop100PopularPagingSource,
-//            filmsTop250PagingSource,
-//            seriesPagingSource,
-//            filmsFiltered1PagingSource,
-//            filmsFiltered2PagingSource,
+            repositoryMainLists,
             application
         )
     }
@@ -55,10 +93,10 @@ class PresentationModule {
 
     @Provides
     fun provideListPagePremieresViewModel(
-        repository: Repository
+        repositoryMainLists: RepositoryMainLists
     ): ListPagePremieresViewModel {
         return ListPagePremieresViewModel(
-            repository
+            repositoryMainLists
         )
     }
 
@@ -70,11 +108,11 @@ class PresentationModule {
     @Provides
     @Singleton
     fun provideListPagePopularViewModel(
-        repository: Repository,
+        repositoryMainLists: RepositoryMainLists,
         application: App
     ): ListPagePopularViewModel {
         return ListPagePopularViewModel(
-            repository,
+            repositoryMainLists,
             application
         )
     }
@@ -88,11 +126,11 @@ class PresentationModule {
     @Provides
     @Singleton
     fun provideListPageTop250ViewModel(
-        repository: Repository,
+        repositoryMainLists: RepositoryMainLists,
         application: App
     ): ListPageTop250ViewModel {
         return ListPageTop250ViewModel(
-            repository,
+            repositoryMainLists,
             application
         )
     }
@@ -105,10 +143,10 @@ class PresentationModule {
 
     @Provides
     fun provideListPageFiltered1ViewModel(
-        repository: Repository
+        repositoryMainLists: RepositoryMainLists
     ): ListPageFiltered1ViewModel {
         return ListPageFiltered1ViewModel(
-            repository
+            repositoryMainLists
         )
     }
 
@@ -119,10 +157,10 @@ class PresentationModule {
 
     @Provides
     fun provideListPageFiltered2ViewModel(
-        repository: Repository
+        repositoryMainLists: RepositoryMainLists
     ): ListPageFiltered2ViewModel {
         return ListPageFiltered2ViewModel(
-            repository
+            repositoryMainLists
         )
     }
 
@@ -133,10 +171,10 @@ class PresentationModule {
 
     @Provides
     fun provideListPageSerialsViewModel(
-        repository: Repository
+        repositoryMainLists: RepositoryMainLists
     ): ListPageSerialsViewModel {
         return ListPageSerialsViewModel(
-            repository
+            repositoryMainLists
         )
     }
 
@@ -145,30 +183,16 @@ class PresentationModule {
         return ListPageSerialsViewModelFactory(listPageSerialsViewModel)
     }
 
-//    @Provides
-//    @Singleton
-//    fun provideFilmViewModel(
-//        repository: Repository,
-//        application: App
-//    ): FilmViewModel {
-//        return FilmViewModel(
-//            repository,
-//            application
-//        )
-//    }
-//
-//    @Provides
-//    @Singleton
-//    fun provideFilmViewModelFactory(filmViewModel: FilmViewModel): FilmViewModelFactory {
-//        return FilmViewModelFactory(filmViewModel)
-//    }
-
     @Provides
     fun provideFilmViewModel(
-        repository: Repository
+        repositoryFilmAndSerial: RepositoryFilmAndSerial,
+        repositoryCollections: RepositoryCollections,
+        converters: Converters
     ): FilmViewModel {
         return FilmViewModel(
-            repository
+            repositoryFilmAndSerial,
+            repositoryCollections,
+            converters
         )
     }
 
@@ -179,10 +203,14 @@ class PresentationModule {
 
     @Provides
     fun provideSerialViewModel(
-        repository: Repository
+        repositoryFilmAndSerial: RepositoryFilmAndSerial,
+        repositoryCollections: RepositoryCollections,
+        converters: Converters
     ): SerialViewModel {
         return SerialViewModel(
-            repository
+            repositoryFilmAndSerial,
+            repositoryCollections,
+            converters
         )
     }
 
@@ -193,10 +221,10 @@ class PresentationModule {
 
     @Provides
     fun provideSerialContentViewModel(
-        repository: Repository
+        repositoryFilmAndSerial: RepositoryFilmAndSerial
     ): SerialContentViewModel {
         return SerialContentViewModel(
-            repository
+            repositoryFilmAndSerial
         )
     }
 
@@ -207,10 +235,10 @@ class PresentationModule {
 
     @Provides
     fun provideBottomDialogViewModel(
-        repository: Repository
+        repositoryCollections: RepositoryCollections
     ): BottomDialogViewModel {
         return BottomDialogViewModel(
-            repository
+            repositoryCollections
         )
     }
     @Provides
@@ -229,10 +257,10 @@ class PresentationModule {
 
     @Provides
     fun provideAllStaffViewModel(
-        repository: Repository,
+        repositoryFilmAndSerial: RepositoryFilmAndSerial,
     ): AllStaffViewModel {
         return AllStaffViewModel(
-            repository
+            repositoryFilmAndSerial
         )
     }
 
@@ -243,10 +271,10 @@ class PresentationModule {
 
     @Provides
     fun provideListPageGalleryViewModel(
-        repository: Repository,
+        repositoryFilmAndSerial: RepositoryFilmAndSerial,
     ): ListPageGalleryViewModel {
         return ListPageGalleryViewModel(
-            repository
+            repositoryFilmAndSerial
         )
     }
 
@@ -257,10 +285,10 @@ class PresentationModule {
 
     @Provides
     fun provideImagePagerViewModel(
-        repository: Repository,
+        repositoryFilmAndSerial: RepositoryFilmAndSerial,
     ): ImagePagerViewModel {
         return ImagePagerViewModel(
-            repository
+            repositoryFilmAndSerial
         )
     }
 
@@ -271,10 +299,10 @@ class PresentationModule {
 
     @Provides
     fun provideListPageSimilarsViewModel(
-        repository: Repository,
+        repositoryFilmAndSerial: RepositoryFilmAndSerial,
     ): ListPageSimilarsViewModel {
         return ListPageSimilarsViewModel(
-            repository
+            repositoryFilmAndSerial
         )
     }
 
@@ -285,10 +313,14 @@ class PresentationModule {
 
     @Provides
     fun provideStaffViewModel(
-        repository: Repository,
+        repositoryFilmAndSerial: RepositoryFilmAndSerial,
+        repositoryPerson: RepositoryPerson,
+        repositoryCollections: RepositoryCollections,
     ): StaffViewModel {
         return StaffViewModel(
-            repository
+            repositoryFilmAndSerial,
+            repositoryPerson,
+            repositoryCollections
         )
     }
 
@@ -299,10 +331,12 @@ class PresentationModule {
 
     @Provides
     fun provideAllFilmsOfStaffViewModel(
-        repository: Repository,
+        repositoryFilmAndSerial: RepositoryFilmAndSerial,
+        repositoryPerson: RepositoryPerson
     ): AllFilmsOfStaffViewModel {
         return AllFilmsOfStaffViewModel(
-            repository
+            repositoryFilmAndSerial,
+            repositoryPerson
         )
     }
 
@@ -313,10 +347,12 @@ class PresentationModule {
 
     @Provides
     fun provideListPageFilmographyViewModel(
-        repository: Repository,
+        repositoryFilmAndSerial: RepositoryFilmAndSerial,
+        repositoryPerson: RepositoryPerson,
     ): ListPageFilmographyViewModel {
         return ListPageFilmographyViewModel(
-            repository
+            repositoryFilmAndSerial,
+            repositoryPerson
         )
     }
 
@@ -328,11 +364,11 @@ class PresentationModule {
     @Provides
     @Singleton
     fun provideSearchViewModel(
-        repository: Repository,
+        repositoryMainLists: RepositoryMainLists,
         application: App
     ): SearchViewModel {
         return SearchViewModel(
-            repository,
+            repositoryMainLists,
             application
         )
     }
@@ -393,10 +429,14 @@ class PresentationModule {
 
     @Provides
     fun provideProfileViewModel(
-        repository: Repository,
+        repositoryFilmAndSerial: RepositoryFilmAndSerial,
+        repositoryPerson: RepositoryPerson,
+        repositoryCollections: RepositoryCollections
     ): ProfileViewModel {
         return ProfileViewModel(
-            repository
+            repositoryFilmAndSerial,
+            repositoryPerson,
+            repositoryCollections
         )
     }
 
@@ -407,10 +447,12 @@ class PresentationModule {
 
     @Provides
     fun provideCollectionViewModel(
-        repository: Repository,
+        repositoryFilmAndSerial: RepositoryFilmAndSerial,
+        repositoryCollections: RepositoryCollections
     ): CollectionViewModel {
         return CollectionViewModel(
-            repository
+            repositoryFilmAndSerial,
+            repositoryCollections
         )
     }
 
@@ -421,10 +463,14 @@ class PresentationModule {
 
     @Provides
     fun provideAllInterestedViewModel(
-        repository: Repository,
+        repositoryFilmAndSerial: RepositoryFilmAndSerial,
+        repositoryPerson: RepositoryPerson,
+        repositoryCollections: RepositoryCollections
     ): AllInterestedViewModel {
         return AllInterestedViewModel(
-            repository
+            repositoryFilmAndSerial,
+            repositoryPerson,
+            repositoryCollections
         )
     }
 

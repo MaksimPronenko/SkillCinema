@@ -2,10 +2,10 @@ package edu.skillbox.skillcinema.data
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import edu.skillbox.skillcinema.models.FilmItemData
+import edu.skillbox.skillcinema.models.filmAndSerial.film.FilmItemData
 
 class FilmsFilteredPagingSource(
-    val repository: Repository,
+    val repository: RepositoryMainLists,
     private val genreKey: Int,
     private val countryKey: Int
 ) : PagingSource<Int, FilmItemData>() {

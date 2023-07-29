@@ -7,7 +7,7 @@
 
     <fragment
         android:id="@+id/Welcome1Fragment"
-        android:name="edu.skillbox.skillcinema.presentation.Welcome1Fragment"
+        android:name="edu.skillbox.skillcinema.presentation.welcome.Welcome1Fragment"
         tools:layout="@layout/fragment_welcome_1">
 
         <action
@@ -24,7 +24,7 @@
 
     <fragment
         android:id="@+id/Welcome2Fragment"
-        android:name="edu.skillbox.skillcinema.presentation.Welcome2Fragment"
+        android:name="edu.skillbox.skillcinema.presentation.welcome.Welcome2Fragment"
         tools:layout="@layout/fragment_welcome_2">
 
         <action
@@ -41,7 +41,7 @@
 
     <fragment
         android:id="@+id/Welcome3Fragment"
-        android:name="edu.skillbox.skillcinema.presentation.Welcome3Fragment"
+        android:name="edu.skillbox.skillcinema.presentation.welcome.Welcome3Fragment"
         tools:layout="@layout/fragment_welcome_3">
 
         <action
@@ -58,7 +58,7 @@
 
     <fragment
         android:id="@+id/MainFragment"
-        android:name="edu.skillbox.skillcinema.presentation.MainFragment"
+        android:name="edu.skillbox.skillcinema.presentation.main.MainFragment"
         tools:layout="@layout/fragment_main">
 
         <action
@@ -92,7 +92,7 @@
 
     <fragment
         android:id="@+id/ListPagePremieresFragment"
-        android:name="edu.skillbox.skillcinema.presentation.ListPagePremieresFragment"
+        android:name="edu.skillbox.skillcinema.presentation.listPagePremieres.ListPagePremieresFragment"
         tools:layout="@layout/fragment_list_page_premieres">
         <action
             android:id="@+id/action_ListPagePremieresFragment_to_FilmFragment"
@@ -104,7 +104,7 @@
 
     <fragment
         android:id="@+id/ListPagePopularFragment"
-        android:name="edu.skillbox.skillcinema.presentation.ListPagePopularFragment"
+        android:name="edu.skillbox.skillcinema.presentation.listPagePopular.ListPagePopularFragment"
         tools:layout="@layout/fragment_list_page_popular">
         <action
             android:id="@+id/action_ListPagePopularFragment_to_FilmFragment"
@@ -116,7 +116,7 @@
 
     <fragment
         android:id="@+id/ListPageFiltered1Fragment"
-        android:name="edu.skillbox.skillcinema.presentation.ListPageFiltered1Fragment"
+        android:name="edu.skillbox.skillcinema.presentation.listPageFiltered1.ListPageFiltered1Fragment"
         tools:layout="@layout/fragment_list_page_filtered_1">
         <argument
             android:name="genre1Key"
@@ -134,7 +134,7 @@
 
     <fragment
         android:id="@+id/ListPageTop250Fragment"
-        android:name="edu.skillbox.skillcinema.presentation.ListPageTop250Fragment"
+        android:name="edu.skillbox.skillcinema.presentation.listPageTop250.ListPageTop250Fragment"
         tools:layout="@layout/fragment_list_page_top_250">
         <action
             android:id="@+id/action_ListPageTop250Fragment_to_FilmFragment"
@@ -146,7 +146,7 @@
 
     <fragment
         android:id="@+id/ListPageFiltered2Fragment"
-        android:name="edu.skillbox.skillcinema.presentation.ListPageFiltered2Fragment"
+        android:name="edu.skillbox.skillcinema.presentation.listPageFiltered2.ListPageFiltered2Fragment"
         tools:layout="@layout/fragment_list_page_filtered_2">
         <argument
             android:name="genre2Key"
@@ -164,7 +164,7 @@
 
     <fragment
         android:id="@+id/ListPageSerialsFragment"
-        android:name="edu.skillbox.skillcinema.presentation.ListPageSerialsFragment"
+        android:name="edu.skillbox.skillcinema.presentation.listPageSerials.ListPageSerialsFragment"
         tools:layout="@layout/fragment_list_page_serials">
         <action
             android:id="@+id/action_ListPageSerialsFragment_to_SerialFragment"
@@ -176,7 +176,7 @@
 
     <fragment
         android:id="@+id/FilmFragment"
-        android:name="edu.skillbox.skillcinema.presentation.FilmFragment"
+        android:name="edu.skillbox.skillcinema.presentation.film.FilmFragment"
         tools:layout="@layout/fragment_film">
         <argument
             android:name="filmId"
@@ -210,7 +210,7 @@
 
     <fragment
         android:id="@+id/SerialFragment"
-        android:name="edu.skillbox.skillcinema.presentation.SerialFragment"
+        android:name="edu.skillbox.skillcinema.presentation.serial.SerialFragment"
         tools:layout="@layout/fragment_serial">
         <argument
             android:name="filmId"
@@ -247,7 +247,7 @@
 
     <fragment
         android:id="@+id/SerialContentFragment"
-        android:name="edu.skillbox.skillcinema.presentation.SerialContentFragment"
+        android:name="edu.skillbox.skillcinema.presentation.serialContent.SerialContentFragment"
         tools:layout="@layout/fragment_serial_content">
         <argument
             android:name="filmId"
@@ -267,7 +267,7 @@
 
     <dialog
         android:id="@+id/BottomDialogFragment"
-        android:name="edu.skillbox.skillcinema.presentation.BottomDialogFragment"
+        android:name="edu.skillbox.skillcinema.presentation.bottomDialogFragment.BottomDialogFragment"
         tools:layout="@layout/bottom_dialog">
         <argument
             android:name="filmId"
@@ -296,7 +296,7 @@
 
     <dialog
         android:id="@+id/CollectionNameDialogFragment"
-        android:name="edu.skillbox.skillcinema.presentation.CollectionNameDialogFragment"
+        android:name="edu.skillbox.skillcinema.presentation.collectionName.CollectionNameDialogFragment"
         tools:layout="@layout/collection_name_dialog">
         <action
             android:id="@+id/action_CollectionNameDialogFragment_to_BottomDialogFragment"
@@ -308,12 +308,12 @@
 
     <dialog
         android:id="@+id/ErrorBottomDialogFragment"
-        android:name="edu.skillbox.skillcinema.presentation.ErrorBottomDialogFragment"
+        android:name="edu.skillbox.skillcinema.presentation.errorBottomDialogFragment.ErrorBottomDialogFragment"
         tools:layout="@layout/error_bottom_dialog" />
 
     <fragment
         android:id="@+id/AllStaffFragment"
-        android:name="edu.skillbox.skillcinema.presentation.AllStaffFragment"
+        android:name="edu.skillbox.skillcinema.presentation.allStaff.AllStaffFragment"
         tools:layout="@layout/fragment_all_staff">
         <argument
             android:name="filmId"
@@ -340,7 +340,7 @@
 
     <fragment
         android:id="@+id/ListPageGalleryFragment"
-        android:name="edu.skillbox.skillcinema.presentation.ListPageGalleryFragment"
+        android:name="edu.skillbox.skillcinema.presentation.listPageGallery.ListPageGalleryFragment"
         tools:layout="@layout/fragment_list_page_gallery">
         <argument
             android:name="filmId"
@@ -356,7 +356,7 @@
 
     <fragment
         android:id="@+id/ListPageSimilarsFragment"
-        android:name="edu.skillbox.skillcinema.presentation.ListPageSimilarsFragment"
+        android:name="edu.skillbox.skillcinema.presentation.listPageSimilars.ListPageSimilarsFragment"
         tools:layout="@layout/fragment_list_page_similars">
         <argument
             android:name="filmId"
@@ -369,7 +369,7 @@
 
     <fragment
         android:id="@+id/ImagePagerFragment"
-        android:name="edu.skillbox.skillcinema.presentation.ImagePagerFragment"
+        android:name="edu.skillbox.skillcinema.presentation.imagePager.ImagePagerFragment"
         tools:layout="@layout/fragment_image_pager">
         <argument
             android:name="filmId"
@@ -390,7 +390,7 @@
 
     <fragment
         android:id="@+id/StaffFragment"
-        android:name="edu.skillbox.skillcinema.presentation.StaffFragment"
+        android:name="edu.skillbox.skillcinema.presentation.staff.StaffFragment"
         tools:layout="@layout/fragment_staff">
         <argument
             android:name="staffId"
@@ -412,7 +412,7 @@
 
     <fragment
         android:id="@+id/ListPageFilmographyFragment"
-        android:name="edu.skillbox.skillcinema.presentation.ListPageFilmographyFragment"
+        android:name="edu.skillbox.skillcinema.presentation.listPageFilmography.ListPageFilmographyFragment"
         tools:layout="@layout/fragment_list_page_filmography">
         <argument
             android:name="staffId"
@@ -428,7 +428,7 @@
 
     <fragment
         android:id="@+id/AllFilmsOfStaffFragment"
-        android:name="edu.skillbox.skillcinema.presentation.AllFilmsOfStaffFragment"
+        android:name="edu.skillbox.skillcinema.presentation.allFilmsOfStaff.AllFilmsOfStaffFragment"
         tools:layout="@layout/fragment_all_films_of_staff">
         <argument
             android:name="staffId"
@@ -444,7 +444,7 @@
 
     <fragment
         android:id="@+id/SearchFragment"
-        android:name="edu.skillbox.skillcinema.presentation.SearchFragment"
+        android:name="edu.skillbox.skillcinema.presentation.search.SearchFragment"
         tools:layout="@layout/fragment_search">
         <action
             android:id="@+id/action_SearchFragment_to_FilmFragment"
@@ -459,7 +459,7 @@
 
     <fragment
         android:id="@+id/SearchSettings1Fragment"
-        android:name="edu.skillbox.skillcinema.presentation.SearchSettings1Fragment"
+        android:name="edu.skillbox.skillcinema.presentation.search.SearchSettings1Fragment"
         tools:layout="@layout/fragment_search_settings_1">
         <action
             android:id="@+id/action_SearchSettings1Fragment_to_SearchFragment"
@@ -477,7 +477,7 @@
 
     <fragment
         android:id="@+id/SearchSettings2Fragment"
-        android:name="edu.skillbox.skillcinema.presentation.SearchSettings2Fragment"
+        android:name="edu.skillbox.skillcinema.presentation.search.SearchSettings2Fragment"
         tools:layout="@layout/fragment_search_settings_2">
         <action
             android:id="@+id/action_SearchSettings2Fragment_to_SearchSettings1Fragment"
@@ -486,7 +486,7 @@
 
     <fragment
         android:id="@+id/SearchSettings3Fragment"
-        android:name="edu.skillbox.skillcinema.presentation.SearchSettings3Fragment"
+        android:name="edu.skillbox.skillcinema.presentation.search.SearchSettings3Fragment"
         tools:layout="@layout/fragment_search_settings_3">
         <action
             android:id="@+id/action_SearchSettings3Fragment_to_SearchSettings1Fragment"
@@ -495,7 +495,7 @@
 
     <fragment
         android:id="@+id/SearchSettings4Fragment"
-        android:name="edu.skillbox.skillcinema.presentation.SearchSettings4Fragment"
+        android:name="edu.skillbox.skillcinema.presentation.search.SearchSettings4Fragment"
         tools:layout="@layout/fragment_search_settings_4">
         <action
             android:id="@+id/action_SearchSettings4Fragment_to_SearchSettings1Fragment"
@@ -504,7 +504,7 @@
 
     <fragment
         android:id="@+id/ProfileFragment"
-        android:name="edu.skillbox.skillcinema.presentation.ProfileFragment"
+        android:name="edu.skillbox.skillcinema.presentation.profile.ProfileFragment"
         tools:layout="@layout/fragment_profile">
         <action
             android:id="@+id/action_ProfileFragment_to_CollectionNameDialogFragment"
@@ -528,7 +528,7 @@
 
     <fragment
         android:id="@+id/CollectionFragment"
-        android:name="edu.skillbox.skillcinema.presentation.CollectionFragment"
+        android:name="edu.skillbox.skillcinema.presentation.collection.CollectionFragment"
         tools:layout="@layout/fragment_collection">
         <argument
             android:name="collectionName"
@@ -541,7 +541,7 @@
 
     <fragment
         android:id="@+id/AllInterestedFragment"
-        android:name="edu.skillbox.skillcinema.presentation.AllInterestedFragment"
+        android:name="edu.skillbox.skillcinema.presentation.allInterested.AllInterestedFragment"
         tools:layout="@layout/fragment_all_interested">
         <action
             android:id="@+id/action_AllInterestedFragment_to_FilmFragment"

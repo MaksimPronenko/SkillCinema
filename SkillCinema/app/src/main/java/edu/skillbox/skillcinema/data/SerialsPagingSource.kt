@@ -2,9 +2,9 @@ package edu.skillbox.skillcinema.data
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
-import edu.skillbox.skillcinema.models.FilmItemData
+import edu.skillbox.skillcinema.models.filmAndSerial.film.FilmItemData
 
-class SerialsPagingSource (val repository: Repository): PagingSource<Int, FilmItemData>() {
+class SerialsPagingSource (val repository: RepositoryMainLists): PagingSource<Int, FilmItemData>() {
 
     override fun getRefreshKey(state: PagingState<Int, FilmItemData>): Int = FIRST_PAGE
 

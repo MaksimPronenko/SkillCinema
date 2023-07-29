@@ -123,5 +123,6 @@
     <string name="interested">Вам было интересно</string>
 
     <string name="input_error">Не более 24 символов</string>
+    <string name="loading_error">Ошибка загрузки</string>
 
 </resources>
