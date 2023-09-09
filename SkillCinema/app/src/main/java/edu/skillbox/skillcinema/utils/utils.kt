@@ -73,6 +73,11 @@ enum class ImageType{
     SCREENSHOT
 }
 
+enum class Collections(val title: String) {
+    FAVORITE("Любимое"),
+    WANT_TO_WATCH("Хочу посмотреть")
+}
+
 class Converters @Inject constructor() {
     fun convertClassListToStringList(anyList: List<Any>): List<String> {
         val resultList: MutableList<String> = emptyList<String>().toMutableList()

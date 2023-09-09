@@ -267,4 +267,28 @@ class FilmViewModel(
             Log.d(TAG, "Просмотрен: $viewed")
         }
     }
+
+    fun getRatingAndNameString(): String {
+        return if (rating != null)
+            rating.toString() + ", " + name
+        else
+            name
+    }
+
+    fun getYearAndGenresString(): String {
+        val yearPart = if (year == null) "" else year.toString() + ", "
+        return yearPart + genres
+    }
+
+    fun getCountriesAndLengthAndAgeLimitString(): String = countries.toString() +
+            if (filmLength != null) {
+                ", " + filmLength.toString()
+            } else {
+                ""
+            } +
+            if (ageLimit != null) {
+                ", " + ageLimit.toString()
+            } else {
+                ""
+            }
 }

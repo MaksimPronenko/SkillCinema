@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -88,11 +89,11 @@ class FilmFragment : Fragment() {
         viewModel.loadSimilarFilmsData()
 
         binding.favorite.setOnClickListener {
-            viewModel.onCollectionButtonClick("Любимое")
+            viewModel.onCollectionButtonClick(Collections.FAVORITE.title)
         }
 
         binding.wantedToWatch.setOnClickListener {
-            viewModel.onCollectionButtonClick("Хочу посмотреть")
+            viewModel.onCollectionButtonClick(Collections.WANT_TO_WATCH.title)
         }
 
         binding.viewed.setOnClickListener {
@@ -166,22 +167,6 @@ class FilmFragment : Fragment() {
             findNavController().navigate(R.id.action_FilmFragment_to_BottomFragment, bundle)
         }
 
-        // При отключении диалога BottomDialogFragment инициирую проверку данных о включении
-        // фильма в "Любимое" и "Хочу посмотреть"
-        val currentFragment = findNavController().getBackStackEntry(R.id.FilmFragment)
-        val dialogObserver = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) {
-                viewModel.checkFilmInCollections()
-            }
-        }
-        val dialogLifecycle = currentFragment.lifecycle
-        dialogLifecycle.addObserver(dialogObserver)
-        viewLifecycleOwner.lifecycle.addObserver(LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_DESTROY) {
-                dialogLifecycle.removeObserver(dialogObserver)
-            }
-        })
-
         binding.backButton.setOnClickListener {
             findNavController().popBackStack()
         }
@@ -240,14 +225,38 @@ class FilmFragment : Fragment() {
             )
         }
 
+        dialogProcessing()
+        channelsProcessing()
+        statesProcessing()
+    }
+
+    private fun dialogProcessing() {
+        // При отключении диалога BottomDialogFragment инициирую проверку данных о включении
+        // фильма в "Любимое" и "Хочу посмотреть"
+        val currentFragment = findNavController().getBackStackEntry(R.id.FilmFragment)
+        val dialogObserver = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.checkFilmInCollections()
+            }
+        }
+        val dialogLifecycle = currentFragment.lifecycle
+        dialogLifecycle.addObserver(dialogObserver)
+        viewLifecycleOwner.lifecycle.addObserver(LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_DESTROY) {
+                dialogLifecycle.removeObserver(dialogObserver)
+            }
+        })
+    }
+
+    private fun channelsProcessing() {
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
                 viewModel.favoriteChannel.collect { isFavorite ->
                     if (isFavorite) {
-                        binding.favorite.setColorFilter(resources.getColor(R.color.blue, null))
+                        binding.favorite.setColorFilter(ContextCompat.getColor(requireContext(), R.color.blue))
                         Log.d(TAG, "Фильм ${viewModel.filmId} в коллекции \"Любимое\"")
                     } else {
-                        binding.favorite.setColorFilter(resources.getColor(R.color.grey_4, null))
+                        binding.favorite.setColorFilter(ContextCompat.getColor(requireContext(), R.color.grey_4))
                         Log.d(TAG, "Фильм ${viewModel.filmId} отсутствует в коллекции \"Любимое\"")
                     }
                 }
@@ -257,15 +266,12 @@ class FilmFragment : Fragment() {
             .launchWhenStarted {
                 viewModel.wantedToWatchChannel.collect { isWantedToWatch ->
                     if (isWantedToWatch) {
-                        binding.wantedToWatch.setColorFilter(resources.getColor(R.color.blue, null))
+                        binding.wantedToWatch.setColorFilter(ContextCompat.getColor(requireContext(), R.color.blue))
                         Log.d(TAG, "Фильм ${viewModel.filmId} в коллекции \"Хочу посмотреть\"")
 
                     } else {
                         binding.wantedToWatch.setColorFilter(
-                            resources.getColor(
-                                R.color.grey_4,
-                                null
-                            )
+                            ContextCompat.getColor(requireContext(), R.color.grey_4)
                         )
                         Log.d(
                             TAG,
@@ -280,17 +286,19 @@ class FilmFragment : Fragment() {
                 viewModel.viewedChannel.collect { viewed ->
                     if (viewed) {
                         binding.viewed.setImageResource(R.drawable.watched)
-                        binding.viewed.setColorFilter(resources.getColor(R.color.blue, null))
+                        binding.viewed.setColorFilter(ContextCompat.getColor(requireContext(), R.color.blue))
                         Log.d(TAG, "Фильм ${viewModel.filmId} просмотрен")
 
                     } else {
                         binding.viewed.setImageResource(R.drawable.not_watched)
-                        binding.viewed.setColorFilter(resources.getColor(R.color.grey_4, null))
+                        binding.viewed.setColorFilter(ContextCompat.getColor(requireContext(), R.color.grey_4))
                         Log.d(TAG, "Фильм ${viewModel.filmId} не просмотрен")
                     }
                 }
             }
+    }
 
+    private fun statesProcessing() {
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
                 viewModel.state
@@ -309,28 +317,12 @@ class FilmFragment : Fragment() {
                                     .load(viewModel.poster)
                                     .into(binding.poster)
 
-                                if (viewModel.rating != null)
-                                    binding.ratingAndName.text =
-                                        viewModel.rating.toString() + ", " + viewModel.name
-                                else
-                                    binding.ratingAndName.text = viewModel.name
+                                binding.ratingAndName.text = viewModel.getRatingAndNameString()
 
-                                val yearPart =
-                                    if (viewModel.year == null) "" else viewModel.year.toString() + ", "
-                                binding.yearAndGenres.text = yearPart + viewModel.genres
+                                binding.yearAndGenres.text = viewModel.getYearAndGenresString()
 
                                 binding.countriesAndLengthAndAgeLimit.text =
-                                    viewModel.countries.toString() +
-                                            if (viewModel.filmLength != null) {
-                                                ", " + viewModel.filmLength.toString()
-                                            } else {
-                                                ""
-                                            } +
-                                            if (viewModel.ageLimit != null) {
-                                                ", " + viewModel.ageLimit.toString()
-                                            } else {
-                                                ""
-                                            }
+                                    viewModel.getCountriesAndLengthAndAgeLimitString()
 
                                 if (viewModel.shortDescription != null)
                                     binding.shortDescription.text =

@@ -78,14 +78,8 @@ class MainFragment : Fragment() {
         return binding.root
     }
 
-    override fun onViewCreated(
-        view: View,
-        savedInstanceState: Bundle?
-    ) {
-        super.onViewCreated(
-            view,
-            savedInstanceState
-        )
+    override fun onViewCreated(view: View,savedInstanceState: Bundle?) {
+        super.onViewCreated(view,savedInstanceState)
 
         binding.premieresRecycler.adapter = filmPremieresAdapter
         binding.popularRecycler.adapter = filmTop100PopularExtendedAdapter
@@ -165,6 +159,10 @@ class MainFragment : Fragment() {
             )
         }
 
+        statesProcessing()
+    }
+
+    private fun statesProcessing() {
         viewLifecycleOwner.lifecycleScope.launchWhenStarted {
             viewModel.state
                 .collect { state ->
@@ -175,6 +173,7 @@ class MainFragment : Fragment() {
                             binding.progress.isGone = false
                             binding.welcome1Image.isGone = false
                         }
+
                         ViewModelState.Loaded -> {
                             binding.scrollView.isGone = false
                             binding.appNameImageLoading.isGone = true
@@ -216,6 +215,7 @@ class MainFragment : Fragment() {
                                 serialsAdapter.setAdapterData(it)
                             }.launchIn(viewLifecycleOwner.lifecycleScope)
                         }
+
                         ViewModelState.Error -> {
                             binding.scrollView.isGone = true
                             binding.appNameImageLoading.isGone = true

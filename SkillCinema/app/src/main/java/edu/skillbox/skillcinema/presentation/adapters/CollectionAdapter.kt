@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import edu.skillbox.skillcinema.R
 import edu.skillbox.skillcinema.databinding.CollectionItemBinding
 import edu.skillbox.skillcinema.models.collection.CollectionInfo
+import edu.skillbox.skillcinema.utils.Collections
 
 class CollectionAdapter(
     private val onOpenCollection: (CollectionInfo) -> Unit,
@@ -40,11 +41,11 @@ class CollectionAdapter(
             if (collection != null) {
                 collectionName.text = collection.collectionName
                 when(collection.collectionName) {
-                    "Любимое" -> {
+                    Collections.FAVORITE.title -> {
                         collectionImage.setImageResource(R.drawable.favorite)
                         deleteButton.isGone = true
                     }
-                    "Хочу посмотреть" -> {
+                    Collections.WANT_TO_WATCH.title -> {
                         collectionImage.setImageResource(R.drawable.wanted_to_watch)
                         deleteButton.isGone = true
                     }
