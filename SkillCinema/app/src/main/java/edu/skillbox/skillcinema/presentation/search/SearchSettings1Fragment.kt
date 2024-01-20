@@ -1,7 +1,6 @@
 package edu.skillbox.skillcinema.presentation.search
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,8 +16,6 @@ import edu.skillbox.skillcinema.utils.FilmOrder
 import edu.skillbox.skillcinema.utils.FilmType
 import javax.inject.Inject
 import kotlin.math.roundToInt
-
-private const val TAG = "SearchSettings.Fragment1"
 
 @AndroidEntryPoint
 class SearchSettings1Fragment : Fragment() {
@@ -57,7 +54,6 @@ class SearchSettings1Fragment : Fragment() {
         binding.textGenre.text = genreText(viewModel.chosenGenreCode)
         binding.textYears.text = periodText(viewModel.yearFrom, viewModel.yearTo)
         binding.ratingSlider.values = listOf(viewModel.ratingFrom.toFloat(), viewModel.ratingTo.toFloat())
-        Log.d(TAG, "ratingSlider.values = ${binding.ratingSlider.values}")
 
         binding.chipDate.isChecked = viewModel.order == FilmOrder.YEAR.name
         binding.chipPopularity.isChecked = viewModel.order == FilmOrder.NUM_VOTE.name
@@ -89,7 +85,6 @@ class SearchSettings1Fragment : Fragment() {
             val values = binding.ratingSlider.values
             viewModel.setAndSaveRatingFrom(values[0].roundToInt())
             viewModel.setAndSaveRatingTo(values[1].roundToInt())
-            Log.d(TAG, "Рейтинг от ${viewModel.ratingFrom} до ${viewModel.ratingTo}")
         }
 
         binding.sortingTypesChipGroup.setOnCheckedStateChangeListener { _, _ ->

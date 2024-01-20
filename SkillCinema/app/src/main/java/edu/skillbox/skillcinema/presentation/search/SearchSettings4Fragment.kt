@@ -1,7 +1,6 @@
 package edu.skillbox.skillcinema.presentation.search
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,8 +14,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
 import edu.skillbox.skillcinema.databinding.FragmentSearchSettings4Binding
 import javax.inject.Inject
-
-private const val TAG = "SearchSettings4.Fragment"
 
 @AndroidEntryPoint
 class SearchSettings4Fragment : Fragment() {
@@ -160,7 +157,6 @@ class SearchSettings4Fragment : Fragment() {
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
                 viewModel.listYearFromFlow.collect { newListYearFrom ->
-                    Log.d(TAG, "newListYearFrom = $newListYearFrom")
                     binding.textPeriod1.text = periodText(newListYearFrom)
                     binding.yearFrom1.text = newListYearFrom[0].toString()
                     binding.yearFrom1.isChecked = newListYearFrom[0] == viewModel.yearFrom
@@ -192,7 +188,6 @@ class SearchSettings4Fragment : Fragment() {
         viewLifecycleOwner.lifecycleScope
             .launchWhenStarted {
                 viewModel.listYearToFlow.collect { newListYearTo ->
-                    Log.d(TAG, "newListYearTo = $newListYearTo")
                     binding.textPeriod2.text = periodText(newListYearTo)
                     binding.yearTo1.text = newListYearTo[0].toString()
                     binding.yearTo1.isChecked = newListYearTo[0] == viewModel.yearTo

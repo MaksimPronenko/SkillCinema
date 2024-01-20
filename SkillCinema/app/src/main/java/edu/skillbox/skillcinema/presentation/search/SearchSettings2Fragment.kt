@@ -3,7 +3,6 @@ package edu.skillbox.skillcinema.presentation.search
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,8 +16,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
 import edu.skillbox.skillcinema.databinding.FragmentSearchSettings2Binding
 import javax.inject.Inject
-
-private const val TAG = "SearchSettings2.Fragment"
 
 @AndroidEntryPoint
 class SearchSettings2Fragment : Fragment() {
@@ -57,7 +54,6 @@ class SearchSettings2Fragment : Fragment() {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
             }
             override fun afterTextChanged(s: Editable) {
-                Log.d(TAG, "Фиксировано изменение текста")
                 viewModel.searchCountry(s.toString())
             }
         })
@@ -69,13 +65,10 @@ class SearchSettings2Fragment : Fragment() {
                     .collect { state ->
                         when (state) {
                             SearchViewModelState.Searching -> {
-                                Log.d(TAG, "Перешли в состояние поиска")
                                 binding.searchFailed.isGone = true
                                 binding.chipScrollView.isGone = true
                             }
                             SearchViewModelState.SearchSuccessfull -> {
-                                Log.d(TAG, "Перешли в состояние удачного поиска")
-                                Log.d(TAG, viewModel.countryChipsActive.toString())
                                 binding.searchFailed.isGone = true
                                 binding.chipScrollView.isGone = false
 
@@ -170,12 +163,10 @@ class SearchSettings2Fragment : Fragment() {
                                     if (binding.switzerland.isChecked) viewModel.setAndSaveCountry(2)
                                     if (binding.poland.isChecked) viewModel.setAndSaveCountry(4)
                                     if (binding.sweden.isChecked) viewModel.setAndSaveCountry(6)
-                                    Log.d(TAG, "Listener. chosenType = ${viewModel.chosenCountryCode}")
                                     findNavController().navigate(R.id.action_SearchSettings2Fragment_to_SearchSettings1Fragment)
                                 }
                             }
                             else -> {
-                                Log.d(TAG, "Перешли в состояние неудачного поиска")
                                 binding.searchFailed.isGone = false
                                 binding.chipScrollView.isGone = true
                             }

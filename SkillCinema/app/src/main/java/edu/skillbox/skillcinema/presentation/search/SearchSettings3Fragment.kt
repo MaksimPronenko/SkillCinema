@@ -3,7 +3,6 @@ package edu.skillbox.skillcinema.presentation.search
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,8 +16,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import edu.skillbox.skillcinema.R
 import edu.skillbox.skillcinema.databinding.FragmentSearchSettings3Binding
 import javax.inject.Inject
-
-private const val TAG = "SearchSettings3.Fragment"
 
 @AndroidEntryPoint
 class SearchSettings3Fragment : Fragment() {
@@ -57,7 +54,6 @@ class SearchSettings3Fragment : Fragment() {
             override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
             }
             override fun afterTextChanged(s: Editable) {
-                Log.d(TAG, "Фиксировано изменение текста")
                 viewModel.searchGenre(s.toString())
             }
         })
@@ -69,13 +65,10 @@ class SearchSettings3Fragment : Fragment() {
                     .collect { state ->
                         when (state) {
                             SearchViewModelState.Searching -> {
-                                Log.d(TAG, "Перешли в состояние поиска")
                                 binding.searchFailed.isGone = true
                                 binding.chipScrollView.isGone = true
                             }
                             SearchViewModelState.SearchSuccessfull -> {
-                                Log.d(TAG, "Перешли в состояние удачного поиска")
-                                Log.d(TAG, viewModel.genreChipsActive.toString())
                                 binding.searchFailed.isGone = true
                                 binding.chipScrollView.isGone = false
 
@@ -155,12 +148,10 @@ class SearchSettings3Fragment : Fragment() {
                                     if (binding.horrorMovie.isChecked) viewModel.setAndSaveGenre(17)
                                     if (binding.warFilm.isChecked) viewModel.setAndSaveGenre(14)
                                     if (binding.historicalFilm.isChecked) viewModel.setAndSaveGenre(15)
-                                    Log.d(TAG, "Listener. chosenType = ${viewModel.chosenGenreCode}")
                                     findNavController().navigate(R.id.action_SearchSettings3Fragment_to_SearchSettings1Fragment)
                                 }
                             }
                             else -> {
-                                Log.d(TAG, "Перешли в состояние неудачного поиска")
                                 binding.searchFailed.isGone = false
                                 binding.chipScrollView.isGone = true
                             }
