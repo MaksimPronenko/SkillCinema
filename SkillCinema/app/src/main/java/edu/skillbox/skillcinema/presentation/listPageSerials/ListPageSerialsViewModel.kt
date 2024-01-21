@@ -28,7 +28,7 @@ class ListPageSerialsViewModel(
     )
     val state = _state.asStateFlow()
 
-    var serialsPagesQuantity = 0
+    private var serialsPagesQuantity = 0
     lateinit var pagedSerials: Flow<PagingData<FilmItemData>>
 
     fun loadSerials() {

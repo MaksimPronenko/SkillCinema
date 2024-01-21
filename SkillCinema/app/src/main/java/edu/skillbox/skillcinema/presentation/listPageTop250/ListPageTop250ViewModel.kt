@@ -31,7 +31,7 @@ class ListPageTop250ViewModel(
     )
     val state = _state.asStateFlow()
 
-    var top250PagesQuantity = 0
+    private var top250PagesQuantity = 0
 
     lateinit var pagedFilmsTop250Extended: Flow<PagingData<FilmItemData>>
 

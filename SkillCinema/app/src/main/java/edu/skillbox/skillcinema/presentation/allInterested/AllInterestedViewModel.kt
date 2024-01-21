@@ -28,8 +28,8 @@ class AllInterestedViewModel(
     )
     val state = _state.asStateFlow()
 
-    var interestedIds: List<InterestedTable> = listOf()
-    var interested: MutableList<Interested> = mutableListOf()
+    private var interestedIds: List<InterestedTable> = listOf()
+    private var interested: MutableList<Interested> = mutableListOf()
     private val _interestedFlow = MutableStateFlow<List<Interested>>(emptyList())
     val interestedFlow = _interestedFlow.asStateFlow()
 
@@ -39,7 +39,7 @@ class AllInterestedViewModel(
         loadData()
     }
 
-    fun loadData() {
+    private fun loadData() {
         Log.d(TAG, "Запущена loadData()")
         viewModelScope.launch(Dispatchers.IO) {
             _state.value = ViewModelState.Loading

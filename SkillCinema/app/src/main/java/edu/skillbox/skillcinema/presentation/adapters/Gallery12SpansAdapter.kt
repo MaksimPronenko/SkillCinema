@@ -15,8 +15,8 @@ class Gallery12SpansAdapter(
 
     private var data: List<ImageTable> = emptyList()
 
-    private val TYPE_ITEM_SMALL = 0
-    private val TYPE_ITEM_BIG = 1
+    private val typeItemSmall = 0
+    private val typeItemBig = 1
 
     @SuppressLint("NotifyDataSetChanged")
     fun setData(data: List<ImageTable>) {
@@ -69,8 +69,8 @@ class Gallery12SpansAdapter(
 
     override fun getItemViewType(position: Int): Int {
         return when (position % 3) {
-            0 -> TYPE_ITEM_BIG
-            else -> TYPE_ITEM_SMALL
+            0 -> typeItemBig
+            else -> typeItemSmall
         }
     }
 }

@@ -145,10 +145,11 @@ class SerialContentFragment : Fragment() {
         Log.d(TAG, "Вызвана refreshRecycler(): viewModel.seasonsList.size = ${viewModel.seasonsList.size}")
         if (viewModel.firstSeason != null) {
             val currentSeasonIndex = viewModel.chosenSeason - viewModel.firstSeason!!
-            binding.seasonNumberAndEpisodeQuantity.text =
-                "${viewModel.chosenSeason} сезон, ${
-                    viewModel.episodeQuantityToText(viewModel.seasonsList[currentSeasonIndex].episodes.size)
-                }"
+            val seasonNumberAndEpisodeQuantityText = "${viewModel.chosenSeason} сезон, ${
+                viewModel.episodeQuantityToText(viewModel.seasonsList[currentSeasonIndex].episodes.size)
+            }"
+            binding.seasonNumberAndEpisodeQuantity.text = seasonNumberAndEpisodeQuantityText
+
             serialAdapter.setData(viewModel.seasonsList[currentSeasonIndex].episodes)
         }
     }

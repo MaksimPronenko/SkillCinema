@@ -3,6 +3,7 @@ package edu.skillbox.skillcinema.presentation.search
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
+@Suppress("UNCHECKED_CAST")
 class SearchViewModelFactory (private val searchViewModel: SearchViewModel) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

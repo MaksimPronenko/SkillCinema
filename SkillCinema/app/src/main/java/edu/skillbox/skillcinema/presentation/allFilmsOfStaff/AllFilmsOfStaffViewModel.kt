@@ -32,12 +32,12 @@ class AllFilmsOfStaffViewModel(
 
     var name: String? = null
 
-    var personFilms: List<FilmOfPersonTable>? = null
+    private var personFilms: List<FilmOfPersonTable>? = null
     private var filmsExtended: MutableList<FilmItemData> = mutableListOf()
     private val _filmsFlow = MutableStateFlow<List<FilmItemData>>(emptyList())
     val filmsFlow = _filmsFlow.asStateFlow()
 
-    var jobLoadFilmsExtended: Job? = null
+    private var jobLoadFilmsExtended: Job? = null
 
     fun loadPersonData(staffId: Int) {
         Log.d(TAG, "loadAllFilmsOfStaff($staffId)")

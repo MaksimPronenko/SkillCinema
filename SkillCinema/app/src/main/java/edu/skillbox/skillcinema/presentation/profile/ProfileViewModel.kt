@@ -34,7 +34,7 @@ class ProfileViewModel(
     val state = _state.asStateFlow()
 
     var viewedQuantity = 0
-    var viewedFilmsIds: List<Int> = listOf()
+    private var viewedFilmsIds: List<Int> = listOf()
     var viewed: MutableList<FilmItemData> = mutableListOf()
     private val _viewedFlow = MutableStateFlow<List<FilmItemData>>(emptyList())
     val viewedFlow = _viewedFlow.asStateFlow()
@@ -44,14 +44,14 @@ class ProfileViewModel(
     val collectionChannel = _collectionChannel.receiveAsFlow()
 
     var interestedQuantity = 0
-    var interestedIds: List<InterestedTable> = listOf()
-    var interested: MutableList<Interested> = mutableListOf()
+    private var interestedIds: List<InterestedTable> = listOf()
+    private var interested: MutableList<Interested> = mutableListOf()
     private val _interestedFlow = MutableStateFlow<List<Interested>>(emptyList())
     val interestedFlow = _interestedFlow.asStateFlow()
 
     var jobLoadProfileData: Job? = null
-    var jobCreateAndSendToAdapterViewedList: Job? = null
-    var jobCreateAndSendToAdapterInterestedList: Job? = null
+    private var jobCreateAndSendToAdapterViewedList: Job? = null
+    private var jobCreateAndSendToAdapterInterestedList: Job? = null
 
     private suspend fun synchronizeCollectionNames() {
         // В этой функции коллеции, фигурирующие вместе с фильмами в collection_table,

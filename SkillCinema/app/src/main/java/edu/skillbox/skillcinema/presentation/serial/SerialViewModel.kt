@@ -48,10 +48,10 @@ class SerialViewModel(
     var rating: Float? = null
     var year: Int? = null
 
-    var length: Int? = null
+    private var length: Int? = null
     var filmLength: String? = null
 
-    var ratingAgeLimits: String? = null
+    private var ratingAgeLimits: String? = null
     var ageLimit: String? = null
 
     var shortDescription: String? = null
@@ -61,12 +61,12 @@ class SerialViewModel(
     var descriptionCollapsed = true
 
     var countries: String? = null
-    var countryList: List<String> = emptyList()
+    private var countryList: List<String> = emptyList()
 
     var genres: String? = null
-    var genreList: List<String> = emptyList()
+    private var genreList: List<String> = emptyList()
 
-    var quantityOfSeasons = 0
+    private var quantityOfSeasons = 0
     var quantityOfEpisodes = 0
     var seasonsInformation: String = ""
     var serialInformation: String = ""
@@ -79,9 +79,9 @@ class SerialViewModel(
     var imageTableList: List<ImageTable>? = null
     var gallerySize = 0
 
-    var similarFilmTableList: List<SimilarFilmTable>? = null
+    private var similarFilmTableList: List<SimilarFilmTable>? = null
     var similarsQuantity = 0
-    var similars: MutableList<FilmItemData> = mutableListOf()
+    private var similars: MutableList<FilmItemData> = mutableListOf()
     private val _similarsFlow = MutableStateFlow<List<FilmItemData>>(emptyList())
     val similarsFlow = _similarsFlow.asStateFlow()
 
@@ -89,7 +89,7 @@ class SerialViewModel(
     private val _favoriteChannel = Channel<Boolean>()
     val favoriteChannel = _favoriteChannel.receiveAsFlow()
 
-    var wantedToWatch = false
+    private var wantedToWatch = false
     private val _wantedToWatchChannel = Channel<Boolean>()
     val wantedToWatchChannel = _wantedToWatchChannel.receiveAsFlow()
 
@@ -97,7 +97,7 @@ class SerialViewModel(
     private val _viewedChannel = Channel<Boolean>()
     val viewedChannel = _viewedChannel.receiveAsFlow()
 
-    var jobLoadSimilarFilmsData: Job? = null
+    private var jobLoadSimilarFilmsData: Job? = null
 
     fun loadSerialData(filmId: Int) {
         Log.d(TAG, "Запущена loadSerialData($filmId)")

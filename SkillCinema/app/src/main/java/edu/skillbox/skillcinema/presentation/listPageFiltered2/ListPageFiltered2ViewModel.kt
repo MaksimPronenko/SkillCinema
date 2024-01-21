@@ -28,7 +28,7 @@ class ListPageFiltered2ViewModel(
     )
     val state = _state.asStateFlow()
 
-    var filmsFiltered2PagesQuantity = 0
+    private var filmsFiltered2PagesQuantity = 0
     lateinit var pagedFilmsFiltered2: Flow<PagingData<FilmItemData>>
 
     fun loadFilmsFiltered2(genre2Key: Int, country2Key: Int) {

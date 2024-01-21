@@ -27,7 +27,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
-private const val TAG = "ListPageFiltered2.Fragment"
+private const val TAG = "ListPageFilter2Fragment"
 
 @AndroidEntryPoint
 class ListPageFiltered2Fragment : Fragment() {
@@ -35,8 +35,8 @@ class ListPageFiltered2Fragment : Fragment() {
     private var _binding: FragmentListPageFiltered2Binding? = null
     private val binding get() = _binding!!
 
-    var genre2Key: Int? = null
-    var country2Key: Int? = null
+    private var genre2Key: Int? = null
+    private var country2Key: Int? = null
 
     private val filmFiltered2Adapter =
         FilmsPagedListAdapter { filmItemData -> onItemClick(filmItemData) }

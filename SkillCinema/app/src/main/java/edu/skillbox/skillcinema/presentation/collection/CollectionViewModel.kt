@@ -27,13 +27,13 @@ class CollectionViewModel(
 
     var collection = ""
 
-    var filmsIds: List<Int> = listOf()
-    var filmsList: MutableList<FilmItemData> = mutableListOf()
+    private var filmsIds: List<Int> = listOf()
+    private var filmsList: MutableList<FilmItemData> = mutableListOf()
     private val _filmsListFlow = MutableStateFlow<List<FilmItemData>>(emptyList())
     val filmsListFlow = _filmsListFlow.asStateFlow()
 
-    var jobLoadData: Job? = null
-    var jobCreateAndSendToAdapterFilmsList: Job? = null
+    private var jobLoadData: Job? = null
+    private var jobCreateAndSendToAdapterFilmsList: Job? = null
 
     fun loadData(collectionName: String) {
         Log.d(TAG, "loadData()")

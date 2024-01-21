@@ -23,7 +23,7 @@ class CollectionFilmAdapter(
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     var data = listOf<RecyclerViewItem>()
-    var mutableData = mutableListOf<RecyclerViewItem>()
+    private var mutableData = mutableListOf<RecyclerViewItem>()
 
     @SuppressLint("NotifyDataSetChanged")
     fun setAdapterData(receivedData: List<CollectionFilm>) {

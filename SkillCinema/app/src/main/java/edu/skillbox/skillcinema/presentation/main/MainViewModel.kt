@@ -34,41 +34,41 @@ class MainViewModel(
     val country2Key: Int = application.country2key
 
     var premieresQuantity = 0
-    var premieres: List<FilmPremiere> = emptyList()
-    var premieresExtended: MutableList<FilmItemData> = mutableListOf()
+    private var premieres: List<FilmPremiere> = emptyList()
+    private var premieresExtended: MutableList<FilmItemData> = mutableListOf()
     private val _premieresExtendedFlow = MutableStateFlow<List<FilmItemData>>(emptyList())
     val premieresExtendedFlow = _premieresExtendedFlow.asStateFlow()
 
     var top100PopularPagesQuantity = 0
     var top100Popular: PagedFilmTopList? = null
-    var top100PopularExtended: MutableList<FilmItemData> = mutableListOf()
+    private var top100PopularExtended: MutableList<FilmItemData> = mutableListOf()
     private val _top100PopularExtendedFlow = MutableStateFlow<List<FilmItemData>>(emptyList())
     val top100PopularExtendedFlow = _top100PopularExtendedFlow.asStateFlow()
 
     var top250PagesQuantity = 0
     var top250: PagedFilmTopList? = null
-    var top250Extended: MutableList<FilmItemData> = mutableListOf()
+    private var top250Extended: MutableList<FilmItemData> = mutableListOf()
     private val _top250ExtendedFlow = MutableStateFlow<List<FilmItemData>>(emptyList())
     val top250ExtendedFlow = _top250ExtendedFlow.asStateFlow()
 
     var serialsPagesQuantity = 0
 
     var serials: PagedFilmFilteredList? = null
-    var serialsExtended: MutableList<FilmItemData> = mutableListOf()
+    private var serialsExtended: MutableList<FilmItemData> = mutableListOf()
     private val _serialsExtendedFlow = MutableStateFlow<List<FilmItemData>>(emptyList())
     val serialsExtendedFlow = _serialsExtendedFlow.asStateFlow()
 
     var filmsFiltered1PagesQuantity = 0
 
     var filmsFiltered1: PagedFilmFilteredList? = null
-    var filmsFiltered1Extended: MutableList<FilmItemData> = mutableListOf()
+    private var filmsFiltered1Extended: MutableList<FilmItemData> = mutableListOf()
     private val _filmsFiltered1ExtendedFlow = MutableStateFlow<List<FilmItemData>>(emptyList())
     val filmsFiltered1ExtendedFlow = _filmsFiltered1ExtendedFlow.asStateFlow()
 
     var filmsFiltered2PagesQuantity = 0
 
     var filmsFiltered2: PagedFilmFilteredList? = null
-    var filmsFiltered2Extended: MutableList<FilmItemData> = mutableListOf()
+    private var filmsFiltered2Extended: MutableList<FilmItemData> = mutableListOf()
     private val _filmsFiltered2ExtendedFlow = MutableStateFlow<List<FilmItemData>>(emptyList())
     val filmsFiltered2ExtendedFlow = _filmsFiltered2ExtendedFlow.asStateFlow()
 

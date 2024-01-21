@@ -35,8 +35,8 @@ class SearchViewModel(
     var searchText: String? = application.keyword
     lateinit var filmsFlow: Flow<PagingData<FilmItemData>>
 
-    lateinit var searchResult: Pair<PagedFilmFilteredList?, Boolean>
-    var foundFilmsQuantity: Int? = null
+    private lateinit var searchResult: Pair<PagedFilmFilteredList?, Boolean>
+    private var foundFilmsQuantity: Int? = null
 
     var jobSearch: Job? = null
 

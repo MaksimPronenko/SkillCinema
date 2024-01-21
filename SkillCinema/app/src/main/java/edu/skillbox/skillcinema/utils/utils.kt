@@ -31,7 +31,7 @@ const val ARG_CURRENT_IMAGE = "currentImage"
 const val ARG_IMAGES_TYPE = "imagesType"
 
 enum class FilmType{
-    FILM, TV_SHOW, TV_SERIES, MINI_SERIES, ALL
+    FILM, TV_SERIES, ALL
 }
 
 enum class FilmOrder{

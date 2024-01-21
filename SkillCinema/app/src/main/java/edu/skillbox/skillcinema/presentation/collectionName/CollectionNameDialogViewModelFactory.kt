@@ -3,6 +3,7 @@ package edu.skillbox.skillcinema.presentation.collectionName
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
+@Suppress("UNCHECKED_CAST")
 class CollectionNameDialogViewModelFactory (private val collectionNameDialogViewModel: CollectionNameDialogViewModel) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

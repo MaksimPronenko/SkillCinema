@@ -25,7 +25,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
 
-private const val TAG = "AllFilmsOfStaff.Fragment"
+private const val TAG = "AllFilmsOfStaffFragment"
 
 @AndroidEntryPoint
 class AllFilmsOfStaffFragment : Fragment() {

@@ -63,7 +63,8 @@ class BottomDialogFragment : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.filmName.text = viewModel.name
-        binding.filmInfo.text = "${viewModel.year}, ${viewModel.genres}"
+        val filmInfoText = "${viewModel.year}, ${viewModel.genres}"
+        binding.filmInfo.text = filmInfoText
         binding.collectionRecycler.adapter = collectionAdapter
 
         Glide

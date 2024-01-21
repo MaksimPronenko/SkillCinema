@@ -27,7 +27,7 @@ class BottomDialogViewModel(
     var favorite = false
     var wantedToWatch = false
 
-    var collectionFilmList: List<CollectionFilm> = emptyList()
+    private var collectionFilmList: List<CollectionFilm> = emptyList()
     private val _collectionChannel = Channel<List<CollectionFilm>>()
     val collectionChannel = _collectionChannel.receiveAsFlow()
 

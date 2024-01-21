@@ -8,7 +8,7 @@ class WelcomeViewModel(
     application: App
 ) : AndroidViewModel(application) {
 
-    var timeToChangeWelcomeScreen = 2000L
+    private var timeToChangeWelcomeScreen = 2000L
 
     val changeScreenScope = CoroutineScope(Dispatchers.IO)
 

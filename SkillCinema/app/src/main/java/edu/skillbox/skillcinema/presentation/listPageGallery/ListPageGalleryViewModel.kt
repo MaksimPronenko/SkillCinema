@@ -38,37 +38,37 @@ class ListPageGalleryViewModel(
     private val _imagesShooting = MutableStateFlow<List<ImageTable>>(emptyList())
     val imagesShooting = _imagesShooting.asStateFlow()
 
-    val imagesPosterList: MutableList<ImageTable> = mutableListOf()
+    private val imagesPosterList: MutableList<ImageTable> = mutableListOf()
     var quantityPoster = 0
     private val _imagesPoster = MutableStateFlow<List<ImageTable>>(emptyList())
     val imagesPoster = _imagesPoster.asStateFlow()
 
-    val imagesFanArtList: MutableList<ImageTable> = mutableListOf()
+    private val imagesFanArtList: MutableList<ImageTable> = mutableListOf()
     var quantityFanArt = 0
     private val _imagesFanArt = MutableStateFlow<List<ImageTable>>(emptyList())
     val imagesFanArt = _imagesFanArt.asStateFlow()
 
-    val imagesPromoList: MutableList<ImageTable> = mutableListOf()
+    private val imagesPromoList: MutableList<ImageTable> = mutableListOf()
     var quantityPromo = 0
     private val _imagesPromo = MutableStateFlow<List<ImageTable>>(emptyList())
     val imagesPromo = _imagesPromo.asStateFlow()
 
-    val imagesConceptList: MutableList<ImageTable> = mutableListOf()
+    private val imagesConceptList: MutableList<ImageTable> = mutableListOf()
     var quantityConcept = 0
     private val _imagesConcept = MutableStateFlow<List<ImageTable>>(emptyList())
     val imagesConcept = _imagesConcept.asStateFlow()
 
-    val imagesWallpaperList: MutableList<ImageTable> = mutableListOf()
+    private val imagesWallpaperList: MutableList<ImageTable> = mutableListOf()
     var quantityWallpaper = 0
     private val _imagesWallpaper = MutableStateFlow<List<ImageTable>>(emptyList())
     val imagesWallpaper = _imagesWallpaper.asStateFlow()
 
-    val imagesCoverList: MutableList<ImageTable> = mutableListOf()
+    private val imagesCoverList: MutableList<ImageTable> = mutableListOf()
     var quantityCover = 0
     private val _imagesCover = MutableStateFlow<List<ImageTable>>(emptyList())
     val imagesCover = _imagesCover.asStateFlow()
 
-    val imagesScreenshotList: MutableList<ImageTable> = mutableListOf()
+    private val imagesScreenshotList: MutableList<ImageTable> = mutableListOf()
     var quantityScreenshot = 0
     private val _imagesScreenshot = MutableStateFlow<List<ImageTable>>(emptyList())
     val imagesScreenshot = _imagesScreenshot.asStateFlow()

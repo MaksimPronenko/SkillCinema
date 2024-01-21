@@ -23,9 +23,9 @@ class ListPagePremieresViewModel(
     )
     val state = _state.asStateFlow()
 
-    var premieresQuantity = 0
+    private var premieresQuantity = 0
     var premieres: List<FilmPremiere> = emptyList()
-    var premieresExtended: MutableList<FilmItemData> = mutableListOf()
+    private var premieresExtended: MutableList<FilmItemData> = mutableListOf()
     private val _premieresExtendedFlow = MutableStateFlow<List<FilmItemData>>(emptyList())
     val premieresExtendedFlow = _premieresExtendedFlow.asStateFlow()
 

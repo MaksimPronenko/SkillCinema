@@ -3,6 +3,7 @@ package edu.skillbox.skillcinema.presentation.allInterested
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
+@Suppress("UNCHECKED_CAST")
 class AllInterestedViewModelFactory (private val allInterestedViewModel: AllInterestedViewModel) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {

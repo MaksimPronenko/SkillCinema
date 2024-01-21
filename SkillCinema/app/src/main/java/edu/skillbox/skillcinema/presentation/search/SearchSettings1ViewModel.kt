@@ -22,7 +22,7 @@ class SearchSettings1ViewModel(
     var ratingTo = application.ratingTo
     var yearFrom = application.yearFrom
     var yearTo = application.yearTo
-    var showWatched = application.showWatched
+    private var showWatched = application.showWatched
 
     fun refreshAppData() {
         chosenCountryCode = application.country

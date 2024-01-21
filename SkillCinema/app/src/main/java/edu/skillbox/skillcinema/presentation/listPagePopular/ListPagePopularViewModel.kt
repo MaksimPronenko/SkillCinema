@@ -31,7 +31,7 @@ class ListPagePopularViewModel(
     )
     val state = _state.asStateFlow()
 
-    var top100PopularPagesQuantity = 0
+    private var top100PopularPagesQuantity = 0
 
     lateinit var pagedFilmsTop100PopularExtended: Flow<PagingData<FilmItemData>>
 

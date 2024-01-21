@@ -191,80 +191,81 @@ class ListPageGalleryFragment : Fragment() {
 
                                 if (viewModel.galleryQuantity > 0) {
                                     binding.filterAll.isGone = false
-                                    binding.filterAll.text =
-                                        getString(R.string.all) + "  " + viewModel.galleryQuantity
+                                    val filterAllText = getString(R.string.all) + "  " + viewModel.galleryQuantity
+                                    binding.filterAll.text = filterAllText
                                 } else {
                                     binding.filterAll.isGone = true
                                 }
 
                                 if (viewModel.quantityStill > 0) {
                                     binding.filterStill.isGone = false
-                                    binding.filterStill.text =
-                                        getString(R.string.still) + "  " + viewModel.quantityStill
+                                    val filterStillText = getString(R.string.still) + "  " + viewModel.quantityStill
+                                    binding.filterStill.text = filterStillText
                                 } else {
                                     binding.filterStill.isGone = true
                                 }
 
                                 if (viewModel.quantityShooting > 0) {
                                     binding.filterShooting.isGone = false
-                                    binding.filterShooting.text =
-                                        getString(R.string.shooting) + "  " + viewModel.quantityShooting
+                                    val filterShootingText = getString(R.string.shooting) + "  " + viewModel.quantityShooting
+                                    binding.filterShooting.text = filterShootingText
+
                                 } else {
                                     binding.filterShooting.isGone = true
                                 }
 
                                 if (viewModel.quantityPoster > 0) {
                                     binding.filterPoster.isGone = false
-                                    binding.filterPoster.text =
-                                        getString(R.string.poster) + "  " + viewModel.quantityPoster
+                                    val filterPosterText = getString(R.string.poster) + "  " + viewModel.quantityPoster
+                                    binding.filterPoster.text = filterPosterText
                                 } else {
                                     binding.filterPoster.isGone = true
                                 }
 
                                 if (viewModel.quantityFanArt > 0) {
                                     binding.filterFanArt.isGone = false
-                                    binding.filterFanArt.text =
-                                        getString(R.string.fan_art) + "  " + viewModel.quantityFanArt
+                                    val filterFanArtText = getString(R.string.fan_art) + "  " + viewModel.quantityFanArt
+                                    binding.filterFanArt.text = filterFanArtText
                                 } else {
                                     binding.filterFanArt.isGone = true
                                 }
 
                                 if (viewModel.quantityPromo > 0) {
                                     binding.filterPromo.isGone = false
-                                    binding.filterPromo.text =
-                                        getString(R.string.promo) + "  " + viewModel.quantityPromo
+                                    val filterPromoText = getString(R.string.promo) + "  " + viewModel.quantityPromo
+                                    binding.filterPromo.text = filterPromoText
                                 } else {
                                     binding.filterPromo.isGone = true
                                 }
 
                                 if (viewModel.quantityConcept > 0) {
                                     binding.filterConcept.isGone = false
-                                    binding.filterConcept.text =
-                                        getString(R.string.concept) + "  " + viewModel.quantityConcept
+                                    val filterConceptText = getString(R.string.concept) + "  " + viewModel.quantityConcept
+                                    binding.filterConcept.text = filterConceptText
                                 } else {
                                     binding.filterConcept.isGone = true
                                 }
 
                                 if (viewModel.quantityWallpaper > 0) {
                                     binding.filterWallpaper.isGone = false
-                                    binding.filterWallpaper.text =
-                                        getString(R.string.wallpaper) + "  " + viewModel.quantityWallpaper
+                                    val filterWallpaperText = getString(R.string.wallpaper) + "  " + viewModel.quantityWallpaper
+                                    binding.filterWallpaper.text = filterWallpaperText
                                 } else {
                                     binding.filterWallpaper.isGone = true
                                 }
 
                                 if (viewModel.quantityCover > 0) {
                                     binding.filterCover.isGone = false
-                                    binding.filterCover.text =
-                                        getString(R.string.cover) + "  " + viewModel.quantityCover
+                                    val filterCoverText = getString(R.string.cover) + "  " + viewModel.quantityCover
+                                    binding.filterCover.text = filterCoverText
                                 } else {
                                     binding.filterCover.isGone = true
                                 }
 
                                 if (viewModel.quantityScreenshot > 0) {
                                     binding.filterScreenshot.isGone = false
-                                    binding.filterScreenshot.text =
-                                        getString(R.string.screenshot) + "  " + viewModel.quantityScreenshot
+                                    val filterScreenshotText = getString(R.string.screenshot) + "  " + viewModel.quantityScreenshot
+                                    binding.filterScreenshot.text = filterScreenshotText
                                 } else {
                                     binding.filterScreenshot.isGone = true
                                 }

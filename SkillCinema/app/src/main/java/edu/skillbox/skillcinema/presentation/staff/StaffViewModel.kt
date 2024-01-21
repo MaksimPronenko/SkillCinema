@@ -39,13 +39,13 @@ class StaffViewModel(
     var filmsQuantity: Int = 0
 
     private var uniqueFilmIDs: MutableList<Int> = emptyList<Int>().toMutableList()
-    var filmsUnique: MutableList<FilmOfPersonTable> = emptyList<FilmOfPersonTable>().toMutableList()
-    var bestFilms: List<FilmOfPersonTable>? = null
+    private var filmsUnique: MutableList<FilmOfPersonTable> = emptyList<FilmOfPersonTable>().toMutableList()
+    private var bestFilms: List<FilmOfPersonTable>? = null
     private var filmsExtended: MutableList<FilmItemData> = mutableListOf()
     private val _bestFilmsFlow = MutableStateFlow<List<FilmItemData>>(emptyList())
     val bestFilmsFlow = _bestFilmsFlow.asStateFlow()
 
-    var jobLoadBestFilmsExtended: Job? = null
+    private var jobLoadBestFilmsExtended: Job? = null
 
     fun loadPersonData(staffId: Int) {
         Log.d(TAG, "loadPersonData($staffId)")

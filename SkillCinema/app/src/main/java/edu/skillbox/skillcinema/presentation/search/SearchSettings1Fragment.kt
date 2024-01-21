@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -53,7 +55,8 @@ class SearchSettings1Fragment : Fragment() {
         binding.textCountry.text = countryText(viewModel.chosenCountryCode)
         binding.textGenre.text = genreText(viewModel.chosenGenreCode)
         binding.textYears.text = periodText(viewModel.yearFrom, viewModel.yearTo)
-        binding.ratingSlider.values = listOf(viewModel.ratingFrom.toFloat(), viewModel.ratingTo.toFloat())
+        binding.ratingSlider.values =
+            listOf(viewModel.ratingFrom.toFloat(), viewModel.ratingTo.toFloat())
 
         binding.chipDate.isChecked = viewModel.order == FilmOrder.YEAR.name
         binding.chipPopularity.isChecked = viewModel.order == FilmOrder.NUM_VOTE.name
@@ -96,21 +99,19 @@ class SearchSettings1Fragment : Fragment() {
         binding.showWatchedButton.setOnClickListener {
             if (viewModel.changeAndSaveShowWatched()) {
                 binding.viewedImage.setImageDrawable(
-                    resources.getDrawable(
-                        R.drawable.watched,
-                        null
-                    )
+                    ResourcesCompat.getDrawable(resources, R.drawable.watched, null)
                 )
-                binding.viewedImage.setColorFilter(resources.getColor(R.color.blue, null))
+                binding.viewedImage.setColorFilter(
+                    ContextCompat.getColor(requireContext(), R.color.blue)
+                )
                 binding.textHideViewed.text = resources.getText(R.string.watched)
             } else {
                 binding.viewedImage.setImageDrawable(
-                    resources.getDrawable(
-                        R.drawable.not_watched,
-                        null
-                    )
+                    ResourcesCompat.getDrawable(resources, R.drawable.not_watched, null)
                 )
-                binding.viewedImage.setColorFilter(resources.getColor(R.color.grey_4, null))
+                binding.viewedImage.setColorFilter(
+                    ContextCompat.getColor(requireContext(),R.color.grey_4)
+                )
                 binding.textHideViewed.text = resources.getText(R.string.not_watched)
             }
         }

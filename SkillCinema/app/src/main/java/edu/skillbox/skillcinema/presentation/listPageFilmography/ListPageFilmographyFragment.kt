@@ -119,136 +119,137 @@ class ListPageFilmographyFragment : Fragment() {
 
                                 if (viewModel.quantityActorFilms > 0) {
                                     binding.chipActor.isGone = false
-                                    binding.chipActor.text =
-                                        getString(R.string.chip_actor) + "  " + viewModel.quantityActorFilms
+                                    val chipActorText = getString(R.string.chip_actor) + "  " + viewModel.quantityActorFilms
+                                    binding.chipActor.text = chipActorText
                                 } else {
                                     binding.chipActor.isGone = true
                                 }
 
                                 if (viewModel.quantityActressFilms > 0) {
                                     binding.chipActress.isGone = false
-                                    binding.chipActress.text =
-                                        getString(R.string.chip_actress) + "  " + viewModel.quantityActressFilms
+                                    val chipActressText = getString(R.string.chip_actress) + "  " + viewModel.quantityActressFilms
+                                    binding.chipActress.text = chipActressText
                                 } else {
                                     binding.chipActress.isGone = true
                                 }
 
                                 if (viewModel.quantityHimselfFilms > 0) {
                                     binding.chipHimself.isGone = false
-                                    binding.chipHimself.text =
-                                        getString(R.string.chip_himself) + "  " + viewModel.quantityHimselfFilms
+                                    val chipHimselfText = getString(R.string.chip_himself) + "  " + viewModel.quantityHimselfFilms
+                                    binding.chipHimself.text = chipHimselfText
                                 } else {
                                     binding.chipHimself.isGone = true
                                 }
 
                                 if (viewModel.quantityHerselfFilms > 0) {
                                     binding.chipHerself.isGone = false
-                                    binding.chipHerself.text =
-                                        getString(R.string.chip_herself) + "  " + viewModel.quantityHerselfFilms
+                                    val chipHerselfText = getString(R.string.chip_herself) + "  " + viewModel.quantityHerselfFilms
+                                    binding.chipHerself.text = chipHerselfText
                                 } else {
                                     binding.chipHerself.isGone = true
                                 }
 
                                 if (viewModel.quantityHronoTitrMaleFilms > 0) {
                                     binding.chipHronoTitrMale.isGone = false
-                                    binding.chipHronoTitrMale.text =
+                                    val chipHronoTitrMaleText =
                                         getString(R.string.chip_hrono_titr_male) + "  " + viewModel.quantityHronoTitrMaleFilms
+                                    binding.chipHronoTitrMale.text = chipHronoTitrMaleText
                                 } else {
                                     binding.chipHronoTitrMale.isGone = true
                                 }
 
                                 if (viewModel.quantityHronoTitrFemaleFilms > 0) {
                                     binding.chipHronoTitrFemale.isGone = false
-                                    binding.chipHronoTitrFemale.text =
-                                        getString(R.string.chip_hrono_titr_female) + "  " + viewModel.quantityHronoTitrFemaleFilms
+                                    val chipHronoTitrFemaleText = getString(R.string.chip_hrono_titr_female) + "  " + viewModel.quantityHronoTitrFemaleFilms
+                                    binding.chipHronoTitrFemale.text = chipHronoTitrFemaleText
                                 } else {
                                     binding.chipHronoTitrFemale.isGone = true
                                 }
 
                                 if (viewModel.quantityDirectorFilms > 0) {
                                     binding.chipDirector.isGone = false
-                                    binding.chipDirector.text =
-                                        getString(R.string.chip_director) + "  " + viewModel.quantityDirectorFilms
+                                    val chipDirectorText = getString(R.string.chip_director) + "  " + viewModel.quantityDirectorFilms
+                                    binding.chipDirector.text = chipDirectorText
                                 } else {
                                     binding.chipDirector.isGone = true
                                 }
 
                                 if (viewModel.quantityProducerFilms > 0) {
                                     binding.chipProducer.isGone = false
-                                    binding.chipProducer.text =
-                                        getString(R.string.chip_producer) + "  " + viewModel.quantityProducerFilms
+                                    val chipProducerText = getString(R.string.chip_producer) + "  " + viewModel.quantityProducerFilms
+                                    binding.chipProducer.text = chipProducerText
                                 } else {
                                     binding.chipProducer.isGone = true
                                 }
 
                                 if (viewModel.quantityProducerUSSRFilms > 0) {
                                     binding.chipProducerUssr.isGone = false
-                                    binding.chipProducerUssr.text =
-                                        getString(R.string.chip_producer_ussr) + "  " + viewModel.quantityProducerUSSRFilms
+                                    val chipProducerUssrText = getString(R.string.chip_producer_ussr) + "  " + viewModel.quantityProducerUSSRFilms
+                                    binding.chipProducerUssr.text = chipProducerUssrText
                                 } else {
                                     binding.chipProducerUssr.isGone = true
                                 }
 
                                 if (viewModel.quantityVoiceDirectorFilms > 0) {
                                     binding.chipVoiceDirector.isGone = false
-                                    binding.chipVoiceDirector.text =
-                                        getString(R.string.chip_voice_director) + "  " + viewModel.quantityVoiceDirectorFilms
+                                    val chipVoiceDirectorText = getString(R.string.chip_voice_director) + "  " + viewModel.quantityVoiceDirectorFilms
+                                    binding.chipVoiceDirector.text = chipVoiceDirectorText
                                 } else {
                                     binding.chipVoiceDirector.isGone = true
                                 }
 
                                 if (viewModel.quantityWriterFilms > 0) {
                                     binding.chipWriter.isGone = false
-                                    binding.chipWriter.text =
-                                        getString(R.string.chip_writer) + "  " + viewModel.quantityWriterFilms
+                                    val chipWriterText = getString(R.string.chip_writer) + "  " + viewModel.quantityWriterFilms
+                                    binding.chipWriter.text = chipWriterText
                                 } else {
                                     binding.chipWriter.isGone = true
                                 }
 
                                 if (viewModel.quantityOperatorFilms > 0) {
                                     binding.chipOperator.isGone = false
-                                    binding.chipOperator.text =
-                                        getString(R.string.chip_operator) + "  " + viewModel.quantityOperatorFilms
+                                    val chipOperatorText = getString(R.string.chip_operator) + "  " + viewModel.quantityOperatorFilms
+                                    binding.chipOperator.text = chipOperatorText
                                 } else {
                                     binding.chipOperator.isGone = true
                                 }
 
                                 if (viewModel.quantityEditorFilms > 0) {
                                     binding.chipEditor.isGone = false
-                                    binding.chipEditor.text =
-                                        getString(R.string.chip_editor) + "  " + viewModel.quantityEditorFilms
+                                    val chipEditorText = getString(R.string.chip_editor) + "  " + viewModel.quantityEditorFilms
+                                    binding.chipEditor.text = chipEditorText
                                 } else {
                                     binding.chipEditor.isGone = true
                                 }
 
                                 if (viewModel.quantityComposerFilms > 0) {
                                     binding.chipComposer.isGone = false
-                                    binding.chipComposer.text =
-                                        getString(R.string.chip_composer) + "  " + viewModel.quantityComposerFilms
+                                    val chipComposerText = getString(R.string.chip_composer) + "  " + viewModel.quantityComposerFilms
+                                    binding.chipComposer.text = chipComposerText
                                 } else {
                                     binding.chipComposer.isGone = true
                                 }
 
                                 if (viewModel.quantityDesignFilms > 0) {
                                     binding.chipDesign.isGone = false
-                                    binding.chipDesign.text =
-                                        getString(R.string.chip_design) + "  " + viewModel.quantityDesignFilms
+                                    val chipDesignText = getString(R.string.chip_design) + "  " + viewModel.quantityDesignFilms
+                                    binding.chipDesign.text = chipDesignText
                                 } else {
                                     binding.chipDesign.isGone = true
                                 }
 
                                 if (viewModel.quantityTranslatorFilms > 0) {
                                     binding.chipTranslator.isGone = false
-                                    binding.chipTranslator.text =
-                                        getString(R.string.chip_translator) + "  " + viewModel.quantityTranslatorFilms
+                                    val chipTranslatorText = getString(R.string.chip_translator) + "  " + viewModel.quantityTranslatorFilms
+                                    binding.chipTranslator.text = chipTranslatorText
                                 } else {
                                     binding.chipTranslator.isGone = true
                                 }
 
                                 if (viewModel.quantityUnknownFilms > 0) {
                                     binding.chipUnknown.isGone = false
-                                    binding.chipUnknown.text =
-                                        getString(R.string.chip_unknown) + "  " + viewModel.quantityUnknownFilms
+                                    val chipUnknownText = getString(R.string.chip_unknown) + "  " + viewModel.quantityUnknownFilms
+                                    binding.chipUnknown.text = chipUnknownText
                                 } else {
                                     binding.chipUnknown.isGone = true
                                 }

@@ -29,7 +29,7 @@ class SerialContentViewModel(
     var chosenSeason: Int = 1
     var firstSeason: Int? = null
 
-    var quantityOfSeasons = 0
+    private var quantityOfSeasons = 0
     var seasonsList: List<SeasonsWithEpisodes> = emptyList()
 
     fun loadSerialInfo(filmId: Int) {

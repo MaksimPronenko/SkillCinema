@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.core.view.isGone
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -101,25 +102,25 @@ class SerialFragment : Fragment() {
         }
 
         binding.share.setOnClickListener {
-                val sendIntent: Intent = Intent().apply {
-                    action = Intent.ACTION_SEND
-                    if(viewModel.imdbId != null) {
-                        putExtra(Intent.EXTRA_TEXT, "https://www.imdb.com/title/${viewModel.imdbId}/")
+            val sendIntent: Intent = Intent().apply {
+                action = Intent.ACTION_SEND
+                if (viewModel.imdbId != null) {
+                    putExtra(Intent.EXTRA_TEXT, "https://www.imdb.com/title/${viewModel.imdbId}/")
+                } else {
+                    // Если отсутствует идентификатор imdbId, то отправляем хоть какие-то
+                    // сведения о фильме: название и год, или только название, если года
+                    // тоже нет в данных.
+                    if (viewModel.year != null) {
+                        putExtra(Intent.EXTRA_TEXT, "${viewModel.name}, ${viewModel.year}")
                     } else {
-                        // Если отсутствует идентификатор imdbId, то отправляем хоть какие-то
-                        // сведения о фильме: название и год, или только название, если года
-                        // тоже нет в данных.
-                        if (viewModel.year != null) {
-                            putExtra(Intent.EXTRA_TEXT, "${viewModel.name}, ${viewModel.year}")
-                        } else {
-                            putExtra(Intent.EXTRA_TEXT, viewModel.name)
-                        }
+                        putExtra(Intent.EXTRA_TEXT, viewModel.name)
                     }
-                    type = "text/plain"
                 }
+                type = "text/plain"
+            }
 
-                val shareIntent = Intent.createChooser(sendIntent, null)
-                startActivity(shareIntent)
+            val shareIntent = Intent.createChooser(sendIntent, null)
+            startActivity(shareIntent)
         }
 
         binding.shortDescription.setOnClickListener {
@@ -263,10 +264,14 @@ class SerialFragment : Fragment() {
             .launchWhenStarted {
                 viewModel.favoriteChannel.collect { isFavorite ->
                     if (isFavorite) {
-                        binding.favorite.setColorFilter(resources.getColor(R.color.blue, null))
+                        binding.favorite.setColorFilter(
+                            ContextCompat.getColor(requireContext(), R.color.blue)
+                        )
                         Log.d(TAG, "Фильм ${viewModel.filmId} в коллекции \"Любимое\"")
                     } else {
-                        binding.favorite.setColorFilter(resources.getColor(R.color.grey_4, null))
+                        binding.favorite.setColorFilter(
+                            ContextCompat.getColor(requireContext(), R.color.grey_4)
+                        )
                         Log.d(TAG, "Фильм ${viewModel.filmId} отсутствует в коллекции \"Любимое\"")
                     }
                 }
@@ -276,15 +281,14 @@ class SerialFragment : Fragment() {
             .launchWhenStarted {
                 viewModel.wantedToWatchChannel.collect { isWantedToWatch ->
                     if (isWantedToWatch) {
-                        binding.wantedToWatch.setColorFilter(resources.getColor(R.color.blue, null))
+                        binding.wantedToWatch.setColorFilter(
+                            ContextCompat.getColor(requireContext(), R.color.blue)
+                        )
                         Log.d(TAG, "Фильм ${viewModel.filmId} в коллекции \"Хочу посмотреть\"")
 
                     } else {
                         binding.wantedToWatch.setColorFilter(
-                            resources.getColor(
-                                R.color.grey_4,
-                                null
-                            )
+                            ContextCompat.getColor(requireContext(), R.color.grey_4)
                         )
                         Log.d(
                             TAG,
@@ -299,12 +303,16 @@ class SerialFragment : Fragment() {
                 viewModel.viewedChannel.collect { viewed ->
                     if (viewed) {
                         binding.viewed.setImageResource(R.drawable.watched)
-                        binding.viewed.setColorFilter(resources.getColor(R.color.blue, null))
+                        binding.viewed.setColorFilter(
+                            ContextCompat.getColor(requireContext(), R.color.blue)
+                        )
                         Log.d(TAG, "Фильм ${viewModel.filmId} просмотрен")
 
                     } else {
                         binding.viewed.setImageResource(R.drawable.not_watched)
-                        binding.viewed.setColorFilter(resources.getColor(R.color.grey_4, null))
+                        binding.viewed.setColorFilter(
+                            ContextCompat.getColor(requireContext(), R.color.grey_4)
+                        )
                         Log.d(TAG, "Фильм ${viewModel.filmId} не просмотрен")
                     }
                 }
@@ -319,6 +327,7 @@ class SerialFragment : Fragment() {
                                 binding.progress.isGone = false
                                 binding.scrollView.isGone = true
                             }
+
                             ViewModelState.Loaded -> {
                                 binding.progress.isGone = true
                                 binding.scrollView.isGone = false
@@ -328,28 +337,32 @@ class SerialFragment : Fragment() {
                                     .load(viewModel.poster)
                                     .into(binding.poster)
 
-                                if (viewModel.rating != null)
-                                    binding.ratingAndName.text =
+                                if (viewModel.rating != null) {
+                                    val ratingAndNameText =
                                         viewModel.rating.toString() + ", " + viewModel.name
-                                else
+                                    binding.ratingAndName.text = ratingAndNameText
+                                } else {
                                     binding.ratingAndName.text = viewModel.name
+                                }
 
-                                binding.yearAndGenresAndSeasonsQuantity.text =
+                                val yearAndGenresAndSeasonsQuantityText =
                                     viewModel.year.toString() + ", " + viewModel.genres +
                                             ", " + viewModel.seasonsInformation
+                                binding.yearAndGenresAndSeasonsQuantity.text =
+                                    yearAndGenresAndSeasonsQuantityText
 
-                                binding.countriesAndLengthAndAgeLimit.text =
-                                    viewModel.countries.toString() +
-                                            if (viewModel.filmLength != null) {
-                                                ", " + viewModel.filmLength.toString()
-                                            } else {
-                                                ""
-                                            } +
-                                            if (viewModel.ageLimit != null) {
-                                                ", " + viewModel.ageLimit.toString()
-                                            } else {
-                                                ""
-                                            }
+                                val countriesAndLengthAndAgeLimitText = viewModel.countries.toString() +
+                                        if (viewModel.filmLength != null) {
+                                            ", " + viewModel.filmLength.toString()
+                                        } else {
+                                            ""
+                                        } +
+                                        if (viewModel.ageLimit != null) {
+                                            ", " + viewModel.ageLimit.toString()
+                                        } else {
+                                            ""
+                                        }
+                                binding.countriesAndLengthAndAgeLimit.text = countriesAndLengthAndAgeLimitText
 
                                 if (viewModel.shortDescription != null)
                                     binding.shortDescription.text =
@@ -450,6 +463,7 @@ class SerialFragment : Fragment() {
                                     }
                                 }
                             }
+
                             ViewModelState.Error -> {
                                 binding.scrollView.isGone = true
                                 binding.progress.isGone = true

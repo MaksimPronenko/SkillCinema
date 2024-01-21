@@ -3,6 +3,7 @@ package edu.skillbox.skillcinema.presentation.welcome
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
+@Suppress("UNCHECKED_CAST")
 class WelcomeViewModelFactory (private val welcomeViewModel: WelcomeViewModel): ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(WelcomeViewModel::class.java)) {

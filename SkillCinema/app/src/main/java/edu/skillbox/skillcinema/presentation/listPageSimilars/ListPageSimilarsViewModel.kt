@@ -26,8 +26,8 @@ class ListPageSimilarsViewModel(
     var filmId: Int = 0
 
     var similarFilmTableList: List<SimilarFilmTable>? = null
-    var similarsQuantity = 0
-    var similars: MutableList<FilmItemData> = mutableListOf()
+    private var similarsQuantity = 0
+    private var similars: MutableList<FilmItemData> = mutableListOf()
     private val _similarsFlow = MutableStateFlow<List<FilmItemData>>(emptyList())
     val similarsFlow = _similarsFlow.asStateFlow()
 

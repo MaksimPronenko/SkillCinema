@@ -3,6 +3,7 @@ package edu.skillbox.skillcinema.presentation.listPagePopular
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 
+@Suppress("UNCHECKED_CAST")
 class ListPagePopularViewModelFactory (private val listPagePopularViewModel: ListPagePopularViewModel) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
