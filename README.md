@@ -17,9 +17,9 @@
 
 Приложение не коммерческое, но вполне достойное по функционалу и качеству на фоне аналогов.
 
-<img src="https://github.com/MaksimPronenko/SkillCinema/assets/105295402/24f9dab2-3a8e-4948-9e8b-9fb091cd509b" width="330" height="715">
-<img src="https://github.com/MaksimPronenko/SkillCinema/assets/105295402/402c828c-db5f-421f-8ea6-89d91cbe0725" width="330" height="715">
-<img src="https://github.com/MaksimPronenko/SkillCinema/assets/105295402/b8f2fe9f-6a17-4486-9c62-62d1f3ee5e53" width="330" height="715">
+<img src="https://github.com/MaksimPronenko/SkillCinema/assets/105295402/24f9dab2-3a8e-4948-9e8b-9fb091cd509b" width="270" height="585">
+<img src="https://github.com/MaksimPronenko/SkillCinema/assets/105295402/402c828c-db5f-421f-8ea6-89d91cbe0725" width="270" height="585">
+<img src="https://github.com/MaksimPronenko/SkillCinema/assets/105295402/b8f2fe9f-6a17-4486-9c62-62d1f3ee5e53" width="270" height="585">
 <img src="https://github.com/MaksimPronenko/SkillCinema/assets/105295402/0cb88518-aac5-42a5-9aea-edaa61ffda08" width="330" height="715">
 <img src="https://github.com/MaksimPronenko/SkillCinema/assets/105295402/9f279b4e-9cd3-43e2-b02e-fb2b8ca5f271" width="330" height="715">
 <img src="https://github.com/MaksimPronenko/SkillCinema/assets/105295402/1b458ab2-6766-47b1-9334-dd196febba0c" width="330" height="715">
