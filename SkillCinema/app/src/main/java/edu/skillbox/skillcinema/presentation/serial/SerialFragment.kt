@@ -28,9 +28,7 @@ import edu.skillbox.skillcinema.presentation.ViewModelState
 import edu.skillbox.skillcinema.presentation.adapters.FilmAdapter
 import edu.skillbox.skillcinema.presentation.adapters.GalleryAdapter
 import edu.skillbox.skillcinema.presentation.adapters.StaffAdapter
-import edu.skillbox.skillcinema.utils.ARG_CURRENT_IMAGE
-import edu.skillbox.skillcinema.utils.ARG_FILM_ID
-import edu.skillbox.skillcinema.utils.ARG_STAFF_ID
+import edu.skillbox.skillcinema.utils.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import javax.inject.Inject
@@ -90,11 +88,11 @@ class SerialFragment : Fragment() {
         viewModel.loadSimilarFilmsData()
 
         binding.favorite.setOnClickListener {
-            viewModel.onCollectionButtonClick("Любимое")
+            viewModel.onCollectionButtonClick(Collections.FAVORITE.title)
         }
 
         binding.wantedToWatch.setOnClickListener {
-            viewModel.onCollectionButtonClick("Хочу посмотреть")
+            viewModel.onCollectionButtonClick(Collections.WANT_TO_WATCH.title)
         }
 
         binding.viewed.setOnClickListener {
@@ -145,23 +143,23 @@ class SerialFragment : Fragment() {
             val bundle =
                 Bundle().apply {
                     putInt(
-                        "filmId",
+                        ARG_FILM_ID,
                         viewModel.filmId
                     )
                     putString(
-                        "posterSmall",
+                        ARG_POSTER_SMALL,
                         viewModel.posterSmall
                     )
                     putString(
-                        "name",
+                        ARG_NAME,
                         viewModel.name
                     )
                     putString(
-                        "year",
+                        ARG_YEAR,
                         if (viewModel.year == null) "" else viewModel.year.toString()
                     )
                     putString(
-                        "genres",
+                        ARG_GENRES,
                         viewModel.genres
                     )
                 }
@@ -192,11 +190,11 @@ class SerialFragment : Fragment() {
             val bundle =
                 Bundle().apply {
                     putInt(
-                        "filmId",
+                        ARG_FILM_ID,
                         viewModel.filmId
                     )
                     putString(
-                        "name",
+                        ARG_NAME,
                         viewModel.name
                     )
                 }
@@ -209,9 +207,9 @@ class SerialFragment : Fragment() {
         binding.buttonAllActors.setOnClickListener {
             val bundle =
                 Bundle().apply {
-                    putInt("filmId", viewModel.filmId)
-                    putString("filmName", viewModel.name)
-                    putBoolean("staffType", false)
+                    putInt(ARG_FILM_ID, viewModel.filmId)
+                    putString(ARG_FILM_NAME, viewModel.name)
+                    putBoolean(ARG_STAFF_TYPE, false)
                 }
             findNavController().navigate(
                 R.id.action_SerialFragment_to_AllStaffFragment,
@@ -222,9 +220,9 @@ class SerialFragment : Fragment() {
         binding.buttonAllStaff.setOnClickListener {
             val bundle =
                 Bundle().apply {
-                    putInt("filmId", viewModel.filmId)
-                    putString("filmName", viewModel.name)
-                    putBoolean("staffType", true)
+                    putInt(ARG_FILM_ID, viewModel.filmId)
+                    putString(ARG_FILM_NAME, viewModel.name)
+                    putBoolean(ARG_STAFF_TYPE, true)
                 }
             findNavController().navigate(
                 R.id.action_SerialFragment_to_AllStaffFragment,
@@ -236,7 +234,7 @@ class SerialFragment : Fragment() {
             val bundle =
                 Bundle().apply {
                     putInt(
-                        "filmId",
+                        ARG_FILM_ID,
                         viewModel.filmId
                     )
                 }
@@ -250,7 +248,7 @@ class SerialFragment : Fragment() {
             val bundle =
                 Bundle().apply {
                     putInt(
-                        "filmId",
+                        ARG_FILM_ID,
                         viewModel.filmId
                     )
                 }
