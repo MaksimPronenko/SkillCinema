@@ -7,7 +7,7 @@
 
 Использованные в проекте технологии:
 - Coroutines;
-- паттерна MVVM;
+- паттерн MVVM;
 - Hilt;
 - Navigation;
 - Retrofit;
